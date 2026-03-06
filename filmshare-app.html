@@ -13116,24 +13116,13 @@
               }, []);
 
               React.useEffect(() => {
-                if (!authToken || !realFriends || realFriends.length === 0) return;
+                if (!authToken) return;
                 const headers = { Authorization: "Bearer " + authToken };
-                Promise.all(
-                  realFriends.map(f =>
-                    fetch(API_BASE + "/api/friends/" + encodeURIComponent(f.username) + "/films", { headers })
-                      .then(r => r.ok ? r.json() : []).catch(() => [])
-                  )
-                ).then(results => {
-                  const seen = new Set();
-                  const flat = [];
-                  results.forEach((films, i) => {
-                    films.forEach(film => {
-                      if (!seen.has(film.id)) { seen.add(film.id); flat.push(Object.assign({}, film, { _fromFriend: realFriends[i].username })); }
-                    });
-                  });
-                  setFriendsRecommendedFilms(flat);
-                });
-              }, [realFriends, authToken]);
+                fetch(API_BASE + "/api/me/recommendations", { headers })
+                  .then(r => r.ok ? r.json() : [])
+                  .then(films => setFriendsRecommendedFilms(films))
+                  .catch(() => {});
+              }, [authToken]);
 
               // Handle arrival from the landing page after sign-up
               useEffect(() => {

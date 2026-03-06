@@ -722,16 +722,24 @@ function switchToSignIn(){
   document.getElementById('signinView').style.display='block';
 }
 
-  // Auto-send friend request to recommender
+  // Auto-send friend request to recommender and record the recommendation
   async function autoFriendRequester(token) {
     const fromUser = film.from_user || (new URLSearchParams(window.location.search)).get('from_user');
-    if (!fromUser) return;
-    try {
-      await fetch('/api/friends/' + encodeURIComponent(fromUser), {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + token }
-      });
-    } catch(e) {}
+    const filmSlug = film.slug || (new URLSearchParams(window.location.search)).get('slug');
+    const headers = { Authorization: 'Bearer ' + token };
+    if (fromUser) {
+      try {
+        await fetch('/api/friends/' + encodeURIComponent(fromUser), { method: 'POST', headers });
+      } catch(e) {}
+    }
+    if (filmSlug) {
+      try {
+        await fetch('/api/me/recommendations', {
+          method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
+          body: JSON.stringify({ film_slug: filmSlug, from_username: fromUser || '' })
+        });
+      } catch(e) {}
+    }
   }
 
 async function emailSignIn(){

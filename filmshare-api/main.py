@@ -155,6 +155,17 @@ def init_db():
                 FOREIGN KEY (addressee_id) REFERENCES users(id)
             );
 
+            CREATE TABLE IF NOT EXISTS user_recommendations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                film_id INTEGER NOT NULL,
+                from_user_id INTEGER,
+                to_user_id INTEGER NOT NULL,
+                created_at TEXT DEFAULT (datetime('now')),
+                UNIQUE(film_id, from_user_id, to_user_id),
+                FOREIGN KEY (film_id) REFERENCES films(id),
+                FOREIGN KEY (to_user_id) REFERENCES users(id)
+            );
+
             CREATE TABLE IF NOT EXISTS user_watchlist (
                 user_id INTEGER NOT NULL,
                 film_id INTEGER NOT NULL,
@@ -206,7 +217,7 @@ def serve_app():
 
 
 def _render_share_page(title="", year="", rating="", genre="", sender="A friend",
-                         note="", poster="", trailer="", runtime="", color="", from_user=""):
+                         note="", poster="", trailer="", runtime="", color="", from_user="", slug=""):
     from fastapi.responses import HTMLResponse
     with open(SHARE_FILE, encoding="utf-8") as fh:
         html = fh.read()
@@ -229,7 +240,7 @@ def _render_share_page(title="", year="", rating="", genre="", sender="A friend"
     film_data = {
         "title": title, "year": year, "rating": rating, "genre": genre,
         "from": sender, "from_user": from_user, "note": note, "poster": poster,
-        "trailer": trailer, "runtime": runtime, "color": color,
+        "trailer": trailer, "runtime": runtime, "color": color, "slug": slug,
     }
     film_json = json.dumps(film_data, ensure_ascii=False)
     inject = "<script>window.__FILM__ = " + film_json + ";"
@@ -259,6 +270,7 @@ def serve_share_slug(slug: str, from_: str = Query(default="A friend", alias="fr
         runtime=row["runtime"] or "",
         color=row["color"] or "",
         from_user=from_user,
+        slug=slug,
     )
 
 
@@ -884,6 +896,58 @@ def tvmaze_enrich(id: int):
         raise HTTPException(status_code=404, detail="No TVmaze match found")
     return data
 
+
+
+@app.post("/api/me/recommendations", status_code=201)
+def record_recommendation(body: dict, current_user=Depends(require_user)):
+    """Record that a film was recommended to the current user via a share link."""
+    film_slug = body.get("film_slug", "")
+    from_username = body.get("from_username", "")
+    with get_db() as conn:
+        film = conn.execute("SELECT id FROM films WHERE slug=?", (film_slug,)).fetchone()
+        if not film:
+            raise HTTPException(status_code=404, detail="Film not found")
+        from_user_id = None
+        if from_username:
+            fu = conn.execute("SELECT id FROM users WHERE username=?", (from_username,)).fetchone()
+            if fu:
+                from_user_id = fu["id"]
+        try:
+            conn.execute(
+                "INSERT OR IGNORE INTO user_recommendations (film_id, from_user_id, to_user_id) VALUES (?,?,?)",
+                (film["id"], from_user_id, current_user["id"])
+            )
+        except Exception:
+            pass
+    return {"ok": True}
+
+
+@app.get("/api/me/recommendations")
+def get_recommendations(current_user=Depends(require_user)):
+    """Films explicitly recommended to the current user via share links."""
+    with get_db() as conn:
+        rows = conn.execute(
+            """SELECT f.*, u.username as rec_from_username, u.display_name as rec_from_name
+               FROM user_recommendations ur
+               JOIN films f ON f.id = ur.film_id
+               LEFT JOIN users u ON u.id = ur.from_user_id
+               WHERE ur.to_user_id=?
+               ORDER BY ur.created_at DESC""",
+            (current_user["id"],)
+        ).fetchall()
+        result = []
+        for row in rows:
+            fid = row["id"]
+            streamers = [r["streamer"] for r in conn.execute(
+                "SELECT streamer FROM film_streamers WHERE film_id=?", (fid,)
+            ).fetchall()]
+            stills = [r["still_url"] for r in conn.execute(
+                "SELECT still_url FROM film_stills WHERE film_id=? ORDER BY rowid", (fid,)
+            ).fetchall()]
+            d = row_to_film(row, streamers, stills)
+            d["_fromFriend"] = row["rec_from_username"] or row["rec_from_name"]
+            result.append(d)
+        return result
 
 
 @app.get("/api/users/find")
