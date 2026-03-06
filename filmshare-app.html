@@ -10948,26 +10948,6 @@
                           }),
                         ),
                       ),
-                      /* No trailer chip */
-                      !film.trailerUrl && React.createElement("div", {
-                        style: { position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)" },
-                      },
-                        React.createElement("button", {
-                          onClick: () => window.open("https://www.youtube.com/results?search_query=" + encodeURIComponent((film.title || "") + " " + (film.year || "") + " trailer"), "_blank"),
-                          style: {
-                            background: "rgba(0,0,0,0.65)", backdropFilter: "blur(10px)",
-                            border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20,
-                            padding: "8px 16px", color: "rgba(255,255,255,0.8)",
-                            fontSize: 12, fontWeight: 600, cursor: "pointer",
-                            display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap",
-                          },
-                        },
-                          React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "#FF0000" },
-                            React.createElement("path", { d: "M19.59 6.69a4.83 4.83 0 01-3.77-2.75 12.06 12.06 0 00-8.26 2.16A11.94 11.94 0 002 12a12 12 0 0020 8.93A11.93 11.93 0 0022 12a12.22 12.22 0 00-2.41-5.31zM10 15V9l6 3-6 3z" }),
-                          ),
-                          "No trailer — search YouTube",
-                        ),
-                      ),
                       React.createElement(
                         "button",
                         {
