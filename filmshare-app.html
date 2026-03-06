@@ -12502,13 +12502,30 @@
             }) {
               const friendsList = (realFriends && realFriends.length > 0) ? realFriends : FRIENDS_DATA;
               const getName = (f) => f.username || f.name || "";
-              const defaultName = defaultFriend || getName(friendsList[0]);
+              const defaultName = defaultFriend || (friendsList.length > 0 ? getName(friendsList[0]) : "");
               const [activeFriend, setActiveFriend] = useState(defaultName);
               const [genreFilter, setGenreFilter] = useState("All");
               const [sortBy, setSortBy] = useState("rating");
               const [friendSearch, setFriendSearch] = useState("");
               const [watchFilter, setWatchFilter] = useState("all");
               const [friendFilmsCache, setFriendFilmsCache] = React.useState({});
+              const [addFriendInput, setAddFriendInput] = React.useState("");
+              const [addFriendStatus, setAddFriendStatus] = React.useState("");
+              const [addFriendLoading, setAddFriendLoading] = React.useState(false);
+
+              const sendFriendRequest = async () => {
+                const username = addFriendInput.trim();
+                if (!username) return;
+                setAddFriendLoading(true); setAddFriendStatus("");
+                try {
+                  const headers = authToken ? { Authorization: "Bearer " + authToken } : {};
+                  const r = await fetch(API_BASE + "/api/friends/" + encodeURIComponent(username), { method: "POST", headers });
+                  const d = await r.json();
+                  if (r.ok) { setAddFriendStatus("Friend request sent to " + username + "!"); setAddFriendInput(""); }
+                  else { setAddFriendStatus(d.detail || "Could not send request"); }
+                } catch(e) { setAddFriendStatus("Network error"); }
+                setAddFriendLoading(false);
+              };
 
               React.useEffect(() => {
                 if (!realFriends || realFriends.length === 0) return;
@@ -12520,14 +12537,14 @@
                   .catch(() => {});
               }, [activeFriend, realFriends]);
 
-              const activeFriendObj = friendsList.find((f) => getName(f) === activeFriend) || friendsList[0];
+              const activeFriendObj = friendsList.find((f) => getName(f) === activeFriend) || friendsList[0] || null;
               const isRealFriends = realFriends && realFriends.length > 0;
               const friendFilms = isRealFriends
                 ? (friendFilmsCache[activeFriend] || [])
                 : ALL_FILMS.filter((f) => ((activeFriendObj && activeFriendObj.watched) || []).includes(f.id));
 
               const filtered = useMemo(() => {
-                const fr = friendsList.find((f) => getName(f) === activeFriend) || friendsList[0];
+                const fr = friendsList.find((f) => getName(f) === activeFriend) || friendsList[0] || null;
                 const frName = getName(fr);
                 let list = isRealFriends
                   ? (friendFilmsCache[frName] || [])
@@ -12606,6 +12623,11 @@
                         paddingBottom: 4,
                       },
                     },
+                    React.createElement("button", {
+                      onClick: () => { setAddFriendInput(""); setAddFriendStatus(""); },
+                      style: { flexShrink: 0, background: "rgba(201,168,76,0.12)", border: "1.5px dashed rgba(201,168,76,0.4)", borderRadius: "50%", width: 64, height: 64, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, color: "var(--gold)" },
+                      title: "Add a friend",
+                    }, "+"),
                     friendsList.map((f) =>
                       React.createElement(
                         "button",
@@ -12659,6 +12681,29 @@
                       ),
                     ),
                   ),
+                ),
+                React.createElement("div", { style: { padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" } },
+                  React.createElement("div", { style: { display: "flex", gap: 8 } },
+                    React.createElement("input", {
+                      type: "text", placeholder: "Find friend by username...",
+                      value: addFriendInput,
+                      onChange: (e) => setAddFriendInput(e.target.value),
+                      onKeyDown: (e) => { if (e.key === "Enter") sendFriendRequest(); },
+                      style: { flex: 1, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "10px 14px", color: "var(--text)", fontSize: 14, outline: "none" },
+                    }),
+                    React.createElement("button", {
+                      onClick: sendFriendRequest, disabled: addFriendLoading || !addFriendInput.trim(),
+                      style: { padding: "10px 16px", background: "var(--gold)", border: "none", borderRadius: 10, cursor: "pointer", fontWeight: 700, fontSize: 13, color: "#111", opacity: (addFriendLoading || !addFriendInput.trim()) ? 0.5 : 1 },
+                    }, addFriendLoading ? "..." : "Add"),
+                  ),
+                  addFriendStatus && React.createElement("div", { style: { marginTop: 8, fontSize: 12, color: addFriendStatus.includes("sent") ? "#4CAF50" : "#e74c3c" } }, addFriendStatus),
+                ),
+                friendsList.length === 0 && React.createElement("div", {
+                  style: { textAlign: "center", padding: "60px 24px", color: "var(--muted)" },
+                },
+                  React.createElement("div", { style: { fontSize: 40, marginBottom: 16 } }, "👥"),
+                  React.createElement("div", { style: { fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 8 } }, "No friends yet"),
+                  React.createElement("div", { style: { fontSize: 13, lineHeight: 1.6 } }, "Search for friends by username above to get started."),
                 ),
                 React.createElement(WatchFilter, {
                   value: watchFilter,
