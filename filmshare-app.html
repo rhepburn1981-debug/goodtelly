@@ -10921,17 +10921,7 @@
                       film.trailerUrl && React.createElement(
                         "button",
                         {
-                          onClick: () => {
-                            if (!film.trailerUrl) { window.open("https://www.youtube.com/results?search_query=" + encodeURIComponent((film.title || "") + " " + (film.year || "") + " trailer"), "_blank"); return; }
-                            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                            if (isMobile) {
-                              const url = film.trailerUrl || "";
-                              const key = url.includes("/embed/") ? url.split("/embed/")[1].split("?")[0] : url.replace("watch?v=", "").split("&")[0];
-                              window.open("https://www.youtube.com/watch?v=" + key, "_blank");
-                            } else {
-                              setShowTrailer(true);
-                            }
-                          },
+                          onClick: () => setShowTrailer(true),
                           style: {
                             position: "absolute", inset: 0, width: "100%", height: "100%",
                             background: "transparent", border: "none", cursor: "pointer",
