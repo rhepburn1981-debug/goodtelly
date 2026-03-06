@@ -160,6 +160,8 @@ def init_db():
                 film_id INTEGER NOT NULL,
                 from_user_id INTEGER,
                 to_user_id INTEGER NOT NULL,
+                note TEXT,
+                rating REAL,
                 created_at TEXT DEFAULT (datetime('now')),
                 UNIQUE(film_id, from_user_id, to_user_id),
                 FOREIGN KEY (film_id) REFERENCES films(id),
@@ -912,6 +914,8 @@ def record_recommendation(body: dict, current_user=Depends(require_user)):
     """Record that a film was recommended to the current user via a share link."""
     film_slug = body.get("film_slug", "")
     from_username = body.get("from_username", "")
+    note = body.get("note", "")
+    rating = body.get("rating")
     with get_db() as conn:
         film = conn.execute("SELECT id FROM films WHERE slug=?", (film_slug,)).fetchone()
         if not film:
@@ -923,8 +927,8 @@ def record_recommendation(body: dict, current_user=Depends(require_user)):
                 from_user_id = fu["id"]
         try:
             conn.execute(
-                "INSERT OR IGNORE INTO user_recommendations (film_id, from_user_id, to_user_id) VALUES (?,?,?)",
-                (film["id"], from_user_id, current_user["id"])
+                "INSERT OR IGNORE INTO user_recommendations (film_id, from_user_id, to_user_id, note, rating) VALUES (?,?,?,?,?)",
+                (film["id"], from_user_id, current_user["id"], note or None, rating or None)
             )
         except Exception:
             pass
@@ -936,7 +940,7 @@ def get_recommendations(current_user=Depends(require_user)):
     """Films explicitly recommended to the current user via share links."""
     with get_db() as conn:
         rows = conn.execute(
-            """SELECT f.*, u.username as rec_from_username, u.display_name as rec_from_name
+            """SELECT f.*, u.username as rec_from_username, u.display_name as rec_from_name, ur.note as rec_note, ur.rating as rec_rating
                FROM user_recommendations ur
                JOIN films f ON f.id = ur.film_id
                LEFT JOIN users u ON u.id = ur.from_user_id
@@ -955,6 +959,8 @@ def get_recommendations(current_user=Depends(require_user)):
             ).fetchall()]
             d = row_to_film(row, streamers, stills)
             d["_fromFriend"] = row["rec_from_username"] or row["rec_from_name"]
+            d["_recNote"] = row["rec_note"]
+            d["_recRating"] = row["rec_rating"]
             result.append(d)
         return result
 

@@ -11520,8 +11520,8 @@
                         ),
                       ),
 
-                  film.sharedBy &&
-                    film.note &&
+                  (film.sharedBy || film._fromFriend) &&
+                    (film.note || film._recNote) &&
                     React.createElement(
                       "div",
                       {
@@ -11545,15 +11545,14 @@
                           },
                         },
                         "Why ",
-                        film.sharedBy,
+                        film._fromFriend || film.sharedBy,
                         " recommends this",
                       ),
                       React.createElement(
                         "div",
                         { style: { display: "flex", gap: 12 } },
                         React.createElement(Avatar, {
-                          name: film.sharedBy,
-                          color: friendData.color || "#888",
+                          name: film._fromFriend || film.sharedBy,
                           size: 38,
                         }),
                         React.createElement(
@@ -11569,7 +11568,7 @@
                                 marginBottom: 5,
                               },
                             },
-                            film.sharedBy,
+                            film._fromFriend || film.sharedBy,
                           ),
                           React.createElement(
                             "div",
@@ -11582,7 +11581,7 @@
                               },
                             },
                             '"',
-                            film.note,
+                            film._recNote || film.note,
                             '"',
                           ),
                         ),
@@ -11880,66 +11879,38 @@
                   ),
                   recommendedFilms.map(film => {
                     const friendName = film._fromFriend || film.sharedBy || "A friend";
+                    const recNote = film._recNote;
+                    const recRating = film._recRating;
                     return React.createElement("div", {
                       key: film.id,
-                      style: {
-                        margin: "0 16px 12px",
-                        background: "var(--surface2)",
-                        borderRadius: 16,
-                        overflow: "hidden",
-                        border: "1px solid rgba(255,255,255,0.06)",
-                      },
+                      onClick: () => onFilmClick(film),
+                      style: { margin: "0 16px 12px", background: "var(--surface2)", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)", cursor: "pointer" },
                     },
-                      /* Friend attribution bar */
-                      React.createElement("div", {
-                        style: { display: "flex", alignItems: "center", gap: 8, padding: "10px 14px 8px" },
-                      },
+                      React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, padding: "10px 14px 8px" } },
                         React.createElement(Avatar, { name: friendName, size: 24 }),
-                        React.createElement("div", { style: { fontSize: 12 } },
-                          React.createElement("span", {
-                            style: { fontWeight: 700, color: "var(--gold-bright)", marginRight: 4 },
-                          }, friendName),
-                          React.createElement("span", { style: { color: "var(--text2)" } }, "has this on their list"),
+                        React.createElement("div", { style: { flex: 1, fontSize: 12 } },
+                          React.createElement("span", { style: { fontWeight: 700, color: "var(--gold-bright)", marginRight: 4 } }, friendName),
+                          React.createElement("span", { style: { color: "var(--text2)" } }, " recommends this"),
                         ),
+                        recRating && React.createElement("div", { style: { fontSize: 12, color: "var(--gold-bright)", fontWeight: 700, whiteSpace: "nowrap" } }, "⭐ " + parseFloat(recRating).toFixed(1)),
                       ),
-                      /* Film row */
-                      React.createElement("div", {
-                        style: { display: "flex", alignItems: "flex-start", gap: 12, padding: "0 14px 12px", cursor: "pointer" },
-                        onClick: () => onFilmClick(film),
-                      },
+                      React.createElement("div", { style: { display: "flex", alignItems: "flex-start", gap: 12, padding: "0 14px 12px" } },
                         film.poster
-                          ? React.createElement("img", {
-                              src: film.poster, alt: film.title,
-                              style: { width: 50, height: 70, objectFit: "cover", borderRadius: 8, flexShrink: 0 },
-                            })
-                          : React.createElement("div", {
-                              style: { width: 50, height: 70, borderRadius: 8, background: film.color || "var(--surface3)", flexShrink: 0 },
-                            }),
+                          ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 50, height: 70, objectFit: "cover", borderRadius: 8, flexShrink: 0 } })
+                          : React.createElement("div", { style: { width: 50, height: 70, borderRadius: 8, background: film.color || "var(--surface3)", flexShrink: 0 } }),
                         React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                          React.createElement("div", {
-                            style: { fontSize: 16, fontWeight: 800, color: "var(--text)", lineHeight: 1.2, marginBottom: 6 },
-                          }, film.title),
-                          film.note && React.createElement("div", {
-                            style: { fontSize: 12, color: "var(--muted)", fontStyle: "italic", lineHeight: 1.4 },
-                          }, `"${film.note}"`),
+                          React.createElement("div", { style: { fontSize: 16, fontWeight: 800, color: "var(--text)", lineHeight: 1.2, marginBottom: 4 } }, film.title),
+                          recNote
+                            ? React.createElement("div", { style: { fontSize: 12, color: "var(--text2)", fontStyle: "italic", lineHeight: 1.4 } }, "“" + recNote + "”")
+                            : film.description && React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" } }, film.description),
                         ),
                         React.createElement("button", {
                           onClick: (e) => { e.stopPropagation(); onAdd(film.id); },
-                          style: {
-                            flexShrink: 0,
-                            padding: "7px 12px", borderRadius: 20,
-                            border: addedIds.includes(film.id) ? "1px solid rgba(46,204,138,0.35)" : "1px solid rgba(201,168,76,0.4)",
-                            background: addedIds.includes(film.id) ? "rgba(46,204,138,0.08)" : "rgba(201,168,76,0.08)",
-                            color: addedIds.includes(film.id) ? "var(--green)" : "var(--gold-bright)",
-                            fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
-                          },
+                          style: { flexShrink: 0, alignSelf: "center", padding: "7px 12px", borderRadius: 20, border: addedIds.includes(film.id) ? "1px solid rgba(46,204,138,0.35)" : "1px solid rgba(201,168,76,0.4)", background: addedIds.includes(film.id) ? "rgba(46,204,138,0.08)" : "rgba(201,168,76,0.08)", color: addedIds.includes(film.id) ? "var(--green)" : "var(--gold-bright)", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
                         }, addedIds.includes(film.id) ? "✓ Added" : "+ Watchlist"),
                       ),
                     );
-                  }),
-                ),
-
-                /* TRENDING & RAGING */
+                  }),TRENDING & RAGING */
                 trendingFilms.length > 0 && React.createElement(React.Fragment, null,
                   sectionLabel("Trending & Banging", null),
                   React.createElement("div", {
@@ -13132,9 +13103,19 @@
                 if (openSlug) {
                   const token = authToken || localStorage.getItem("filmshare_token");
                   const headers = token ? { Authorization: "Bearer " + token } : {};
+                  const recFrom = params.get("rec_from") || "";
+                  const recNote = params.get("rec_note") || "";
+                  const recRating = params.get("rec_rating") || "";
                   fetch(API_BASE + "/api/films/slug/" + encodeURIComponent(openSlug), { headers })
                     .then(r => r.ok ? r.json() : null)
-                    .then(film => { if (film) setSelectedFilm(film); })
+                    .then(film => {
+                      if (film) {
+                        if (recFrom) film._fromFriend = recFrom;
+                        if (recNote) film._recNote = recNote;
+                        if (recRating) film._recRating = parseFloat(recRating);
+                        setSelectedFilm(film);
+                      }
+                    })
                     .catch(() => {});
                   window.history.replaceState({}, "", "/");
                 }

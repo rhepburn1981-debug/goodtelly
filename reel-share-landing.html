@@ -716,7 +716,7 @@ function toggleWatchlist(){
     if (!r.ok) return; // Token invalid/expired
     // Already logged in — record recommendation + friend request silently, then redirect
     await autoFriendRequester(token);
-    window.location.href = '/' + (film.slug ? '?open=' + encodeURIComponent(film.slug) : '');
+    window.location.href = '/' + (film.slug ? '?open=' + encodeURIComponent(film.slug) + (film.from_user ? '&rec_from=' + encodeURIComponent(film.from_user) : '') + (film.note ? '&rec_note=' + encodeURIComponent(film.note) : '') + (film.rating ? '&rec_rating=' + encodeURIComponent(film.rating) : '') : '');
   } catch(e) {}
 })();
 
@@ -752,7 +752,7 @@ function switchToSignIn(){
       try {
         await fetch('/api/me/recommendations', {
           method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
-          body: JSON.stringify({ film_slug: filmSlug, from_username: fromUser || '' })
+          body: JSON.stringify({ film_slug: filmSlug, from_username: fromUser || '', note: film.note || '', rating: film.rating || null })
         });
       } catch(e) {}
     }
@@ -774,7 +774,7 @@ async function emailSignIn(){
     if (!r.ok) { errEl.textContent = d.detail || 'Incorrect email or password'; errEl.style.display='block'; btn.textContent='Sign In'; btn.disabled=false; return; }
     localStorage.setItem('filmshare_token', d.access_token);
     await autoFriendRequester(d.access_token);
-    window.location.href = '/' + (film.slug ? '?open=' + encodeURIComponent(film.slug) : '');
+    window.location.href = '/' + (film.slug ? '?open=' + encodeURIComponent(film.slug) + (film.from_user ? '&rec_from=' + encodeURIComponent(film.from_user) : '') + (film.note ? '&rec_note=' + encodeURIComponent(film.note) : '') + (film.rating ? '&rec_rating=' + encodeURIComponent(film.rating) : '') : '');
   } catch(e) { errEl.textContent = 'Network error, try again'; errEl.style.display='block'; btn.textContent='Sign In'; btn.disabled=false; }
 }
 
@@ -812,7 +812,7 @@ async function emailSignUp(){
     if (!lr.ok) { switchToSignIn(); btn.textContent='Create Account'; btn.disabled=false; return; }
     localStorage.setItem('filmshare_token', ld.access_token);
     await autoFriendRequester(ld.access_token);
-    window.location.href = '/' + (film.slug ? '?open=' + encodeURIComponent(film.slug) : '');
+    window.location.href = '/' + (film.slug ? '?open=' + encodeURIComponent(film.slug) + (film.from_user ? '&rec_from=' + encodeURIComponent(film.from_user) : '') + (film.note ? '&rec_note=' + encodeURIComponent(film.note) : '') + (film.rating ? '&rec_rating=' + encodeURIComponent(film.rating) : '') : '');
   } catch(e) { errEl.textContent = 'Network error, try again'; errEl.style.display='block'; btn.textContent='Create Account'; btn.disabled=false; }
 }
 
