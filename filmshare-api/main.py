@@ -232,8 +232,8 @@ def _render_share_page(title="", year="", rating="", genre="", sender="A friend"
         "trailer": trailer, "runtime": runtime, "color": color,
     }
     film_json = json.dumps(film_data, ensure_ascii=False)
-    html = html.replace("<script>", f"<script>window.__FILM__ = {film_json};
-", 1)
+    inject = "<script>window.__FILM__ = " + film_json + ";"
+    html = html.replace("<script>", inject, 1)
     return HTMLResponse(html)
 
 
