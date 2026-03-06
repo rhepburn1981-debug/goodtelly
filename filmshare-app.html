@@ -11604,7 +11604,7 @@
                         const dName = f.display_name || f.username || f.name || "";
                         return React.createElement("button", {
                           key: f.username || f.name || f.id,
-                          onClick: () => onFriendClick && onFriendClick(dName),
+                          onClick: () => onFriendClick && onFriendClick(f.username || f.name || dName),
                           style: { flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center" },
                         },
                           React.createElement("div", { style: { marginBottom: 6 } },
@@ -12248,6 +12248,7 @@
               const getName = (f) => f ? (f.username || f.name || "") : "";
               const defaultName = defaultFriend || (friendsList.length > 0 ? getName(friendsList[0]) : "");
               const [activeFriend, setActiveFriend] = useState(defaultName);
+              useEffect(() => { if (defaultFriend) setActiveFriend(defaultFriend); }, [defaultFriend]);
               const [genreFilter, setGenreFilter] = useState("All");
               const [sortBy, setSortBy] = useState("rating");
               const [friendSearch, setFriendSearch] = useState("");
