@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>reel. — only the good stuff</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap"
@@ -35,12 +35,16 @@
         --ff-body: "DM Sans", system-ui, sans-serif;
         --ff-mono: "DM Mono", monospace;
       }
+      html, body {
+        overflow-x: hidden;
+        overscroll-behavior: none;
+      }
       html {
         font-size: 112%;
       }
       body {
         background: var(--ink);
-        min-height: 100vh;
+        min-height: 100dvh;
         font-family: var(--ff-body);
         color: var(--text);
       }
@@ -125,7 +129,6 @@
       }
       /* Frosted-glass bottom nav */
       .nav-bar {
-        height: 72px;
         background: rgba(13, 13, 20, 0.82);
         backdrop-filter: blur(24px) saturate(1.4);
         -webkit-backdrop-filter: blur(24px) saturate(1.4);
@@ -135,6 +138,8 @@
         flex-shrink: 0;
         position: relative;
         z-index: 10;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        height: calc(72px + env(safe-area-inset-bottom, 0px));
       }
       .nav-btn {
         flex: 1;
@@ -13401,6 +13406,7 @@
                   style: {
                     width: "100vw",
                     height: "100vh",
+                    height: "100dvh",
                     background: "var(--surface)",
                     display: "flex",
                     flexDirection: "column",
