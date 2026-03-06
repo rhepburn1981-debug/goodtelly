@@ -442,7 +442,14 @@ def list_friends(current_user=Depends(require_user)):
             "WHERE (uf.requester_id = ? OR uf.addressee_id = ?) AND uf.status = 'accepted'",
             (current_user["id"], current_user["id"], current_user["id"])
         ).fetchall()
-        return [dict(r) for r in rows]
+        result = []
+        for r in rows:
+            d = dict(r)
+            d["count"] = conn.execute(
+                "SELECT COUNT(*) as c FROM user_watchlist WHERE user_id=?", (d["id"],)
+            ).fetchone()["c"]
+            result.append(d)
+        return result
 
 
 @app.post("/api/friends/{username}", status_code=201)
@@ -896,14 +903,22 @@ def list_legacy_friends():
 
 @app.get("/api/friends/{username}/films")
 def get_friend_films(username: str):
-    """Films shared by a user (checks both legacy friends and users tables)."""
+    """Watchlist films for a real user, or legacy shared films for seed friends."""
     with get_db() as conn:
-        if not conn.execute("SELECT id FROM friends WHERE name=?", (username,)).fetchone():
-            if not conn.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone():
+        user = conn.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone()
+        if user:
+            rows = conn.execute(
+                """SELECT f.* FROM films f
+                   JOIN user_watchlist uw ON uw.film_id = f.id
+                   WHERE uw.user_id=? ORDER BY uw.added_at DESC""",
+                (user["id"],)
+            ).fetchall()
+        else:
+            if not conn.execute("SELECT id FROM friends WHERE name=?", (username,)).fetchone():
                 raise HTTPException(status_code=404, detail="User not found")
-        films = conn.execute("SELECT f.* FROM films f WHERE f.shared_by=?", (username,)).fetchall()
+            rows = conn.execute("SELECT f.* FROM films f WHERE f.shared_by=?", (username,)).fetchall()
         result = []
-        for row in films:
+        for row in rows:
             fid = row["id"]
             streamers = [r["streamer"] for r in conn.execute(
                 "SELECT streamer FROM film_streamers WHERE film_id=?", (fid,)
