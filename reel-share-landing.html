@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta property="og:type"        content="website"/>
+  <meta property="og:site_name"   content="reel."/>
+  <meta property="og:title"       content="Your friend recommended a film on reel."/>
+  <meta property="og:description" content="Watch the trailer and see what your friends are watching."/>
+  <meta property="og:image"       content="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80"/>
+  <meta name="twitter:card"       content="summary_large_image"/>
+  <title>reel. \u2014 your friend sent you a pick</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      background:#0A0A10;
+      font-family:'Inter',sans-serif;
+      color:#F0EDE8;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      overflow-x:hidden;
+    }
+
+    /* \u2500\u2500 HERO \u2500\u2500 */
+    .hero{
+      width:100%;max-width:480px;
+      position:relative;
+      min-height:100svh;
+      display:flex;flex-direction:column;justify-content:flex-end;
+      overflow:hidden;
+    }
+    .hero-bg{
+      position:absolute;inset:0;
+      background-size:cover;background-position:center top;
+      background-image:url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80');
+    }
+    /* multi-layer gradient: subtle top, heavy bottom */
+    .hero-bg::after{
+      content:'';position:absolute;inset:0;
+      background:
+        linear-gradient(to bottom,
+          rgba(10,10,16,0.45) 0%,
+          rgba(10,10,16,0.0) 25%,
+          rgba(10,10,16,0.0) 45%,
+          rgba(10,10,16,0.75) 70%,
+          rgba(10,10,16,1.0)  100%);
+    }
+
+    /* top bar */
+    .topbar{
+      position:absolute;top:0;left:0;right:0;
+      padding:18px 20px;
+      display:flex;align-items:center;justify-content:space-between;
+      z-index:2;
+    }
+    .brand{
+      font-family:'Playfair Display',serif;
+      font-size:20px;font-weight:900;color:#F1C40F;letter-spacing:-0.5px;
+    }
+    .topbar-actions{display:flex;gap:10px}
+    .topbar-btn{
+      background:rgba(255,255,255,0.1);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:20px;padding:6px 14px;
+      font-size:12px;font-weight:600;color:#F0EDE8;
+      cursor:pointer;font-family:'Inter',sans-serif;
+      text-decoration:none;
+    }
+
+    /* hero content */
+    .hero-content{
+      position:relative;z-index:2;
+      padding:0 20px 28px;
+    }
+    .from-chip{
+      display:inline-flex;align-items:center;gap:7px;
+      background:rgba(255,255,255,0.1);
+      border:1px solid rgba(255,255,255,0.15);
+      backdrop-filter:blur(8px);
+      border-radius:20px;padding:5px 12px 5px 6px;
+      margin-bottom:14px;
+    }
+    .chip-avatar{
+      width:24px;height:24px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:900;color:#fff;flex-shrink:0;
+    }
+    .from-chip span{font-size:11px;color:#CCC;}
+    .from-chip strong{color:#fff;}
+
+    .hero-title{
+      font-family:'Playfair Display',serif;
+      font-size:36px;font-weight:900;line-height:1.05;
+      color:#fff;margin-bottom:10px;
+      text-shadow:0 2px 20px rgba(0,0,0,0.5);
+    }
+    .hero-meta{
+      display:flex;align-items:center;gap:10px;
+      flex-wrap:wrap;margin-bottom:12px;
+    }
+    .rating-badge{
+      display:flex;align-items:center;gap:5px;
+      background:rgba(0,0,0,0.45);
+      border:1px solid rgba(241,196,15,0.4);
+      border-radius:20px;padding:5px 12px;
+      font-size:13px;font-weight:700;color:#F1C40F;
+      backdrop-filter:blur(6px);
+    }
+    .hot-badge{
+      display:flex;align-items:center;gap:4px;
+      background:rgba(0,0,0,0.45);
+      border:1px solid rgba(231,76,60,0.4);
+      border-radius:20px;padding:5px 12px;
+      font-size:12px;font-weight:700;color:#FF6B6B;
+      backdrop-filter:blur(6px);
+    }
+    .hero-note{
+      font-size:14px;color:rgba(255,255,255,0.75);
+      font-style:italic;margin-bottom:18px;line-height:1.5;
+    }
+    .hero-note::before{content:'"';color:#F1C40F;font-style:normal;font-size:18px;margin-right:2px;}
+    .hero-note::after{content:'"';color:#F1C40F;font-style:normal;font-size:18px;margin-left:2px;}
+
+    /* BIG trailer button */
+    .btn-trailer{
+      width:100%;padding:16px;
+      background:linear-gradient(135deg,#F4D03F,#E67E22);
+      border:none;border-radius:16px;
+      font-size:16px;font-weight:800;color:#1a1a1a;
+      cursor:pointer;font-family:'Inter',sans-serif;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      transition:transform 0.15s,opacity 0.15s;
+      box-shadow:0 8px 32px rgba(244,208,63,0.3);
+    }
+    .btn-trailer:hover{opacity:0.93;transform:translateY(-1px);}
+    .btn-trailer:active{transform:translateY(0);}
+
+    /* watchlist button */
+    .btn-watchlist{
+      width:100%;padding:14px;
+      background:rgba(255,255,255,0.08);
+      border:1.5px solid rgba(255,255,255,0.2);
+      border-radius:16px;
+      font-size:15px;font-weight:700;color:#F0EDE8;
+      cursor:pointer;font-family:'Inter',sans-serif;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      margin-top:10px;
+      transition:background 0.2s,border-color 0.2s;
+      backdrop-filter:blur(6px);
+    }
+    .btn-watchlist:hover{background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.35);}
+    .btn-watchlist.saved{
+      background:rgba(241,196,15,0.15);
+      border-color:rgba(241,196,15,0.5);
+      color:#F1C40F;
+    }
+
+    .play-icon{
+      width:28px;height:28px;border-radius:50%;
+      background:rgba(0,0,0,0.2);
+      display:flex;align-items:center;justify-content:center;
+      font-size:11px;flex-shrink:0;
+    }
+
+    /* scroll hint */
+    .scroll-hint{
+      text-align:center;padding:10px 0 4px;
+      font-size:10px;color:rgba(255,255,255,0.3);
+      letter-spacing:1px;text-transform:uppercase;
+      position:relative;z-index:2;
+      animation:bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+
+    /* \u2500\u2500 SECTION BELOW THE FOLD \u2500\u2500 */
+    .below{
+      width:100%;max-width:480px;
+      background:#0A0A10;
+      padding:0 0 60px;
+    }
+
+    /* Social proof block */
+    .social-proof{
+      padding:28px 20px 24px;
+      text-align:center;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .proof-headline{
+      font-size:17px;font-weight:700;color:#F0EDE8;
+      line-height:1.4;margin-bottom:16px;
+    }
+    .proof-headline strong{color:#F1C40F;}
+    .friends-row{
+      display:flex;align-items:center;justify-content:center;
+      gap:10px;margin-bottom:16px;
+    }
+    .friend-avatars{display:flex;}
+    .friend-avatar{
+      width:36px;height:36px;border-radius:50%;
+      border:2px solid #0A0A10;
+      display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:900;color:#fff;
+      margin-left:-10px;flex-shrink:0;
+    }
+    .friend-avatars .friend-avatar:first-child{margin-left:0}
+    .friends-label{text-align:left;}
+    .friends-label strong{display:block;font-size:13px;color:#F0EDE8;font-weight:700;}
+    .friends-label span{font-size:11px;color:#777;}
+
+    /* Teaser film list */
+    .teaser-list{
+      padding:0 20px;margin-bottom:4px;
+    }
+    .teaser-item{
+      display:flex;align-items:center;gap:12px;
+      padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);
+    }
+    .teaser-item:last-child{border-bottom:none;}
+    .teaser-poster{
+      width:46px;height:64px;border-radius:8px;
+      object-fit:cover;background:#1A1A28;flex-shrink:0;
+    }
+    .teaser-info{flex:1;min-width:0;}
+    .teaser-title{
+      font-family:'Playfair Display',serif;
+      font-size:15px;font-weight:700;color:#F0EDE8;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .teaser-meta{font-size:11px;color:#777;margin-top:3px;}
+    .teaser-stars{color:#F1C40F;font-size:12px;}
+    .teaser-lock{
+      width:36px;height:36px;border-radius:50%;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.1);
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;flex-shrink:0;
+    }
+    .more-label{
+      text-align:center;padding:10px 0 20px;
+      font-size:13px;color:#555;font-style:italic;
+    }
+
+    /* Unlock CTA */
+    .unlock-card{
+      margin:0 20px 28px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.09);
+      border-radius:20px;
+      padding:24px 20px;
+      text-align:center;
+    }
+    .lock-icon{font-size:32px;margin-bottom:12px;}
+    .unlock-title{
+      font-family:'Playfair Display',serif;
+      font-size:20px;font-weight:900;color:#F0EDE8;
+      margin-bottom:6px;line-height:1.3;
+    }
+    .unlock-title em{color:#F1C40F;font-style:normal;}
+    .unlock-sub{
+      font-size:13px;color:#666;margin-bottom:20px;line-height:1.6;
+    }
+
+    /* Perks */
+    .perks{display:flex;gap:8px;margin-bottom:20px;}
+    .perk{
+      flex:1;background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:12px;padding:12px 6px;
+      text-align:center;font-size:10px;color:#666;line-height:1.5;
+    }
+    .perk-icon{display:block;font-size:18px;margin-bottom:5px;}
+
+    .btn-google{
+      width:100%;padding:14px;
+      background:#fff;border:none;border-radius:14px;
+      font-size:14px;font-weight:700;color:#1a1a1a;
+      cursor:pointer;font-family:'Inter',sans-serif;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      margin-bottom:9px;transition:opacity 0.15s;
+      box-shadow:0 4px 16px rgba(0,0,0,0.3);
+    }
+    .btn-google:hover{opacity:0.93;}
+
+    .btn-outline{
+      width:100%;padding:13px;
+      background:transparent;
+      border:1.5px solid rgba(255,255,255,0.13);
+      border-radius:14px;
+      font-size:13px;font-weight:600;color:#888;
+      cursor:pointer;font-family:'Inter',sans-serif;
+      transition:all 0.2s;margin-bottom:14px;
+    }
+    .btn-outline:hover{border-color:rgba(255,255,255,0.28);color:#BBB;}
+
+    .fine-print{font-size:10px;color:#444;line-height:1.6;}
+    .fine-print a{color:#666;text-decoration:none;}
+
+    /* Trending section */
+    .trending-section{padding:0 20px 10px;}
+    .section-heading{
+      font-size:15px;font-weight:800;color:#F0EDE8;
+      margin-bottom:14px;display:flex;align-items:center;gap:6px;
+    }
+    .trending-grid{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+    .trending-grid::-webkit-scrollbar{display:none;}
+    .trending-card{
+      flex-shrink:0;width:130px;cursor:pointer;
+      position:relative;border-radius:12px;overflow:hidden;
+    }
+    .trending-card img{width:100%;height:182px;object-fit:cover;display:block;}
+    .trending-card-overlay{
+      position:absolute;inset:0;
+      background:linear-gradient(to top,rgba(0,0,0,0.88) 0%,transparent 55%);
+    }
+    .trending-card-info{
+      position:absolute;bottom:0;left:0;right:0;
+      padding:8px 10px;
+    }
+    .tc-title{
+      font-family:'Playfair Display',serif;
+      font-size:12px;font-weight:700;color:#fff;
+      line-height:1.25;margin-bottom:3px;
+      overflow:hidden;display:-webkit-box;
+      -webkit-line-clamp:2;-webkit-box-orient:vertical;
+    }
+    .tc-rating{font-size:10px;color:#F1C40F;}
+    .tc-rank{
+      position:absolute;top:8px;left:8px;
+      background:rgba(0,0,0,0.65);
+      border-radius:6px;padding:2px 7px;
+      font-size:11px;font-weight:900;color:#fff;font-family:monospace;
+    }
+    .tc-rank.gold{background:#F1C40F;color:#1a1a1a;}
+    .tc-locked{
+      position:absolute;inset:0;
+      background:rgba(10,10,16,0.6);
+      display:flex;align-items:center;justify-content:center;
+      font-size:28px;backdrop-filter:blur(3px);
+    }
+
+    /* Trailer modal */
+    .modal{
+      position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:300;
+      display:none;flex-direction:column;
+      align-items:center;justify-content:center;padding:20px;
+    }
+    .modal.open{display:flex;}
+    .modal-close{
+      align-self:flex-end;margin-bottom:12px;
+      background:rgba(255,255,255,0.1);border:none;color:#fff;
+      font-size:12px;font-weight:700;border-radius:20px;
+      padding:7px 16px;cursor:pointer;font-family:'Inter',sans-serif;
+    }
+    .modal-video{width:100%;max-width:480px;border-radius:14px;overflow:hidden;}
+    .modal-video iframe{width:100%;height:270px;border:none;display:block;}
+    .modal-film-title{
+      font-family:'Playfair Display',serif;
+      font-size:16px;color:#F0EDE8;margin-top:14px;
+      text-align:center;font-weight:700;
+    }
+    .modal-cta{
+      margin-top:16px;width:100%;max-width:480px;
+      padding:14px;background:linear-gradient(135deg,#F4D03F,#E67E22);
+      border:none;border-radius:14px;font-size:14px;font-weight:800;
+      color:#1a1a1a;cursor:pointer;font-family:'Inter',sans-serif;
+    }
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .animate{animation:fadeUp 0.5s ease forwards;}
+
+    /* Sign-in modal */
+    .signin-modal{
+      position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;
+      display:none;flex-direction:column;align-items:center;justify-content:flex-end;
+      padding-bottom:0;
+    }
+    .signin-modal.open{display:flex;}
+    .signin-sheet{
+      width:100%;max-width:480px;
+      background:#141420;
+      border-radius:24px 24px 0 0;
+      padding:28px 24px 40px;
+      border-top:1px solid rgba(255,255,255,0.1);
+    }
+    .signin-handle{
+      width:40px;height:4px;border-radius:2px;
+      background:rgba(255,255,255,0.2);
+      margin:0 auto 24px;
+    }
+    .signin-title{
+      font-family:'Playfair Display',serif;
+      font-size:22px;font-weight:900;color:#F0EDE8;
+      margin-bottom:6px;text-align:center;
+    }
+    .signin-sub{
+      font-size:13px;color:#666;text-align:center;margin-bottom:24px;line-height:1.5;
+    }
+    .signin-divider{
+      display:flex;align-items:center;gap:10px;margin:16px 0;
+    }
+    .signin-divider hr{flex:1;border:none;border-top:1px solid rgba(255,255,255,0.08);}
+    .signin-divider span{font-size:11px;color:#555;}
+    .signin-input{
+      width:100%;padding:13px 14px;
+      background:rgba(255,255,255,0.05);
+      border:1.5px solid rgba(255,255,255,0.1);
+      border-radius:12px;font-size:14px;color:#F0EDE8;
+      font-family:'Inter',sans-serif;margin-bottom:10px;
+      outline:none;
+    }
+    .signin-input:focus{border-color:rgba(241,196,15,0.5);}
+    .signin-input::placeholder{color:#555;}
+    .btn-signin-submit{
+      width:100%;padding:14px;
+      background:linear-gradient(135deg,#F4D03F,#E67E22);
+      border:none;border-radius:14px;
+      font-size:14px;font-weight:800;color:#1a1a1a;
+      cursor:pointer;font-family:'Inter',sans-serif;
+      margin-bottom:12px;margin-top:4px;
+    }
+    .signin-switch{font-size:12px;color:#555;text-align:center;}
+    .signin-switch a{color:#F1C40F;text-decoration:none;font-weight:600;cursor:pointer;}
+    .signin-close{
+      position:absolute;top:16px;right:20px;
+      background:none;border:none;color:#555;font-size:20px;cursor:pointer;
+      line-height:1;
+    }
+  </style>
+</head>
+<body>
+
+<!-- \u2500\u2500 HERO (above fold) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 -->
+<div class="hero">
+  <div class="hero-bg" id="heroBg"></div>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="brand">reel.</div>
+    <div class="topbar-actions">
+      <a href="#" class="topbar-btn" onclick="openSignIn();return false;">Sign Up</a>
+      <a href="#" class="topbar-btn" onclick="openSignIn();return false;">Sign In</a>
+    </div>
+  </div>
+
+  <!-- Hero content -->
+  <div class="hero-content">
+    <div class="from-chip">
+      <div class="chip-avatar" id="chipAvatar" style="background:#E74C3C">D</div>
+      <span><strong id="fromName">Dave</strong> recommends this</span>
+    </div>
+
+    <h1 class="hero-title" id="heroTitle">Oppenheimer</h1>
+
+    <div class="hero-meta">
+      <div class="rating-badge">\u2b50 <span id="heroRating">4.7</span></div>
+      <div class="hot-badge">\ud83d\udd25 Banging</div>
+      <span style="font-size:12px;color:#AAA" id="heroYear">2023 \u00b7 180 min</span>
+    </div>
+
+    <div class="hero-note" id="heroNote">An absolute cinematic event. See it loud.</div>
+
+    <button class="btn-trailer" onclick="openTrailer()">
+      <div class="play-icon">\u25b6</div>
+      Watch the Trailer
+    </button>
+
+    <button class="btn-watchlist" id="watchlistBtn" onclick="toggleWatchlist()">
+      <span id="watchlistIcon">+</span>
+      <span id="watchlistLabel">Add to Watchlist</span>
+    </button>
+  </div>
+
+  <div class="scroll-hint">\u2193 &nbsp; scroll to see more</div>
+</div>
+
+<!-- \u2500\u2500 BELOW THE FOLD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 -->
+<div class="below">
+
+  <!-- Social proof -->
+  <div class="social-proof animate">
+    <div class="proof-headline">
+      See all <strong id="recCount">12</strong> recommendations<br>from your friends
+    </div>
+    <div class="friends-row">
+      <div class="friend-avatars">
+        <div class="friend-avatar" style="background:#9B59B6">R</div>
+        <div class="friend-avatar" style="background:#27AE60">M</div>
+        <div class="friend-avatar" style="background:#2980B9">T</div>
+      </div>
+      <div class="friends-label">
+        <strong>Ryan, Mia & Tom</strong>
+        <span>also recommend it</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teaser list \u2014 first two visible, rest locked -->
+  <div class="teaser-list">
+    <div class="teaser-item">
+      <div class="teaser-poster" style="background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;align-items:center;justify-content:center;font-size:22px;">&#127917;</div>
+      <div class="teaser-info">
+        <div class="teaser-title">Prisoners</div>
+        <div class="teaser-meta">Thriller \u00b7 2013</div>
+        <div class="teaser-stars">\u2605\u2605\u2605\u2605\u00bd</div>
+      </div>
+      <div class="teaser-lock">\ud83d\udd12</div>
+    </div>
+    <div class="teaser-item">
+      <div class="teaser-poster" style="background:linear-gradient(135deg,#0f3460,#533483);display:flex;align-items:center;justify-content:center;font-size:22px;">&#127775;</div>
+      <div class="teaser-info">
+        <div class="teaser-title">Everything Everywhere</div>
+        <div class="teaser-meta">Sci-Fi \u00b7 2022</div>
+        <div class="teaser-stars">\u2605\u2605\u2605\u2605\u2605</div>
+      </div>
+      <div class="teaser-lock">\ud83d\udd12</div>
+    </div>
+  </div>
+  <div class="more-label">\u2026and 10 more from your friends</div>
+
+  <!-- Unlock CTA -->
+  <div class="unlock-card" id="unlock">
+    <div class="lock-icon">\ud83c\udfac</div>
+    <div class="unlock-title">Unlock all your friends'<br><em>picks \u2014 Free</em></div>
+    <div class="unlock-sub">Takes 20 seconds. No spam.<br>Save this film instantly when you join.</div>
+
+    <div class="perks">
+      <div class="perk"><span class="perk-icon">\ud83d\udccb</span>Build your watchlist</div>
+      <div class="perk"><span class="perk-icon">\ud83d\udc65</span>See friends' picks</div>
+      <div class="perk"><span class="perk-icon">\ud83d\udce4</span>Share anything</div>
+    </div>
+
+    <button class="btn-google" onclick="openSignIn('signup')">
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Continue with Google \u2014 it's free
+    </button>
+
+    <button class="btn-outline" onclick="openSignIn('signup')">Continue with email</button>
+
+    <div class="fine-print">
+      Already on reel.? <a href="#" onclick="openSignIn();return false;">Sign in \u2192</a><br><br>
+      By signing up you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>
+    </div>
+  </div>
+
+  <!-- Trending this week -->
+  <div class="trending-section">
+    <div class="section-heading">\ud83d\udd25 Trending &amp; Banging This Week</div>
+    <div class="trending-grid">
+      <div class="trending-card" onclick="openSignIn()">
+        <div style="width:100%;height:182px;background:linear-gradient(135deg,#1a1a2e,#e94560);display:block;"></div>
+        <div class="trending-card-overlay"></div>
+        <div class="trending-card-info">
+          <div class="tc-title">Succession S4</div>
+          <div class="tc-rating">\u2605\u2605\u2605\u2605\u2605 5.0</div>
+        </div>
+        <div class="tc-rank gold">#1</div>
+      </div>
+      <div class="trending-card" onclick="openSignIn()">
+        <div style="width:100%;height:182px;background:linear-gradient(135deg,#0f3460,#16213e);display:block;"></div>
+        <div class="trending-card-overlay"></div>
+        <div class="trending-card-info">
+          <div class="tc-title">Poor Things</div>
+          <div class="tc-rating">\u2605\u2605\u2605\u2605\u00bd 4.7</div>
+        </div>
+        <div class="tc-rank">#2</div>
+      </div>
+      <div class="trending-card" onclick="openSignIn()">
+        <div style="width:100%;height:182px;background:linear-gradient(135deg,#2d132c,#ee4540);display:block;"></div>
+        <div class="trending-card-overlay"></div>
+        <div class="trending-card-info">
+          <div class="tc-title">Saltburn</div>
+          <div class="tc-rating">\u2605\u2605\u2605\u2605\u00bd 4.4</div>
+        </div>
+        <div class="tc-rank">#3</div>
+        <div class="tc-locked">\ud83d\udd12</div>
+      </div>
+      <div class="trending-card" onclick="openSignIn()">
+        <div style="width:100%;height:182px;background:linear-gradient(135deg,#1b1b2f,#162447);display:block;"></div>
+        <div class="trending-card-overlay"></div>
+        <div class="trending-card-info">
+          <div class="tc-title">Hereditary</div>
+          <div class="tc-rating">\u2605\u2605\u2605\u2605\u00bd 4.6</div>
+        </div>
+        <div class="tc-rank">#4</div>
+        <div class="tc-locked">\ud83d\udd12</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /below -->
+
+<!-- \u2500\u2500 TRAILER MODAL \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 -->
+<div class="modal" id="trailerModal">
+  <button class="modal-close" onclick="closeTrailer()">\u2715 Close</button>
+  <div class="modal-video">
+    <iframe id="trailerFrame" src="" allow="autoplay; fullscreen" allowfullscreen title="Trailer"></iframe>
+  </div>
+  <div class="modal-film-title" id="modalTitle">Oppenheimer \u2014 Official Trailer</div>
+  <button class="modal-cta" onclick="closeTrailer();openSignIn('signup')">
+    Save this film \u2014 join reel. free \u2192
+  </button>
+</div>
+
+<!-- \u2500\u2500 SIGN IN / SIGN UP MODAL \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 -->
+<div class="signin-modal" id="signinModal" onclick="if(event.target===this)closeSignIn()">
+  <div class="signin-sheet" style="position:relative;">
+    <button class="signin-close" onclick="closeSignIn()">\u2715</button>
+    <div class="signin-handle"></div>
+
+    <div id="signinView">
+      <div class="signin-title">Welcome back</div>
+      <div class="signin-sub">Sign in to see your list and friends' picks</div>
+
+      <button class="btn-google" onclick="googleSignUp()" style="margin-bottom:10px;">
+        <svg width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="signin-divider"><hr/><span>or</span><hr/></div>
+
+      <input class="signin-input" type="email" placeholder="Email address" id="signinEmail"/>
+      <input class="signin-input" type="password" placeholder="Password" id="signinPassword"/>
+      <button class="btn-signin-submit" onclick="emailSignIn()">Sign In</button>
+
+      <div class="signin-switch">
+        Don't have an account? <a onclick="switchToSignUp()">Sign up free \u2192</a>
+      </div>
+    </div>
+
+    <div id="signupView" style="display:none;">
+      <div class="signin-title">Join reel.</div>
+      <div class="signin-sub">Save this film and see everything your friends are watching</div>
+
+      <button class="btn-google" onclick="googleSignUp()" style="margin-bottom:10px;">
+        <svg width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Continue with Google \u2014 it's free
+      </button>
+
+      <div class="signin-divider"><hr/><span>or</span><hr/></div>
+
+      <input class="signin-input" type="text" placeholder="Your name" id="signupName"/>
+      <input class="signin-input" type="email" placeholder="Email address" id="signupEmail"/>
+      <input class="signin-input" type="password" placeholder="Choose a password" id="signupPassword"/>
+      <button class="btn-signin-submit" onclick="emailSignUp()">Create Account</button>
+
+      <div class="signin-switch">
+        Already on reel.? <a onclick="switchToSignIn()">Sign in \u2192</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// \u2500\u2500 URL param hydration \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+const p = new URLSearchParams(window.location.search);
+
+const AVATAR_COLORS = ["#E74C3C","#9B59B6","#27AE60","#2980B9","#E67E22","#16A085","#8E44AD"];
+function strColor(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%AVATAR_COLORS.length;return AVATAR_COLORS[h];}
+
+const film = {
+  title:   p.get("title")   || "Oppenheimer",
+  year:    p.get("year")    || "2023",
+  runtime: p.get("runtime") || "180 min",
+  genre:   p.get("genre")   || "Drama",
+  rating:  parseFloat(p.get("rating") || "4.7"),
+  from:    p.get("from")    || "Dave",
+  note:    p.get("note")    || "An absolute cinematic event. See it loud.",
+  poster:  p.get("poster")  || "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80",
+  trailer: p.get("trailer") || "https://www.youtube.com/embed/uYPbbksJxIg",
+  color:   p.get("color")   || "",
+};
+
+// Populate hero
+document.getElementById("heroBg").style.backgroundImage = `url('${film.poster}')`;
+document.getElementById("heroTitle").textContent   = film.title;
+document.getElementById("heroRating").textContent  = film.rating;
+document.getElementById("heroYear").textContent    = `${film.year} \u00b7 ${film.runtime}`;
+document.getElementById("heroNote").textContent    = film.note;
+document.getElementById("fromName").textContent    = film.from;
+document.getElementById("modalTitle").textContent  = `${film.title} \u2014 Official Trailer`;
+document.title = `${film.from} recommended ${film.title} on reel.`;
+
+const av = document.getElementById("chipAvatar");
+av.textContent = film.from[0].toUpperCase();
+av.style.background = film.color || strColor(film.from);
+
+// Stars
+const full = Math.floor(film.rating), half = film.rating % 1 >= 0.5;
+document.getElementById("heroRating").textContent = film.rating;
+
+// \u2500\u2500 Trailer \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Watchlist toggle ────────────────────────────────────────────────────────
+var watchlisted = false;
+function toggleWatchlist(){
+  watchlisted = !watchlisted;
+  var btn   = document.getElementById('watchlistBtn');
+  var icon  = document.getElementById('watchlistIcon');
+  var label = document.getElementById('watchlistLabel');
+  if(watchlisted){
+    btn.classList.add('saved');
+    icon.textContent  = '\u2713';
+    label.textContent = 'Saved to Watchlist';
+  } else {
+    btn.classList.remove('saved');
+    icon.textContent  = '+';
+    label.textContent = 'Add to Watchlist';
+  }
+  // In production: POST /api/watchlist { filmId, userId }
+}
+
+function openSignIn(mode){
+  document.getElementById('signinModal').classList.add('open');
+  document.body.style.overflow='hidden';
+  if(mode==='signup'){ switchToSignUp(); } else { switchToSignIn(); }
+}
+function closeSignIn(){
+  document.getElementById('signinModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+function switchToSignUp(){
+  document.getElementById('signinView').style.display='none';
+  document.getElementById('signupView').style.display='block';
+}
+function switchToSignIn(){
+  document.getElementById('signupView').style.display='none';
+  document.getElementById('signinView').style.display='block';
+}
+function emailSignIn(){
+  alert('In production this would verify credentials and sign you in.');
+}
+
+function openTrailer(){
+  document.getElementById("trailerFrame").src = film.trailer + "?autoplay=1";
+  document.getElementById("trailerModal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeTrailer(){
+  document.getElementById("trailerFrame").src = "";
+  document.getElementById("trailerModal").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+// \u2500\u2500 Auth (wire to real OAuth in production) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+function googleSignUp(){
+  const next = `/welcome?film=${encodeURIComponent(film.title)}&from=${encodeURIComponent(film.from)}`;
+  // window.location.href = `/auth/google?next=${encodeURIComponent(next)}`;
+  alert(`Google OAuth would launch here.\
+\
+After sign-up, "${film.title}" is auto-saved to your watchlist and you're dropped straight into reel.`);
+}
+function emailSignUp(){
+  alert("Email sign-up flow.");
+}
+
+// \u2500\u2500 WhatsApp deep link builder (used by the reel. React app) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+window.buildWhatsAppShareUrl = function({ film, fromName, note }){
+  const base = "https://reel.app/share";
+  const qs = new URLSearchParams({
+    title: film.title, year: String(film.year||""), runtime: film.runtime||"",
+    genre: film.genre||"", rating: String(film.rating||""),
+    from: fromName, note: note||"",
+    poster: film.backdrop||film.poster||"",
+    trailer: film.trailerUrl||"", color: film.color||"",
+  });
+  const shareUrl = `${base}?${qs}`;
+  const msg = `Hey! I think you'd love *${film.title}* \ud83c\udfac\
+\
+"${note||"Trust me on this one."}"\
+\
+\ud83d\udc49 ${shareUrl}`;
+  return { shareUrl, message: msg, waLink: `https://wa.me/?text=${encodeURIComponent(msg)}` };
+};
+</script>
+</body>
+</html>
