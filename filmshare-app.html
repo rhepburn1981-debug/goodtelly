@@ -13110,7 +13110,7 @@
                   const flat = [];
                   results.forEach((films, i) => {
                     films.forEach(film => {
-                      if (\!seen.has(film.id)) { seen.add(film.id); flat.push(Object.assign({}, film, { _fromFriend: realFriends[i].username })); }
+                      if (!seen.has(film.id)) { seen.add(film.id); flat.push(Object.assign({}, film, { _fromFriend: realFriends[i].username })); }
                     });
                   });
                   setFriendsRecommendedFilms(flat);
