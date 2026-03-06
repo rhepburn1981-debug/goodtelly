@@ -474,7 +474,7 @@
     </button>
   </div>
 
-  <div class="scroll-hint">\u2193 &nbsp; scroll to see more</div>
+  <div class="scroll-hint">↓ &nbsp; scroll to see more</div>
 </div>
 
 <!-- ── BELOW THE FOLD ────────────────────────────────────────────────── -->
@@ -519,11 +519,11 @@
       <div class="teaser-lock">🔒</div>
     </div>
   </div>
-  <div class="more-label">\u2026and 10 more from your friends</div>
+  <div class="more-label">…and 10 more from your friends</div>
 
   <!-- Unlock CTA -->
   <div class="unlock-card" id="unlock">
-    <div class="lock-icon">\ud83c\udfac</div>
+    <div class="lock-icon">🎬</div>
     <div class="unlock-title">Unlock all your friends'<br><em>picks — Free</em></div>
     <div class="unlock-sub">Takes 20 seconds. No spam.<br>Save this film instantly when you join.</div>
 
@@ -600,7 +600,7 @@
 
 <!-- ── TRAILER MODAL ──────────────────────────────────────────────────── -->
 <div class="modal" id="trailerModal">
-  <button class="modal-close" onclick="closeTrailer()">\u2715 Close</button>
+  <button class="modal-close" onclick="closeTrailer()">✕ Close</button>
   <div class="modal-video">
     <iframe id="trailerFrame" src="" allow="autoplay; fullscreen" allowfullscreen title="Trailer"></iframe>
   </div>
@@ -613,7 +613,7 @@
 <!-- ── SIGN IN / SIGN UP MODAL ─────────────────────────────────── -->
 <div class="signin-modal" id="signinModal" onclick="if(event.target===this)closeSignIn()">
   <div class="signin-sheet" style="position:relative;">
-    <button class="signin-close" onclick="closeSignIn()">\u2715</button>
+    <button class="signin-close" onclick="closeSignIn()">✕</button>
     <div class="signin-handle"></div>
 
     <div id="signinView">
@@ -718,7 +718,7 @@ function toggleWatchlist(){
   var label = document.getElementById('watchlistLabel');
   if(watchlisted){
     btn.classList.add('saved');
-    icon.textContent  = '\u2713';
+    icon.textContent  = '✓';
     label.textContent = 'Saved to Watchlist';
   } else {
     btn.classList.remove('saved');
@@ -783,7 +783,7 @@ window.buildWhatsAppShareUrl = function({ film, fromName, note }){
     trailer: film.trailerUrl||"", color: film.color||"",
   });
   const shareUrl = `${base}?${qs}`;
-  const msg = `Hey! I think you'd love *${film.title}* \ud83c\udfac\
+  const msg = `Hey! I think you'd love *${film.title}* 🎬\
 \
 "${note||"Trust me on this one."}"\
 \

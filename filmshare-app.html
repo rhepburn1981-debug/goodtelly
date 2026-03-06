@@ -10385,7 +10385,7 @@
               const totalSelected = selectedInApp.length;
 
               // "from" should be the current user (sender), not the recipient contact
-              const CURRENT_USER = (currentUser && (currentUser.display_name || currentUser.username)) || "A friend";
+              const CURRENT_USER = (currentUser && (currentUser.display_name || currentUser.username || (currentUser.email && currentUser.email.split("@")[0]))) || "A friend";
 
               const buildShareUrl = () => {
                 const base = window.location.origin + '/share';
