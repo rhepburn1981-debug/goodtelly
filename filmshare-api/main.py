@@ -209,6 +209,23 @@ def init_db():
 
 init_db()
 
+# Migrations: add columns that may not exist in older DBs
+def _migrate():
+    with get_db() as conn:
+        for sql in [
+            "ALTER TABLE user_recommendations ADD COLUMN note TEXT",
+            "ALTER TABLE user_recommendations ADD COLUMN rating REAL",
+            "ALTER TABLE films ADD COLUMN slug TEXT",
+            "ALTER TABLE films ADD COLUMN tmdb_id INTEGER",
+        ]:
+            try:
+                conn.execute(sql)
+            except Exception:
+                pass  # column already exists
+
+_migrate()
+
+
 HTML_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "filmshare-app.html")
 SHARE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "reel-share-landing.html")
 
