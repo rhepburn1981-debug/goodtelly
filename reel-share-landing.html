@@ -653,17 +653,20 @@ const AVATAR_COLORS = ["#E74C3C","#9B59B6","#27AE60","#2980B9","#E67E22","#16A08
 function strColor(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%AVATAR_COLORS.length;return AVATAR_COLORS[h];}
 
 const _d = window.__FILM__ || {};
+const _slug = _d.slug || window.location.pathname.split('/').filter(Boolean).pop() || "";
 const film = {
-  title:   _d.title   || p.get("title")   || "Oppenheimer",
-  year:    _d.year    || p.get("year")    || "2023",
-  runtime: _d.runtime || p.get("runtime") || "180 min",
-  genre:   _d.genre   || p.get("genre")   || "Drama",
-  rating:  parseFloat(_d.rating   || p.get("rating") || "4.7"),
-  from:    _d.from    || p.get("from")    || "A friend",
-  note:    _d.note    || p.get("note")    || "An absolute cinematic event. See it loud.",
-  poster:  _d.poster  || p.get("poster")  || "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80",
-  trailer: _d.trailer || p.get("trailer") || "https://www.youtube.com/embed/uYPbbksJxIg",
-  color:   _d.color   || p.get("color")   || "",
+  title:     _d.title     || p.get("title")   || "Oppenheimer",
+  year:      _d.year      || p.get("year")    || "2023",
+  runtime:   _d.runtime   || p.get("runtime") || "180 min",
+  genre:     _d.genre     || p.get("genre")   || "Drama",
+  rating:    parseFloat(_d.rating   || p.get("rating") || "4.7"),
+  from:      _d.from      || p.get("from")    || "A friend",
+  from_user: _d.from_user || p.get("from_user") || "",
+  note:      _d.note      || p.get("note")    || "An absolute cinematic event. See it loud.",
+  poster:    _d.poster    || p.get("poster")  || "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80",
+  trailer:   _d.trailer   || p.get("trailer") || "https://www.youtube.com/embed/uYPbbksJxIg",
+  color:     _d.color     || p.get("color")   || "",
+  slug:      _slug,
 };
 
 // Populate hero
@@ -713,7 +716,7 @@ function toggleWatchlist(){
     if (!r.ok) return; // Token invalid/expired
     // Already logged in — record recommendation + friend request silently, then redirect
     await autoFriendRequester(token);
-    window.location.href = '/';
+    window.location.href = '/' + (film.slug ? '?open=' + encodeURIComponent(film.slug) : '');
   } catch(e) {}
 })();
 
@@ -771,7 +774,7 @@ async function emailSignIn(){
     if (!r.ok) { errEl.textContent = d.detail || 'Incorrect email or password'; errEl.style.display='block'; btn.textContent='Sign In'; btn.disabled=false; return; }
     localStorage.setItem('filmshare_token', d.access_token);
     await autoFriendRequester(d.access_token);
-    window.location.href = '/';
+    window.location.href = '/' + (film.slug ? '?open=' + encodeURIComponent(film.slug) : '');
   } catch(e) { errEl.textContent = 'Network error, try again'; errEl.style.display='block'; btn.textContent='Sign In'; btn.disabled=false; }
 }
 
@@ -809,7 +812,7 @@ async function emailSignUp(){
     if (!lr.ok) { switchToSignIn(); btn.textContent='Create Account'; btn.disabled=false; return; }
     localStorage.setItem('filmshare_token', ld.access_token);
     await autoFriendRequester(ld.access_token);
-    window.location.href = '/';
+    window.location.href = '/' + (film.slug ? '?open=' + encodeURIComponent(film.slug) : '');
   } catch(e) { errEl.textContent = 'Network error, try again'; errEl.style.display='block'; btn.textContent='Create Account'; btn.disabled=false; }
 }
 

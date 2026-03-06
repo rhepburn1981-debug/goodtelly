@@ -13124,9 +13124,20 @@
                   .catch(() => {});
               }, [authToken]);
 
-              // Handle arrival from the landing page after sign-up
+              // Handle arrival from the landing page after sign-up or share link
               useEffect(() => {
                 const params = new URLSearchParams(window.location.search);
+                // ?open=SLUG — open a specific film (from share link redirect)
+                const openSlug = params.get("open");
+                if (openSlug) {
+                  const token = authToken || localStorage.getItem("filmshare_token");
+                  const headers = token ? { Authorization: "Bearer " + token } : {};
+                  fetch(API_BASE + "/api/films/slug/" + encodeURIComponent(openSlug), { headers })
+                    .then(r => r.ok ? r.json() : null)
+                    .then(film => { if (film) setSelectedFilm(film); })
+                    .catch(() => {});
+                  window.history.replaceState({}, "", "/");
+                }
                 if (params.get("newUser") === "1") {
                   const name = params.get("name") || "there";
                   const filmName = params.get("film");

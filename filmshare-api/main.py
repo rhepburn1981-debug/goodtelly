@@ -699,6 +699,15 @@ def get_film(film_id: int):
         return film
 
 
+
+@app.get("/api/films/slug/{slug}")
+def get_film_by_slug(slug: str):
+    with get_db() as conn:
+        film = conn.execute("SELECT * FROM films WHERE slug=?", (slug,)).fetchone()
+        if not film:
+            raise HTTPException(status_code=404, detail="Film not found")
+        return get_film_by_id(conn, film["id"])
+
 @app.post("/api/films/{film_id}/refresh")
 def refresh_film(film_id: int):
     """Re-enrich a film from TMDB/TVmaze to fill missing trailer, cast, stills etc."""
