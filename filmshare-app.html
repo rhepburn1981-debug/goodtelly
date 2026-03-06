@@ -11487,7 +11487,7 @@
                   React.createElement("div", {
                     style: { fontSize: 11, color: "var(--muted)", marginTop: 2 },
                   }, [film.genre ? film.genre.split(",")[0].trim() : null, film.year].filter(Boolean).join(" · ")),
-                  film.rating && React.createElement("div", {
+                  parseFloat(film.rating) > 0 && React.createElement("div", {
                     style: { display: "flex", alignItems: "center", gap: 4, marginTop: 3 },
                   },
                     React.createElement(InlineStars, { rating: film.rating, size: 11 }),
@@ -12115,7 +12115,7 @@
                       style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" },
                     },
                       React.createElement(InlineStars, { rating: featuredFilm.rating || 0, size: 12 }),
-                      React.createElement("span", { style: { fontSize: 12, color: "rgba(255,255,255,0.8)" } }, featuredFilm.rating),
+                      parseFloat(featuredFilm.rating) > 0 && React.createElement("span", { style: { fontSize: 12, color: "rgba(255,255,255,0.8)" } }, featuredFilm.rating),
                       React.createElement("span", {
                         style: {
                           fontSize: 11, padding: "2px 8px", borderRadius: 6,
@@ -12187,9 +12187,9 @@
                       React.createElement("div", {
                         style: { display: "flex", alignItems: "center", gap: 6, marginTop: 3 },
                       },
-                        film.rating && React.createElement(InlineStars, { rating: film.rating, size: 10 }),
-                        film.rating && React.createElement("span", { style: { fontSize: 10, color: "var(--muted)" } }, film.rating),
-                        film.trendingViews && React.createElement("span", { style: { fontSize: 10, color: "var(--muted)" } }, "· " + formatViews(film.trendingViews)),
+                        parseFloat(film.rating) > 0 && React.createElement(InlineStars, { rating: film.rating, size: 10 }),
+                        parseFloat(film.rating) > 0 && React.createElement("span", { style: { fontSize: 10, color: "var(--muted)" } }, film.rating),
+                        film.trendingViews > 0 && React.createElement("span", { style: { fontSize: 10, color: "var(--muted)" } }, "· " + formatViews(film.trendingViews)),
                       ),
                       film.streamers && film.streamers.length > 0 && React.createElement(StreamerBadges, { ids: film.streamers }),
                     ),
