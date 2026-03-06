@@ -12,15 +12,21 @@ TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p"
 
 
 def _get(path: str, params: dict) -> dict:
+    token = os.environ.get("TMDB_READ_TOKEN", "")
     key = os.environ.get("TMDB_API_KEY", "")
-    if not key:
+    if not token and not key:
         return {}
-    params["api_key"] = key
     url = f"{TMDB_BASE}{path}?{urllib.parse.urlencode(params)}"
+    if not token:
+        url += f"&api_key={key}"
     try:
-        with urllib.request.urlopen(url, timeout=5) as resp:
+        req = urllib.request.Request(url)
+        if token:
+            req.add_header("Authorization", f"Bearer {token}")
+        with urllib.request.urlopen(req, timeout=15) as resp:
             return json.loads(resp.read())
-    except Exception:
+    except Exception as e:
+        print(f"TMDB _get error for {path}: {e}", flush=True)
         return {}
 
 
