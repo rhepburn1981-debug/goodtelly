@@ -10032,9 +10032,7 @@
         </svg>`,
 
               discover: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="9" fill="currentColor" opacity="0.1" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M15 9L12.5 11.5L9 13L11.5 10.5L15 9Z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>
-          <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" opacity="0.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>`,
 
               friends: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10876,7 +10874,7 @@
                         src: (() => {
                           const url = film.trailerUrl || '';
                           const base = url.includes('/embed/') ? url : url.replace('watch?v=', 'embed/');
-                          return base.split('?')[0] + '?rel=0&modestbranding=1&autoplay=1';
+                          return base.split('?')[0] + '?rel=0&modestbranding=1&autoplay=1&playsinline=1';
                         })(),
                         style: { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" },
                         allow: "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; autoplay",
@@ -11544,6 +11542,7 @@
               visiblePicks,
               showAllPicks,
               setShowAllPicks,
+              realFriends,
               onFilmClick,
               addedIds,
               watchedIds,
@@ -11573,30 +11572,35 @@
               return React.createElement("div", { style: { height: "100%", overflowY: "auto" } },
 
                 /* YOUR FRIENDS */
-                FRIENDS_DATA.length > 0 && React.createElement(React.Fragment, null,
-                  sectionLabel("Your Friends", null),
-                  React.createElement("div", {
-                    style: { display: "flex", gap: 16, overflowX: "auto", padding: "0 16px 16px", scrollbarWidth: "none" },
-                  },
-                    FRIENDS_DATA.map(f =>
-                      React.createElement("button", {
-                        key: f.name || f.id,
-                        onClick: () => onFriendClick && onFriendClick(f.name),
-                        style: { flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center" },
-                      },
-                        React.createElement("div", { style: { marginBottom: 6 } },
-                          React.createElement(Avatar, { name: f.name, color: f.color, size: 64 }),
-                        ),
-                        React.createElement("div", {
-                          style: { fontSize: 11, fontWeight: 600, color: "var(--text2)" },
-                        }, f.name),
-                        React.createElement("div", {
-                          style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 1 },
-                        }, (f.count || 0) + " picks"),
-                      ),
+                (() => {
+                  const homeFriends = (realFriends && realFriends.length > 0) ? realFriends : FRIENDS_DATA;
+                  if (!homeFriends.length) return null;
+                  return React.createElement(React.Fragment, null,
+                    sectionLabel("Your Friends", null),
+                    React.createElement("div", {
+                      style: { display: "flex", gap: 16, overflowX: "auto", padding: "0 16px 16px", scrollbarWidth: "none" },
+                    },
+                      homeFriends.map(f => {
+                        const dName = f.display_name || f.username || f.name || "";
+                        return React.createElement("button", {
+                          key: f.username || f.name || f.id,
+                          onClick: () => onFriendClick && onFriendClick(dName),
+                          style: { flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center" },
+                        },
+                          React.createElement("div", { style: { marginBottom: 6 } },
+                            React.createElement(Avatar, { name: dName, color: f.color, size: 64 }),
+                          ),
+                          React.createElement("div", {
+                            style: { fontSize: 11, fontWeight: 600, color: "var(--text2)" },
+                          }, dName),
+                          React.createElement("div", {
+                            style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 1 },
+                          }, (f.count || 0) + " picks"),
+                        );
+                      }),
                     ),
-                  ),
-                ),
+                  );
+                })(),
 
                 /* RECOMMENDED FOR YOU */
                 recommendedFilms.length > 0 && React.createElement(React.Fragment, null,
@@ -12067,7 +12071,7 @@
                     },
                   }, "#1 " + periodLabel),
                   /* Views */
-                  React.createElement("div", {
+                  featuredFilm.trendingViews > 0 && React.createElement("div", {
                     style: {
                       position: "absolute", top: 14, right: 14,
                       color: "rgba(255,255,255,0.7)", fontSize: 11, display: "flex", alignItems: "center", gap: 4,
@@ -13162,58 +13166,35 @@
                     },
                     React.createElement(
                       "div",
-                      { style: { display: "flex", alignItems: "center", gap: 10 } },
+                      { style: { display: "flex", alignItems: "center", gap: 0 } },
                       React.createElement(
                         "div",
                         {
                           style: {
-                            width: 38, height: 26, borderRadius: 7,
-                            background: "#FF5500",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            flexShrink: 0,
-                            boxShadow: "0 2px 10px rgba(255,85,0,0.4)",
+                            fontFamily: "'Arial Black', 'Arial Bold', Gadget, sans-serif",
+                            fontSize: 30,
+                            fontWeight: 900,
+                            color: "#E8000D",
+                            letterSpacing: -1,
+                            lineHeight: 1,
                           },
                         },
-                        React.createElement(
-                          "svg",
-                          { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none" },
-                          React.createElement("path", {
-                            d: "M6 4L20 12L6 20V4Z",
-                            fill: "#fff",
-                          }),
-                        ),
+                        "REEL",
                       ),
                       React.createElement(
                         "div",
-                        { style: { display: "flex", alignItems: "baseline", gap: 8 } },
-                        React.createElement(
-                          "div",
-                          {
-                            style: {
-                              fontFamily: "var(--ff-display)",
-                              fontSize: 28,
-                              fontWeight: 700,
-                              fontStyle: "italic",
-                              color: "var(--gold-bright)",
-                              letterSpacing: 1,
-                              lineHeight: 1,
-                            },
+                        {
+                          style: {
+                            fontSize: 11,
+                            color: "rgba(255,255,255,0.55)",
+                            letterSpacing: 0.5,
+                            fontStyle: "italic",
+                            marginLeft: 10,
+                            marginBottom: -2,
+                            alignSelf: "flex-end",
                           },
-                          "Reel.",
-                        ),
-                        React.createElement(
-                          "div",
-                          {
-                            style: {
-                              fontSize: 15,
-                              color: "rgba(255,255,255,0.75)",
-                              letterSpacing: 0.3,
-                              fontStyle: "italic",
-                              fontFamily: "var(--ff-display)",
-                            },
-                          },
-                          "great telly",
-                        ),
+                        },
+                        "just great content",
                       ),
                     ),
                     currentUser
@@ -13396,6 +13377,7 @@
                         onMarkWatched: markWatched,
                         onRecommend: (f) => setRecommendFilm(f),
                         userRatings: userRatings,
+                        realFriends: realFriends,
                         onFriendClick: (name) => { setFriendsDefaultFriend(name); setTab("friends"); },
                       }),
 
