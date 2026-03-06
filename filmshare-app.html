@@ -39,6 +39,10 @@
         overflow-x: hidden;
         overscroll-behavior: none;
       }
+      /* Prevent iOS auto-zoom on input focus */
+      input, textarea, select {
+        font-size: 16px !important;
+      }
       html {
         font-size: 112%;
       }
@@ -11122,12 +11126,14 @@
                 "div",
                 {
                   style: {
-                    position: "absolute",
+                    position: "fixed",
                     inset: 0,
                     background: "#0D0D13",
                     zIndex: 80,
                     overflowY: "auto",
                     overflowX: "hidden",
+                    overscrollBehavior: "contain",
+                    WebkitOverflowScrolling: "touch",
                   },
                 },
                 showTrailer && film.trailerUrl
