@@ -13098,7 +13098,7 @@
               }, []);
 
               React.useEffect(() => {
-                if (\!authToken || \!realFriends || realFriends.length === 0) return;
+                if (!authToken || !realFriends || realFriends.length === 0) return;
                 const headers = { Authorization: "Bearer " + authToken };
                 Promise.all(
                   realFriends.map(f =>
