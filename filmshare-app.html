@@ -10373,8 +10373,9 @@
             }
 
             // ─── Recommend Modal ────────────────────────────────────────────────────────────
-            function RecommendModal({ film, onClose, showToast, currentUser, realFriends, authToken }) {
+            function RecommendModal({ film, onClose, showToast, currentUser, realFriends, authToken, userRatings, onSaveRating }) {
               const [note, setNote] = useState("");
+              const [rating, setRating] = useState((userRatings && userRatings[film.id]) || 0);
               const [sending, setSending] = useState({});
 
               const CURRENT_USER = (currentUser && (currentUser.display_name || currentUser.username || (currentUser.email && currentUser.email.split("@")[0]))) || "A friend";
@@ -10415,6 +10416,7 @@
               };
 
               const sendInApp = async (friend) => {
+                if (rating && onSaveRating) onSaveRating(film.id, rating);
                 setSending(s => ({ ...s, [friend.username]: "loading" }));
                 try {
                   const res = await fetch("/api/me/send-recommendation", {
@@ -10436,6 +10438,7 @@
               };
 
               const sendViaWhatsApp = () => {
+                if (rating && onSaveRating) onSaveRating(film.id, rating);
                 const shareUrl = buildShareUrl();
                 window.open("https://wa.me/?text=" + encodeURIComponent(buildWAMsg(shareUrl)), "_blank");
               };
@@ -10517,6 +10520,13 @@
                   React.createElement(
                     "div",
                     { style: { overflowY: "auto", padding: "14px 16px 8px", flex: 1 } },
+                    /* Star rating */
+                    React.createElement("div", { style: { textAlign: "center", marginBottom: 14 } },
+                      React.createElement("div", { style: { fontSize: 10, fontWeight: 700, color: "#AAA", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 } },
+                        rating ? "Your rating" : "Rate it",
+                      ),
+                      React.createElement(StarPicker, { onRate: setRating, selected: rating }),
+                    ),
                     React.createElement("div", { style: { fontSize: 11, fontWeight: 700, color: "#AAA", marginBottom: 6 } },
                       "Your note ", React.createElement("span", { style: { fontWeight: 400, color: "#555" } }, "(optional)"),
                     ),
@@ -13342,11 +13352,7 @@
                             onAdd: addToList,
                             added: addedIds.includes(film.id),
                             onMarkWatched: markWatched,
-                            onRecommend: (f) => {
-                              setRatingPromptStars(0);
-                              setRatingPromptForRecommend(true);
-                              setRatingPrompt(f.id);
-                            },
+                            onRecommend: (f) => setRecommendFilm(f),
                             onClick: () => openFilm(film),
                           }),
                         ),
@@ -13388,11 +13394,7 @@
                         watchedIds: watchedIds,
                         onAdd: addToList,
                         onMarkWatched: markWatched,
-                        onRecommend: (f) => {
-                          setRatingPromptStars(0);
-                          setRatingPromptForRecommend(true);
-                          setRatingPrompt(f.id);
-                        },
+                        onRecommend: (f) => setRecommendFilm(f),
                         userRatings: userRatings,
                         onFriendClick: (name) => { setFriendsDefaultFriend(name); setTab("friends"); },
                       }),
@@ -13407,11 +13409,7 @@
                         onFilmClick: openFilm,
                         onAdd: addToList,
                         onMarkWatched: markWatched,
-                        onRecommend: (f) => {
-                          setRatingPromptStars(0);
-                          setRatingPromptForRecommend(true);
-                          setRatingPrompt(f.id);
-                        },
+                        onRecommend: (f) => setRecommendFilm(f),
                         onRemove: removeFromList,
                         listSort: listSort,
                         setListSort: setListSort,
@@ -13434,11 +13432,7 @@
                         addedIds: addedIds,
                         onAdd: addToList,
                         onMarkWatched: markWatched,
-                        onRecommend: (f) => {
-                          setRatingPromptStars(0);
-                          setRatingPromptForRecommend(true);
-                          setRatingPrompt(f.id);
-                        },
+                        onRecommend: (f) => setRecommendFilm(f),
                       }),
 
                     /* FRIENDS */
@@ -13450,11 +13444,7 @@
                         watchedIds: watchedIds,
                         onAdd: addToList,
                         onMarkWatched: markWatched,
-                        onRecommend: (f) => {
-                          setRatingPromptStars(0);
-                          setRatingPromptForRecommend(true);
-                          setRatingPrompt(f.id);
-                        },
+                        onRecommend: (f) => setRecommendFilm(f),
                         defaultFriend: friendsDefaultFriend,
                         realFriends: realFriends,
                         authToken: authToken,
@@ -13548,9 +13538,7 @@
                       onMarkWatched: markWatched,
                       onUnmarkWatched: unmarkWatched,
                       onRecommend: () => {
-                        setRatingPromptStars(userRatings[selectedFilm.id] || 0);
-                        setRatingPromptForRecommend(true);
-                        setRatingPrompt(selectedFilm.id);
+                        setRecommendFilm(selectedFilm);
                       },
                     }),
 
@@ -13657,6 +13645,8 @@
                       currentUser: currentUser,
                       realFriends: realFriends,
                       authToken: authToken,
+                      userRatings: userRatings,
+                      onSaveRating: (id, stars) => setUserRatings(prev => ({ ...prev, [id]: stars })),
                     }),
 
                   ratingPrompt &&
