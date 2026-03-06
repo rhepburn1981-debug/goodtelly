@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import json
 
 # Load .env if present
 _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
@@ -224,6 +225,15 @@ def _render_share_page(title="", year="", rating="", genre="", sender="A friend"
             '<meta property="og:image"       content="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80"/>',
             f'<meta property="og:image"       content="{poster}"/>',
         )
+    # Inject film data so the page JS can hydrate without URL params
+    film_data = {
+        "title": title, "year": year, "rating": rating, "genre": genre,
+        "from": sender, "note": note, "poster": poster,
+        "trailer": trailer, "runtime": runtime, "color": color,
+    }
+    film_json = json.dumps(film_data, ensure_ascii=False)
+    html = html.replace("<script>", f"<script>window.__FILM__ = {film_json};
+", 1)
     return HTMLResponse(html)
 
 

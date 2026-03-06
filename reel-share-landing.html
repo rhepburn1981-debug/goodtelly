@@ -676,17 +676,18 @@ const p = new URLSearchParams(window.location.search);
 const AVATAR_COLORS = ["#E74C3C","#9B59B6","#27AE60","#2980B9","#E67E22","#16A085","#8E44AD"];
 function strColor(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%AVATAR_COLORS.length;return AVATAR_COLORS[h];}
 
+const _d = window.__FILM__ || {};
 const film = {
-  title:   p.get("title")   || "Oppenheimer",
-  year:    p.get("year")    || "2023",
-  runtime: p.get("runtime") || "180 min",
-  genre:   p.get("genre")   || "Drama",
-  rating:  parseFloat(p.get("rating") || "4.7"),
-  from:    p.get("from")    || "Dave",
-  note:    p.get("note")    || "An absolute cinematic event. See it loud.",
-  poster:  p.get("poster")  || "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80",
-  trailer: p.get("trailer") || "https://www.youtube.com/embed/uYPbbksJxIg",
-  color:   p.get("color")   || "",
+  title:   _d.title   || p.get("title")   || "Oppenheimer",
+  year:    _d.year    || p.get("year")    || "2023",
+  runtime: _d.runtime || p.get("runtime") || "180 min",
+  genre:   _d.genre   || p.get("genre")   || "Drama",
+  rating:  parseFloat(_d.rating   || p.get("rating") || "4.7"),
+  from:    _d.from    || p.get("from")    || "A friend",
+  note:    _d.note    || p.get("note")    || "An absolute cinematic event. See it loud.",
+  poster:  _d.poster  || p.get("poster")  || "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80",
+  trailer: _d.trailer || p.get("trailer") || "https://www.youtube.com/embed/uYPbbksJxIg",
+  color:   _d.color   || p.get("color")   || "",
 };
 
 // Populate hero
