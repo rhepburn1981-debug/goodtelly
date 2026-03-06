@@ -982,6 +982,29 @@ def get_recommendations(current_user=Depends(require_user)):
         return result
 
 
+@app.post("/api/me/send-recommendation")
+def send_recommendation(body: dict, current_user=Depends(require_user)):
+    """Push an in-app recommendation to a friend directly."""
+    film_id = body.get("film_id")
+    to_username = body.get("to_username", "")
+    note = body.get("note", "")
+    with get_db() as conn:
+        to_user = conn.execute("SELECT id FROM users WHERE username=?", (to_username,)).fetchone()
+        if not to_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        film = conn.execute("SELECT id FROM films WHERE id=?", (film_id,)).fetchone()
+        if not film:
+            raise HTTPException(status_code=404, detail="Film not found")
+        try:
+            conn.execute(
+                "INSERT OR REPLACE INTO user_recommendations (film_id, from_user_id, to_user_id, note) VALUES (?,?,?,?)",
+                (film_id, current_user["id"], to_user["id"], note or None)
+            )
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+    return {"ok": True}
+
+
 @app.get("/api/users/find")
 def find_user(q: str, current_user=Depends(require_user)):
     """Find a user by email address or username."""
