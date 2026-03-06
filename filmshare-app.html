@@ -10917,11 +10917,11 @@
                           background: `linear-gradient(135deg, ${film.color}44, transparent 60%)`,
                         },
                       }),
-                      /* Play button — only when trailerUrl available */
-                      film.trailerUrl && React.createElement(
+                      /* Play button — trailer if available, else YouTube search */
+                      React.createElement(
                         "button",
                         {
-                          onClick: () => setShowTrailer(true),
+                          onClick: () => film.trailerUrl ? setShowTrailer(true) : window.open("https://www.youtube.com/results?search_query=" + encodeURIComponent((film.title || "") + " " + (film.year || "") + " trailer"), "_blank"),
                           style: {
                             position: "absolute", inset: 0, width: "100%", height: "100%",
                             background: "transparent", border: "none", cursor: "pointer",
