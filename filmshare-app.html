@@ -11797,6 +11797,7 @@
             // ─── Home Tab ─────────────────────────────────────────────────────────────────
             function HomeTab({
               trendingFilms,
+              friendsRecommendedFilms,
               friendPicks,
               visiblePicks,
               showAllPicks,
@@ -11810,7 +11811,9 @@
               userRatings,
               onFriendClick,
             }) {
-              const recommendedFilms = ALL_FILMS.filter(f => f.sharedBy && !addedIds.includes(f.id) && !watchedIds.includes(f.id)).slice(0, 6);
+              const recommendedFilms = (friendsRecommendedFilms && friendsRecommendedFilms.length > 0)
+                ? friendsRecommendedFilms.filter(f => !addedIds.includes(f.id) && !watchedIds.includes(f.id)).slice(0, 6)
+                : ALL_FILMS.filter(f => f.sharedBy && !addedIds.includes(f.id) && !watchedIds.includes(f.id)).slice(0, 6);
 
               const sectionLabel = (text, action) =>
                 React.createElement("div", {
@@ -11862,8 +11865,7 @@
                     }, "See all →"),
                   ),
                   recommendedFilms.map(film => {
-                    const friendObj = FRIENDS_DATA.find(f => f.name === film.sharedBy) || {};
-                    const hasAvatar = FRIEND_AVATARS[film.sharedBy];
+                    const friendName = film._fromFriend || film.sharedBy || "A friend";
                     return React.createElement("div", {
                       key: film.id,
                       style: {
@@ -11878,12 +11880,12 @@
                       React.createElement("div", {
                         style: { display: "flex", alignItems: "center", gap: 8, padding: "10px 14px 8px" },
                       },
-                        React.createElement(Avatar, { name: film.sharedBy, color: friendObj.color, size: 24 }),
+                        React.createElement(Avatar, { name: friendName, size: 24 }),
                         React.createElement("div", { style: { fontSize: 12 } },
                           React.createElement("span", {
                             style: { fontWeight: 700, color: "var(--gold-bright)", marginRight: 4 },
-                          }, film.sharedBy),
-                          React.createElement("span", { style: { color: "var(--text2)" } }, "thinks you'd love this"),
+                          }, friendName),
+                          React.createElement("span", { style: { color: "var(--text2)" } }, "has this on their list"),
                         ),
                       ),
                       /* Film row */
@@ -13045,6 +13047,7 @@
               const [authToken, setAuthToken] = useState(window.__AUTH_TOKEN || null);
               const [showAuth, setShowAuth] = useState(false);
               const [realFriends, setRealFriends] = useState([]);
+              const [friendsRecommendedFilms, setFriendsRecommendedFilms] = useState([]);
               const [addedIds, setAddedIds] = useState([...INITIAL_WATCHLIST_IDS]);
               const [watchedIds, setWatchedIds] = useState(
                 INITIAL_WATCHLIST.filter(f => f.isWatched).map(f => f.id)
@@ -13093,6 +13096,26 @@
                     .then(r => r.ok ? r.json() : []).then(fs => setRealFriends(fs)).catch(() => {});
                 }
               }, []);
+
+              React.useEffect(() => {
+                if (\!authToken || \!realFriends || realFriends.length === 0) return;
+                const headers = { Authorization: "Bearer " + authToken };
+                Promise.all(
+                  realFriends.map(f =>
+                    fetch(API_BASE + "/api/friends/" + encodeURIComponent(f.username) + "/films", { headers })
+                      .then(r => r.ok ? r.json() : []).catch(() => [])
+                  )
+                ).then(results => {
+                  const seen = new Set();
+                  const flat = [];
+                  results.forEach((films, i) => {
+                    films.forEach(film => {
+                      if (\!seen.has(film.id)) { seen.add(film.id); flat.push(Object.assign({}, film, { _fromFriend: realFriends[i].username })); }
+                    });
+                  });
+                  setFriendsRecommendedFilms(flat);
+                });
+              }, [realFriends, authToken]);
 
               // Handle arrival from the landing page after sign-up
               useEffect(() => {
@@ -13633,6 +13656,7 @@
                       tab === "home" &&
                       React.createElement(HomeTab, {
                         trendingFilms: trendingFilms,
+                        friendsRecommendedFilms: friendsRecommendedFilms,
                         friendPicks: friendPicks,
                         visiblePicks: visiblePicks,
                         showAllPicks: showAllPicks,
