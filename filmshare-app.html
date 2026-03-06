@@ -12501,7 +12501,7 @@
               authToken,
             }) {
               const friendsList = (realFriends && realFriends.length > 0) ? realFriends : FRIENDS_DATA;
-              const getName = (f) => f.username || f.name || "";
+              const getName = (f) => f ? (f.username || f.name || "") : "";
               const defaultName = defaultFriend || (friendsList.length > 0 ? getName(friendsList[0]) : "");
               const [activeFriend, setActiveFriend] = useState(defaultName);
               const [genreFilter, setGenreFilter] = useState("All");
