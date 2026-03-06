@@ -12499,6 +12499,7 @@
               defaultFriend,
               realFriends,
               authToken,
+              onFriendsChanged,
             }) {
               const friendsList = (realFriends && realFriends.length > 0) ? realFriends : FRIENDS_DATA;
               const getName = (f) => f ? (f.username || f.name || "") : "";
@@ -12525,7 +12526,10 @@
               const acceptFriend = async (username) => {
                 const headers = { Authorization: "Bearer " + authToken };
                 const r = await fetch(API_BASE + "/api/friends/" + encodeURIComponent(username) + "/accept", { method: "PUT", headers });
-                if (r.ok) { setPendingRequests(prev => prev.filter(req => req.username !== username)); }
+                if (r.ok) {
+                  setPendingRequests(prev => prev.filter(req => req.username !== username));
+                  if (onFriendsChanged) onFriendsChanged();
+                }
               };
 
               const sendFriendRequest = async () => {
@@ -13708,6 +13712,10 @@
                         defaultFriend: friendsDefaultFriend,
                         realFriends: realFriends,
                         authToken: authToken,
+                        onFriendsChanged: () => {
+                          fetch(API_BASE + "/api/friends", { headers: { Authorization: "Bearer " + authToken } })
+                            .then(r => r.ok ? r.json() : []).then(fs => setRealFriends(fs)).catch(() => {});
+                        },
                       }),
 
                     /* PROFILE */
