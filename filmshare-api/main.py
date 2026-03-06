@@ -206,7 +206,7 @@ def serve_app():
 
 
 def _render_share_page(title="", year="", rating="", genre="", sender="A friend",
-                         note="", poster="", trailer="", runtime="", color=""):
+                         note="", poster="", trailer="", runtime="", color="", from_user=""):
     from fastapi.responses import HTMLResponse
     with open(SHARE_FILE, encoding="utf-8") as fh:
         html = fh.read()
@@ -228,7 +228,7 @@ def _render_share_page(title="", year="", rating="", genre="", sender="A friend"
     # Inject film data so the page JS can hydrate without URL params
     film_data = {
         "title": title, "year": year, "rating": rating, "genre": genre,
-        "from": sender, "note": note, "poster": poster,
+        "from": sender, "from_user": from_user, "note": note, "poster": poster,
         "trailer": trailer, "runtime": runtime, "color": color,
     }
     film_json = json.dumps(film_data, ensure_ascii=False)
@@ -238,7 +238,7 @@ def _render_share_page(title="", year="", rating="", genre="", sender="A friend"
 
 
 @app.get("/share/{slug}", include_in_schema=False)
-def serve_share_slug(slug: str, from_: str = Query(default="A friend", alias="from"), note: str = ""):
+def serve_share_slug(slug: str, from_: str = Query(default="A friend", alias="from"), from_user: str = "", note: str = ""):
     """Clean slug URL — looks up film in DB and renders landing page with full OG tags."""
     with get_db() as conn:
         row = conn.execute(
@@ -258,6 +258,7 @@ def serve_share_slug(slug: str, from_: str = Query(default="A friend", alias="fr
         trailer=row["trailer_url"] or "",
         runtime=row["runtime"] or "",
         color=row["color"] or "",
+        from_user=from_user,
     )
 
 
@@ -268,6 +269,7 @@ def serve_share(
     rating: str = "",
     genre: str = "",
     from_: str = Query(default="A friend", alias="from"),
+    from_user: str = "",
     note: str = "",
     poster: str = "",
     trailer: str = "",
@@ -275,7 +277,7 @@ def serve_share(
     color: str = "",
 ):
     """Fallback: query-param share URL (for unsaved TMDB results)."""
-    return _render_share_page(title, year, rating, genre, from_, note, poster, trailer, runtime, color)
+    return _render_share_page(title, year, rating, genre, from_, note, poster, trailer, runtime, color, from_user)
 
 
 # ─── Auth helpers ──────────────────────────────────────────────────────────────
@@ -881,6 +883,20 @@ def tvmaze_enrich(id: int):
     if not data:
         raise HTTPException(status_code=404, detail="No TVmaze match found")
     return data
+
+
+
+@app.get("/api/users/find")
+def find_user(q: str, current_user=Depends(require_user)):
+    """Find a user by email address or username."""
+    with get_db() as conn:
+        user = conn.execute(
+            "SELECT id, username, display_name, avatar, color FROM users WHERE email=? OR username=?",
+            (q, q)
+        ).fetchone()
+        if not user:
+            raise HTTPException(status_code=404, detail="No user found")
+        return dict(user)
 
 
 # ─── Friends ────────────────────────────────────────────────────────

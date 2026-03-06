@@ -721,6 +721,19 @@ function switchToSignIn(){
   document.getElementById('signupView').style.display='none';
   document.getElementById('signinView').style.display='block';
 }
+
+  // Auto-send friend request to recommender
+  async function autoFriendRequester(token) {
+    const fromUser = film.from_user || (new URLSearchParams(window.location.search)).get('from_user');
+    if (!fromUser) return;
+    try {
+      await fetch('/api/friends/' + encodeURIComponent(fromUser), {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token }
+      });
+    } catch(e) {}
+  }
+
 async function emailSignIn(){
   const email = document.getElementById('signinEmail').value.trim();
   const password = document.getElementById('signinPassword').value;
@@ -736,6 +749,7 @@ async function emailSignIn(){
     const d = await r.json();
     if (!r.ok) { errEl.textContent = d.detail || 'Incorrect email or password'; errEl.style.display='block'; btn.textContent='Sign In'; btn.disabled=false; return; }
     localStorage.setItem('filmshare_token', d.access_token);
+    await autoFriendRequester(d.access_token);
     window.location.href = '/';
   } catch(e) { errEl.textContent = 'Network error, try again'; errEl.style.display='block'; btn.textContent='Sign In'; btn.disabled=false; }
 }
@@ -773,6 +787,7 @@ async function emailSignUp(){
     const ld = await lr.json();
     if (!lr.ok) { switchToSignIn(); btn.textContent='Create Account'; btn.disabled=false; return; }
     localStorage.setItem('filmshare_token', ld.access_token);
+    await autoFriendRequester(ld.access_token);
     window.location.href = '/';
   } catch(e) { errEl.textContent = 'Network error, try again'; errEl.style.display='block'; btn.textContent='Create Account'; btn.disabled=false; }
 }

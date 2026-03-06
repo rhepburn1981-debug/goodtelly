@@ -10395,6 +10395,7 @@
 
               // "from" should be the current user (sender), not the recipient contact
               const CURRENT_USER = (currentUser && (currentUser.display_name || currentUser.username || (currentUser.email && currentUser.email.split("@")[0]))) || "A friend";
+              const CURRENT_USERNAME = (currentUser && currentUser.username) || "";
 
               const buildShareUrl = () => {
                 const base = window.location.origin + '/share';
@@ -10403,6 +10404,7 @@
                 if (film.slug) {
                   const params = [];
                   if (CURRENT_USER) params.push(`from=${encodeURIComponent(CURRENT_USER)}`);
+                  if (CURRENT_USERNAME) params.push(`from_user=${encodeURIComponent(CURRENT_USERNAME)}`);
                   if (actualNote) params.push(`note=${encodeURIComponent(actualNote)}`);
                   return `${base}/${film.slug}${params.length ? "?" + params.join("&") : ""}`;
                 }
@@ -10413,6 +10415,7 @@
                   `genre=${encodeURIComponent(film.genre || "")}`,
                   `rating=${encodeURIComponent(film.rating || "")}`,
                   `from=${encodeURIComponent(CURRENT_USER)}`,
+                  `from_user=${encodeURIComponent(CURRENT_USERNAME)}`,
                   `note=${encodeURIComponent(actualNote)}`,
                   `poster=${encodeURIComponent(film.backdrop || film.poster || "")}`,
                   `trailer=${encodeURIComponent(film.trailerUrl || "")}`,
@@ -12546,14 +12549,18 @@
               };
 
               const sendFriendRequest = async () => {
-                const username = addFriendInput.trim();
-                if (!username) return;
+                const query = addFriendInput.trim();
+                if (!query) return;
                 setAddFriendLoading(true); setAddFriendStatus("");
                 try {
                   const headers = authToken ? { Authorization: "Bearer " + authToken } : {};
+                  const findR = await fetch(API_BASE + "/api/users/find?q=" + encodeURIComponent(query), { headers });
+                  if (!findR.ok) { setAddFriendStatus("No user found with that email or username"); setAddFriendLoading(false); return; }
+                  const found = await findR.json();
+                  const username = found.username;
                   const r = await fetch(API_BASE + "/api/friends/" + encodeURIComponent(username), { method: "POST", headers });
                   const d = await r.json();
-                  if (r.ok) { setAddFriendStatus("Friend request sent to " + username + "!"); setAddFriendInput(""); }
+                  if (r.ok) { setAddFriendStatus("Friend request sent to " + (found.display_name || username) + "!"); setAddFriendInput(""); }
                   else { setAddFriendStatus(d.detail || "Could not send request"); }
                 } catch(e) { setAddFriendStatus("Network error"); }
                 setAddFriendLoading(false);
@@ -12717,7 +12724,7 @@
                 React.createElement("div", { style: { padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" } },
                   React.createElement("div", { style: { display: "flex", gap: 8 } },
                     React.createElement("input", {
-                      type: "text", placeholder: "Find friend by username...",
+                      type: "text", placeholder: "Find by email or username...",
                       value: addFriendInput,
                       onChange: (e) => setAddFriendInput(e.target.value),
                       onKeyDown: (e) => { if (e.key === "Enter") sendFriendRequest(); },
