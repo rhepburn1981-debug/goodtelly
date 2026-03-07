@@ -119,6 +119,6 @@ def enrich_film(title: str, year: Optional[int] = None) -> dict:
         "director": director,
         "cast": cast,
         "trailer_url": trailer_url,
-        "rating": details.get("vote_average"),
+        "rating": round(details.get("vote_average", 0) / 2.0, 2) if details.get("vote_average") else None,
         "stills": stills,
     }

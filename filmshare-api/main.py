@@ -666,6 +666,51 @@ def rate_film(film_id: int, body: dict, current_user=Depends(require_user)):
         return {"ok": True}
 
 
+@app.get("/api/me/friends-ratings")
+def friends_ratings(current_user=Depends(require_user)):
+    """Return friends' ratings for all films, keyed by film_id."""
+    uid = current_user["id"]
+    with get_db() as conn:
+        rows = conn.execute(
+            """
+            SELECT ur.film_id, ur.rating, u.username, u.display_name
+            FROM user_ratings ur
+            JOIN users u ON u.id = ur.user_id
+            WHERE ur.user_id IN (
+                SELECT CASE WHEN requester_id = ? THEN addressee_id ELSE requester_id END
+                FROM user_friends
+                WHERE (requester_id = ? OR addressee_id = ?) AND status = 'accepted'
+            ) AND ur.rating IS NOT NULL
+            """,
+            (uid, uid, uid)
+        ).fetchall()
+    result = {}
+    for r in rows:
+        fid = r["film_id"]
+        rating = r["rating"]
+        # Normalize ratings stored on 10-scale to 5-scale
+        if rating and rating > 5:
+            rating = round(rating / 2, 2)
+        if fid not in result:
+            result[fid] = {"sum": 0, "count": 0, "users": []}
+        result[fid]["sum"] += rating
+        result[fid]["count"] += 1
+        result[fid]["users"].append({
+            "username": r["username"],
+            "display_name": r["display_name"],
+            "rating": rating,
+        })
+    # Build final output
+    return {
+        fid: {
+            "avg": round(d["sum"] / d["count"], 2),
+            "count": d["count"],
+            "users": d["users"],
+        }
+        for fid, d in result.items()
+    }
+
+
 # ─── Films ─────────────────────────────────────────────────────────────────────
 
 @app.get("/api/films")

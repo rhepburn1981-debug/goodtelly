@@ -10699,9 +10699,11 @@
               );
             }
 
+            const normalizeRating = (r) => { const n = parseFloat(r) || 0; return n > 5 ? parseFloat((n / 2).toFixed(2)) : n; };
+
             function InlineStars({ rating, onRate, size = 14 }) {
               const [hov, setHov] = React.useState(0);
-              const active = hov || rating || 0;
+              const active = hov || normalizeRating(rating) || 0;
               return React.createElement(
                 "div",
                 {
@@ -11491,7 +11493,7 @@
                     style: { display: "flex", alignItems: "center", gap: 4, marginTop: 3 },
                   },
                     React.createElement(InlineStars, { rating: film.rating, size: 11 }),
-                    React.createElement("span", { style: { fontSize: 11, color: "var(--muted)" } }, film.rating),
+                    React.createElement("span", { style: { fontSize: 11, color: "var(--muted)" } }, normalizeRating(film.rating).toFixed(1)),
                   ),
                   film.streamers && film.streamers.length > 0 && React.createElement(StreamerBadges, { ids: film.streamers }),
                 ),
@@ -11702,6 +11704,7 @@
               userRatings,
               myListFilter,
               setMyListFilter,
+              friendsRatings,
             }) {
               const toWatch = myList.filter(f => !watchedIds.includes(f.id));
               const watched = myList.filter(f => watchedIds.includes(f.id));
@@ -11711,7 +11714,8 @@
               const filterSort = (list) => {
                 let l = [...list];
                 if (listGenreFilter !== "All") l = l.filter(f => (f.genre || "").includes(listGenreFilter));
-                if (listSort === "rating" || listSort === "friends_rating") l = l.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                if (listSort === "rating") l = l.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                else if (listSort === "friends_rating") l = l.sort((a, b) => ((friendsRatings && friendsRatings[b.id] && friendsRatings[b.id].avg) || 0) - ((friendsRatings && friendsRatings[a.id] && friendsRatings[a.id].avg) || 0));
                 else if (listSort === "alpha") l = l.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
                 return l;
               };
@@ -11901,6 +11905,9 @@
                             style: { fontSize: 11, color: "var(--muted)", marginTop: 2 },
                           }, [film.genre ? film.genre.split(",")[0].trim() : null, film.year].filter(Boolean).join(" · ")),
                           film.streamers && film.streamers.length > 0 && React.createElement(StreamerBadges, { ids: film.streamers }),
+                          friendsRatings && friendsRatings[film.id] && React.createElement("div", {
+                            style: { fontSize: 11, color: "var(--gold-bright)", marginTop: 3, fontWeight: 600 },
+                          }, "★ " + friendsRatings[film.id].avg.toFixed(1) + "/5 (" + friendsRatings[film.id].count + " friend" + (friendsRatings[film.id].count !== 1 ? "s" : "") + ")"),
                           React.createElement("div", {
                             style: { fontSize: 10, color: "var(--muted)", marginTop: 4, display: "flex", alignItems: "center", gap: 4 },
                           },
@@ -12115,7 +12122,7 @@
                       style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" },
                     },
                       React.createElement(InlineStars, { rating: featuredFilm.rating || 0, size: 12 }),
-                      parseFloat(featuredFilm.rating) > 0 && React.createElement("span", { style: { fontSize: 12, color: "rgba(255,255,255,0.8)" } }, featuredFilm.rating),
+                      parseFloat(featuredFilm.rating) > 0 && React.createElement("span", { style: { fontSize: 12, color: "rgba(255,255,255,0.8)" } }, normalizeRating(featuredFilm.rating).toFixed(1)),
                       React.createElement("span", {
                         style: {
                           fontSize: 11, padding: "2px 8px", borderRadius: 6,
@@ -12187,8 +12194,8 @@
                       React.createElement("div", {
                         style: { display: "flex", alignItems: "center", gap: 6, marginTop: 3 },
                       },
-                        parseFloat(film.rating) > 0 && React.createElement(InlineStars, { rating: film.rating, size: 10 }),
-                        parseFloat(film.rating) > 0 && React.createElement("span", { style: { fontSize: 10, color: "var(--muted)" } }, film.rating),
+                        normalizeRating(film.rating) > 0 && React.createElement(InlineStars, { rating: film.rating, size: 10 }),
+                        parseFloat(film.rating) > 0 && React.createElement("span", { style: { fontSize: 10, color: "var(--muted)" } }, normalizeRating(film.rating).toFixed(1)),
                         film.trendingViews > 0 && React.createElement("span", { style: { fontSize: 10, color: "var(--muted)" } }, "· " + formatViews(film.trendingViews)),
                       ),
                       film.streamers && film.streamers.length > 0 && React.createElement(StreamerBadges, { ids: film.streamers }),
@@ -12773,6 +12780,7 @@
               const [authToken, setAuthToken] = useState(window.__AUTH_TOKEN || null);
               const [showAuth, setShowAuth] = useState(false);
               const [realFriends, setRealFriends] = useState([]);
+              const [friendsRatings, setFriendsRatings] = useState({});
               const [friendsRecommendedFilms, setFriendsRecommendedFilms] = useState([]);
               const [addedIds, setAddedIds] = useState([...INITIAL_WATCHLIST_IDS]);
               const [watchedIds, setWatchedIds] = useState(
@@ -12829,6 +12837,10 @@
                 fetch(API_BASE + "/api/me/recommendations", { headers })
                   .then(r => r.ok ? r.json() : [])
                   .then(films => setFriendsRecommendedFilms(films))
+                  .catch(() => {});
+                fetch(API_BASE + "/api/me/friends-ratings", { headers })
+                  .then(r => r.ok ? r.json() : {})
+                  .then(fr => setFriendsRatings(fr))
                   .catch(() => {});
               }, [authToken]);
 
@@ -13405,6 +13417,7 @@
                         userRatings: userRatings,
                         myListFilter: myListFilter,
                         setMyListFilter: setMyListFilter,
+                        friendsRatings: friendsRatings,
                       }),
 
                     /* DISCOVER */
