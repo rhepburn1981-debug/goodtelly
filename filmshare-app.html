@@ -11207,7 +11207,7 @@
                               size: 13,
                               style: { color: "#111" },
                             }),
-                            " Watchlist",
+                            "+ Watchlist",
                           ),
                     ),
                     React.createElement(
@@ -11609,7 +11609,10 @@
               const [discoverShows, setDiscoverShows] = React.useState([]);
               const [friendsOpen, setFriendsOpen] = React.useState(false);
               const [trendingNow, setTrendingNow] = React.useState([]);
+              const [upcomingShows, setUpcomingShows] = React.useState([]);
               React.useEffect(() => {
+                fetch(API_BASE + "/api/trending/upcoming-tv")
+                  .then(r => r.ok ? r.json() : []).then(setUpcomingShows).catch(() => {});
                 fetch(API_BASE + "/api/trending/tv-schedule")
                   .then(r => r.ok ? r.json() : []).then(setTvSchedule).catch(() => {});
                 fetch(API_BASE + "/api/trending/discover-tv")
@@ -11913,6 +11916,33 @@
                   ),
                 ),
 
+                /* UP & COMING IN THE UK THIS WEEK */
+                upcomingShows.length > 0 && React.createElement(React.Fragment, null,
+                  sectionLabel("Up & Coming in the UK this week", null),
+                  React.createElement("div", {
+                    style: { margin: "0 16px 16px", background: "var(--surface2)", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" },
+                  },
+                    upcomingShows.slice(0, 10).map((show, idx) =>
+                      React.createElement("div", {
+                        key: show.id,
+                        onClick: () => onFilmClick(extToFilm(show, 4000000, { _fromTvmaze: true, tvmaze_id: show.id })),
+                        style: { display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderBottom: idx < Math.min(upcomingShows.length, 10) - 1 ? "1px solid rgba(255,255,255,0.05)" : "none", cursor: "pointer" },
+                      },
+                        show.image
+                          ? React.createElement("img", { src: show.image, alt: show.name, style: { width: 44, height: 62, objectFit: "cover", borderRadius: 8, flexShrink: 0 } })
+                          : React.createElement("div", { style: { width: 44, height: 62, borderRadius: 8, background: "var(--surface3)", flexShrink: 0 } }),
+                        React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                          React.createElement("div", { style: { fontSize: 13, fontWeight: 700, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.name),
+                          React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginTop: 2 } },
+                            [show.channel, show.airdate ? new Date(show.airdate).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) : null].filter(Boolean).join(" \u00b7 ")),
+                          show.genres && show.genres.length > 0 && React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 2, opacity: 0.8 } }, show.genres.slice(0, 2).join(" / ")),
+                        ),
+                        show.rating && React.createElement("div", { style: { fontSize: 11, color: "var(--gold-bright)", fontWeight: 700, flexShrink: 0 } }, "\u2605 " + parseFloat(show.rating).toFixed(1)),
+                      ),
+                    ),
+                  ),
+                ),
+
                 React.createElement("div", { style: { height: 20 } }),
               );
             }
@@ -11940,6 +11970,7 @@
               setMyListFilter,
               friendsRatings,
             }) {
+              const [listStreamerFilter, setListStreamerFilter] = React.useState("all");
               const toWatch = myList.filter(f => !watchedIds.includes(f.id));
               const watched = myList.filter(f => watchedIds.includes(f.id));
 
@@ -11948,6 +11979,7 @@
               const filterSort = (list) => {
                 let l = [...list];
                 if (listGenreFilter !== "All") l = l.filter(f => (f.genre || "").includes(listGenreFilter));
+                if (listStreamerFilter !== "all") l = l.filter(f => f.streamers && f.streamers.includes(listStreamerFilter));
                 if (listSort === "rating") l = l.sort((a, b) => (b.rating || 0) - (a.rating || 0));
                 else if (listSort === "friends_rating") l = l.sort((a, b) => ((friendsRatings && friendsRatings[b.id] && friendsRatings[b.id].avg) || 0) - ((friendsRatings && friendsRatings[a.id] && friendsRatings[a.id].avg) || 0));
                 else if (listSort === "alpha") l = l.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
@@ -12078,6 +12110,31 @@
                     }, g),
                   ),
                 ),
+
+                /* Streamer pills */
+                (() => {
+                  const usedStreamers = [...new Set(myList.flatMap(f => f.streamers || []))];
+                  if (!usedStreamers.length) return null;
+                  return React.createElement("div", {
+                    style: { display: "flex", gap: 8, padding: "0 16px 12px", overflowX: "auto", scrollbarWidth: "none", alignItems: "center" },
+                  },
+                    React.createElement("button", {
+                      onClick: () => setListStreamerFilter("all"),
+                      style: { flexShrink: 0, padding: "5px 12px", borderRadius: 20, border: listStreamerFilter === "all" ? "1px solid var(--gold)" : "1px solid rgba(255,255,255,0.1)", background: listStreamerFilter === "all" ? "rgba(201,168,76,0.12)" : "transparent", color: listStreamerFilter === "all" ? "var(--gold-bright)" : "var(--text2)", fontSize: 11, fontWeight: listStreamerFilter === "all" ? 700 : 400, cursor: "pointer" },
+                    }, "All"),
+                    usedStreamers.map(id => {
+                      const s = STREAMERS[id];
+                      if (!s) return null;
+                      return React.createElement("button", {
+                        key: id, onClick: () => setListStreamerFilter(id),
+                        style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 20, border: listStreamerFilter === id ? "1px solid var(--gold)" : "1px solid rgba(255,255,255,0.1)", background: listStreamerFilter === id ? "rgba(201,168,76,0.12)" : "transparent", cursor: "pointer" },
+                      },
+                        s.logo ? React.createElement("img", { src: s.logo, style: { width: 14, height: 14, borderRadius: 3, objectFit: "cover" } }) : null,
+                        React.createElement("span", { style: { fontSize: 11, fontWeight: listStreamerFilter === id ? 700 : 400, color: listStreamerFilter === id ? "var(--gold-bright)" : "var(--text2)" } }, s.label),
+                      );
+                    }),
+                  );
+                })(),
 
                 /* Film list */
                 displayList.length > 0
@@ -12613,11 +12670,6 @@
                         paddingBottom: 4,
                       },
                     },
-                    React.createElement("button", {
-                      onClick: () => { setAddFriendInput(""); setAddFriendStatus(""); },
-                      style: { flexShrink: 0, background: "rgba(201,168,76,0.12)", border: "1.5px dashed rgba(201,168,76,0.4)", borderRadius: "50%", width: 64, height: 64, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, color: "var(--gold)" },
-                      title: "Add a friend",
-                    }, "+"),
                     friendsList.map((f) =>
                       React.createElement(
                         "button",
@@ -13060,7 +13112,15 @@
                   .then(r => r.ok ? r.json() : {})
                   .then(fr => setFriendsRatings(fr))
                   .catch(() => {});
-              }, [authToken]);
+                fetch(API_BASE + "/api/me/watchlist", { headers })
+                  .then(r => r.ok ? r.json() : null)
+                  .then(wl => { if (wl) { setMyList(wl); setAddedIds(wl.map(f => f.id)); } })
+                  .catch(() => {});
+                fetch(API_BASE + "/api/friends", { headers })
+                  .then(r => r.ok ? r.json() : null)
+                  .then(fs => { if (fs) setRealFriends(fs); })
+                  .catch(() => {});
+              }, [authToken, tab]);
 
               // Handle arrival from the landing page after sign-up or share link
               useEffect(() => {
