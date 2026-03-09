@@ -10273,6 +10273,49 @@
             }
 
             // ─── Streaming badges ──────────────────────────────────────────────────────────
+
+            function ChannelBadge({ name }) {
+              if (\!name) return null;
+              const CH = {
+                "BBC One":      { bg: "#D52B2B", t: "#fff" },
+                "BBC Two":      { bg: "#2A2A2A", t: "#fff" },
+                "BBC Three":    { bg: "#3D3D9E", t: "#fff" },
+                "BBC Four":     { bg: "#1a1a1a", t: "#bbb" },
+                "ITV":          { bg: "#EFCF00", t: "#111" },
+                "ITV2":         { bg: "#E5B800", t: "#111" },
+                "ITV3":         { bg: "#E5B800", t: "#111" },
+                "ITV4":         { bg: "#E5B800", t: "#111" },
+                "ITVX":         { bg: "#1A1A1A", t: "#fff" },
+                "Channel 4":    { bg: "#2A2A2A", t: "#fff" },
+                "E4":           { bg: "#7B0082", t: "#fff" },
+                "More4":        { bg: "#555",    t: "#fff" },
+                "Film4":        { bg: "#C8102E", t: "#fff" },
+                "Channel 5":    { bg: "#0088C8", t: "#fff" },
+                "5Star":        { bg: "#0060A0", t: "#fff" },
+                "Sky One":      { bg: "#003B8B", t: "#fff" },
+                "Sky Atlantic":  { bg: "#003B8B", t: "#fff" },
+                "Sky Max":      { bg: "#003B8B", t: "#fff" },
+                "Sky Arts":     { bg: "#003B8B", t: "#fff" },
+                "Dave":         { bg: "#E65C00", t: "#fff" },
+                "Gold":         { bg: "#B8870B", t: "#fff" },
+                "W":            { bg: "#7B68EE", t: "#fff" },
+              };
+              const s = CH[name] || { bg: "#444", t: "#fff" };
+              const short = name.replace("Channel ", "C").replace("Sky ", "Sky ").replace("BBC ", "BBC ");
+              return React.createElement("span", {
+                title: name,
+                style: {
+                  background: s.bg, color: s.t,
+                  fontSize: 9, fontWeight: 800,
+                  borderRadius: 4, padding: "2px 5px",
+                  letterSpacing: 0.3, lineHeight: 1,
+                  display: "inline-block", flexShrink: 0,
+                  whiteSpace: "nowrap", maxWidth: 60,
+                  overflow: "hidden", textOverflow: "ellipsis",
+                },
+              }, short);
+            }
+
             function StreamerBadges({ ids = [], size = "sm" }) {
               if (!ids || ids.length === 0) return null;
               const iconSize = size === "lg" ? 24 : 20;
@@ -11879,8 +11922,9 @@
                           React.createElement("div", {
                             style: { fontSize: 13, fontWeight: 700, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
                           }, show.name),
-                          React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginTop: 2 } },
-                            [show.channel, show.airtime].filter(Boolean).join(" · ")),
+                          React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 5 } },
+                            show.channel && React.createElement(ChannelBadge, { name: show.channel }),
+                            show.airtime || ""),
                           show.genres && show.genres.length > 0 && React.createElement("div", {
                             style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 2, opacity: 0.8 },
                           }, show.genres.slice(0, 2).join(" / ")),
@@ -11933,8 +11977,9 @@
                           : React.createElement("div", { style: { width: 44, height: 62, borderRadius: 8, background: "var(--surface3)", flexShrink: 0 } }),
                         React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                           React.createElement("div", { style: { fontSize: 13, fontWeight: 700, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.name),
-                          React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginTop: 2 } },
-                            [show.channel, show.airdate ? new Date(show.airdate).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) : null].filter(Boolean).join(" \u00b7 ")),
+                          React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 5 } },
+                            show.channel && React.createElement(ChannelBadge, { name: show.channel }),
+                            show.airdate ? new Date(show.airdate).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) : "")
                           show.genres && show.genres.length > 0 && React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 2, opacity: 0.8 } }, show.genres.slice(0, 2).join(" / ")),
                         ),
                         show.rating && React.createElement("div", { style: { fontSize: 11, color: "var(--gold-bright)", fontWeight: 700, flexShrink: 0 } }, "\u2605 " + parseFloat(show.rating).toFixed(1)),
