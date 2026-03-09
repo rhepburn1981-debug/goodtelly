@@ -971,6 +971,75 @@ def tvmaze_enrich(id: int):
 
 
 
+@app.get("/api/trending/tv-schedule")
+def tv_schedule():
+    """Proxy UK TV schedule from TVmaze, deduplicated by show."""
+    import urllib.request, json as _json, datetime
+    today = datetime.date.today().isoformat()
+    url = f"https://api.tvmaze.com/schedule?country=GB&date={today}"
+    try:
+        with urllib.request.urlopen(url, timeout=8) as resp:
+            data = _json.loads(resp.read())
+    except Exception:
+        return []
+    seen = set()
+    results = []
+    for ep in data:
+        show = ep.get("show", {})
+        sid = show.get("id")
+        if not sid or sid in seen:
+            continue
+        seen.add(sid)
+        img = show.get("image") or {}
+        results.append({
+            "id": sid,
+            "name": show.get("name", ""),
+            "image": img.get("medium") or img.get("original"),
+            "channel": (show.get("network") or show.get("webChannel") or {}).get("name", ""),
+            "genres": show.get("genres", []),
+            "airtime": ep.get("airtime", ""),
+            "summary": (show.get("summary") or "").replace("<p>", "").replace("</p>", "").replace("<b>", "").replace("</b>", ""),
+            "rating": show.get("rating", {}).get("average"),
+        })
+    return results[:20]
+
+
+@app.get("/api/trending/discover-tv")
+def discover_tv():
+    """Proxy TMDB discover TV for popular GB English shows."""
+    key = os.environ.get("TMDB_API_KEY", "")
+    if not key:
+        return []
+    import urllib.request, urllib.parse, json as _json
+    params = urllib.parse.urlencode({
+        "api_key": key,
+        "with_original_language": "en",
+        "with_origin_country": "GB",
+        "sort_by": "popularity.desc",
+        "page": 1,
+    })
+    url = f"https://api.themoviedb.org/3/discover/tv?{params}"
+    try:
+        with urllib.request.urlopen(url, timeout=8) as resp:
+            data = _json.loads(resp.read())
+    except Exception:
+        return []
+    results = []
+    for s in (data.get("results") or [])[:20]:
+        poster = s.get("poster_path")
+        results.append({
+            "id": s.get("id"),
+            "name": s.get("name", ""),
+            "image": f"https://image.tmdb.org/t/p/w185{poster}" if poster else None,
+            "poster_large": f"https://image.tmdb.org/t/p/w342{poster}" if poster else None,
+            "overview": (s.get("overview") or "")[:200],
+            "rating": s.get("vote_average"),
+            "first_air_date": s.get("first_air_date", ""),
+            "genres": s.get("genre_ids", []),
+        })
+    return results
+
+
 @app.post("/api/me/recommendations", status_code=201)
 def record_recommendation(body: dict, current_user=Depends(require_user)):
     """Record that a film was recommended to the current user via a share link."""
