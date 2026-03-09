@@ -11783,6 +11783,10 @@
                             ? React.createElement("div", { style: { fontSize: 12, color: "var(--text2)", fontStyle: "italic", lineHeight: 1.4 } }, "“" + recNote + "” — " + friendName)
                             : film.description && React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" } }, film.description),
                         ),
+                        React.createElement("button", {
+                          onClick: (e) => { e.stopPropagation(); onAdd(film.id); },
+                          style: { flexShrink: 0, alignSelf: "center", padding: "7px 12px", borderRadius: 20, border: addedIds.includes(film.id) ? "1px solid rgba(46,204,138,0.35)" : "1px solid rgba(201,168,76,0.4)", background: addedIds.includes(film.id) ? "rgba(46,204,138,0.08)" : "rgba(201,168,76,0.08)", color: addedIds.includes(film.id) ? "var(--green)" : "var(--gold-bright)", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
+                        }, addedIds.includes(film.id) ? "\u2713 Added" : "+ Watchlist"),
 
                       ),
                     );
