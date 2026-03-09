@@ -10861,6 +10861,20 @@
             }) {
               const [activeStill, setActiveStill] = useState(0);
               const [showTrailer, setShowTrailer] = useState(false);
+              const [editingStreamers, setEditingStreamers] = React.useState(false);
+              const [localStreamers, setLocalStreamers] = React.useState(film.streamers || []);
+              const [savingStreamers, setSavingStreamers] = React.useState(false);
+              const displayStreamers = localStreamers;
+              const toggleStreamer = (id) => setLocalStreamers(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+              const saveStreamers = () => {
+                if (!window.__AUTH_TOKEN || film.id < 0) return;
+                setSavingStreamers(true);
+                fetch(API_BASE + "/api/films/" + film.id + "/streamers", {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json", "Authorization": "Bearer " + window.__AUTH_TOKEN },
+                  body: JSON.stringify({ streamers: localStreamers }),
+                }).then(() => { setEditingStreamers(false); setSavingStreamers(false); }).catch(() => setSavingStreamers(false));
+              };
               const friendData = FRIENDS_DATA.find(
                 (f) => f.name === film.sharedBy,
               ) || { color: "#888" };
@@ -11054,37 +11068,66 @@
                     React.createElement(StarRating, { rating: film.rating }),
                   ),
 
-                  /* Streaming badges */
-                  film.streamers &&
-                    film.streamers.length > 0 &&
+                  /* Streaming badges — always shown, editable for local films */
+                  (displayStreamers.length > 0 || (film.id > 0 && window.__AUTH_TOKEN)) &&
                     React.createElement(
                       "div",
                       { style: { marginBottom: 14 } },
-                      React.createElement(
-                        "div",
-                        {
-                          style: {
-                            fontSize: 9,
-                            color: "#555",
-                            textTransform: "uppercase",
-                            letterSpacing: 2,
-                            marginBottom: 8,
-                          },
-                        },
-                        "Where to Watch",
+                      /* Header row: "Where to Watch" + edit/save buttons */
+                      React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8 } },
+                        React.createElement("div", {
+                          style: { fontSize: 9, color: "#555", textTransform: "uppercase", letterSpacing: 2 },
+                        }, "Where to Watch"),
+                        film.id > 0 && window.__AUTH_TOKEN && !editingStreamers &&
+                          React.createElement("button", {
+                            onClick: () => setEditingStreamers(true),
+                            style: { background: "none", border: "none", cursor: "pointer", color: "var(--muted)", fontSize: 11, padding: "0 4px" },
+                          }, "✏️"),
+                        editingStreamers && React.createElement(React.Fragment, null,
+                          React.createElement("button", {
+                            onClick: saveStreamers, disabled: savingStreamers,
+                            style: { background: "var(--gold)", border: "none", cursor: "pointer", color: "#000", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 6 },
+                          }, savingStreamers ? "..." : "Save"),
+                          React.createElement("button", {
+                            onClick: () => { setEditingStreamers(false); setLocalStreamers(film.streamers || []); },
+                            style: { background: "none", border: "none", cursor: "pointer", color: "var(--muted)", fontSize: 10, padding: "2px 4px" },
+                          }, "Cancel"),
+                        ),
                       ),
-                      React.createElement(
+                      /* Service picker when editing */
+                      editingStreamers && React.createElement("div", {
+                        style: { display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 },
+                      },
+                        Object.entries(STREAMERS).filter(([k]) => k !== "cinema").map(([id, s]) =>
+                          React.createElement("button", {
+                            key: id,
+                            onClick: () => toggleStreamer(id),
+                            style: {
+                              display: "flex", alignItems: "center", gap: 5,
+                              background: localStreamers.includes(id) ? s.bg : "rgba(255,255,255,0.05)",
+                              border: localStreamers.includes(id) ? "2px solid rgba(255,255,255,0.3)" : "1px solid rgba(255,255,255,0.1)",
+                              borderRadius: 8, padding: "5px 10px", cursor: "pointer",
+                            },
+                          },
+                            s.logo
+                              ? React.createElement("img", { src: s.logo, style: { width: 18, height: 18, borderRadius: 4, objectFit: "cover" } })
+                              : React.createElement("span", { style: { fontSize: 10, fontWeight: 800, color: s.text } }, s.short),
+                            React.createElement("span", { style: { fontSize: 10, fontWeight: 700, color: localStreamers.includes(id) ? s.text : "var(--text2)" } }, s.label),
+                          )
+                        ),
+                      ),
+                      /* Current streamers display */
+                      displayStreamers.length > 0 && React.createElement(
                         "div",
                         { style: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" } },
-                        film.streamers.map((id) => {
+                        displayStreamers.map((id) => {
                           const s = STREAMERS[id];
                           if (!s) return null;
                           if (s.logo) {
                             return React.createElement(
                               "div",
                               {
-                                key: id,
-                                title: s.label,
+                                key: id, title: s.label,
                                 style: {
                                   display: "flex", alignItems: "center", gap: 8,
                                   background: "rgba(255,255,255,0.06)",
@@ -11096,9 +11139,7 @@
                                 src: s.logo, alt: s.label,
                                 style: { width: 28, height: 28, borderRadius: 6, objectFit: "cover", flexShrink: 0 },
                               }),
-                              React.createElement("span", {
-                                style: { fontSize: 12, fontWeight: 700, color: "var(--text)" },
-                              }, s.label),
+                              React.createElement("span", { style: { fontSize: 12, fontWeight: 700, color: "var(--text)" } }, s.label),
                             );
                           }
                           return React.createElement(
@@ -11111,12 +11152,8 @@
                                 border: "1px solid rgba(255,255,255,0.1)",
                               },
                             },
-                            React.createElement("span", {
-                              style: { fontSize: 11, fontWeight: 900, color: s.text },
-                            }, s.short),
-                            React.createElement("span", {
-                              style: { fontSize: 10, fontWeight: 700, color: s.text, opacity: 0.85 },
-                            }, s.label),
+                            React.createElement("span", { style: { fontSize: 11, fontWeight: 900, color: s.text } }, s.short),
+                            React.createElement("span", { style: { fontSize: 10, fontWeight: 700, color: s.text, opacity: 0.85 } }, s.label),
                           );
                         }),
                       ),
