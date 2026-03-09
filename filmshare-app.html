@@ -11068,54 +11068,55 @@
                             color: "#555",
                             textTransform: "uppercase",
                             letterSpacing: 2,
-                            marginBottom: 6,
+                            marginBottom: 8,
                           },
                         },
                         "Where to Watch",
                       ),
                       React.createElement(
                         "div",
-                        { style: { display: "flex", gap: 6, flexWrap: "wrap" } },
+                        { style: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" } },
                         film.streamers.map((id) => {
                           const s = STREAMERS[id];
                           if (!s) return null;
+                          if (s.logo) {
+                            return React.createElement(
+                              "div",
+                              {
+                                key: id,
+                                title: s.label,
+                                style: {
+                                  display: "flex", alignItems: "center", gap: 8,
+                                  background: "rgba(255,255,255,0.06)",
+                                  borderRadius: 10, padding: "6px 12px 6px 8px",
+                                  border: "1px solid rgba(255,255,255,0.1)",
+                                },
+                              },
+                              React.createElement("img", {
+                                src: s.logo, alt: s.label,
+                                style: { width: 28, height: 28, borderRadius: 6, objectFit: "cover", flexShrink: 0 },
+                              }),
+                              React.createElement("span", {
+                                style: { fontSize: 12, fontWeight: 700, color: "var(--text)" },
+                              }, s.label),
+                            );
+                          }
                           return React.createElement(
                             "div",
                             {
                               key: id,
                               style: {
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 6,
-                                background: s.bg,
-                                borderRadius: 8,
-                                padding: "5px 10px",
+                                display: "flex", alignItems: "center", gap: 6,
+                                background: s.bg, borderRadius: 8, padding: "5px 10px",
                                 border: "1px solid rgba(255,255,255,0.1)",
                               },
                             },
-                            React.createElement(
-                              "span",
-                              {
-                                style: {
-                                  fontSize: 11,
-                                  fontWeight: 900,
-                                  color: s.text,
-                                },
-                              },
-                              s.short,
-                            ),
-                            React.createElement(
-                              "span",
-                              {
-                                style: {
-                                  fontSize: 10,
-                                  fontWeight: 700,
-                                  color: s.text,
-                                  opacity: 0.85,
-                                },
-                              },
-                              s.label,
-                            ),
+                            React.createElement("span", {
+                              style: { fontSize: 11, fontWeight: 900, color: s.text },
+                            }, s.short),
+                            React.createElement("span", {
+                              style: { fontSize: 10, fontWeight: 700, color: s.text, opacity: 0.85 },
+                            }, s.label),
                           );
                         }),
                       ),
