@@ -11651,6 +11651,34 @@
 
               return React.createElement("div", { style: { height: "100%", overflowY: "auto" } },
 
+                /* MY LIST RIBBON */
+                onGoToList && React.createElement("div", {
+                  onClick: onGoToList,
+                  style: {
+                    margin: "12px 16px 4px",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 14,
+                    padding: "11px 16px",
+                    display: "flex", alignItems: "center", gap: 12, cursor: "pointer",
+                  },
+                },
+                  React.createElement("div", {
+                    style: {
+                      width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+                      background: "rgba(255,255,255,0.08)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 18,
+                    },
+                  }, "\u2630"),
+                  React.createElement("div", { style: { flex: 1 } },
+                    React.createElement("div", { style: { fontSize: 15, fontWeight: 800, color: "var(--text)" } }, "My Watchlist"),
+                    React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 2 } },
+                      "Your saved films & shows →"),
+                  ),
+                  React.createElement("div", { style: { fontSize: 18, color: "var(--muted)" } }, "\u203a"),
+                ),
+
                 /* YOUR FRIENDS RIBBON */
                 (() => {
                   const homeFriends = (realFriends && realFriends.length > 0) ? realFriends : FRIENDS_DATA;
@@ -11660,7 +11688,7 @@
                     React.createElement("div", {
                       onClick: () => setFriendsOpen(!friendsOpen),
                       style: {
-                        margin: "12px 16px 4px",
+                        margin: "8px 16px 12px",
                         background: "linear-gradient(90deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06))",
                         border: "1px solid rgba(201,168,76,0.3)",
                         borderRadius: 14,
@@ -11730,34 +11758,6 @@
                     ),
                   );
                 })(),
-
-                /* MY LIST RIBBON */
-                onGoToList && React.createElement("div", {
-                  onClick: onGoToList,
-                  style: {
-                    margin: "8px 16px 12px",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 14,
-                    padding: "11px 16px",
-                    display: "flex", alignItems: "center", gap: 12, cursor: "pointer",
-                  },
-                },
-                  React.createElement("div", {
-                    style: {
-                      width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                      background: "rgba(255,255,255,0.08)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 18,
-                    },
-                  }, "\u2630"),
-                  React.createElement("div", { style: { flex: 1 } },
-                    React.createElement("div", { style: { fontSize: 15, fontWeight: 800, color: "var(--text)" } }, "My Watchlist"),
-                    React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 2 } },
-                      "Your saved films & shows →"),
-                  ),
-                  React.createElement("div", { style: { fontSize: 18, color: "var(--muted)" } }, "\u203a"),
-                ),
 
                 /* RECOMMENDED FOR YOU */
                 recommendedFilms.length > 0 && React.createElement(React.Fragment, null,
@@ -12001,7 +12001,7 @@
                   style: { display: "flex", alignItems: "baseline", justifyContent: "space-between", padding: "16px 16px 12px" },
                 },
                   React.createElement("div", {
-                    style: { fontFamily: "var(--ff-display, 'Cormorant Garamond', serif)", fontSize: 22, fontWeight: 900, color: "var(--text)" },
+                    style: { fontFamily: "var(--ff-body)", fontSize: 20, fontWeight: 800, color: "var(--text)" },
                   }, "My Watchlist"),
                   React.createElement("div", {
                     style: { fontSize: 12, color: "var(--muted)" },
@@ -13535,21 +13535,19 @@
                         style: {
                           display: "flex",
                           alignItems: "center",
-                          background: "var(--surface3)",
+                          background: "rgba(255,255,255,0.92)",
                           borderRadius: 12,
                           padding: "8px 12px",
                           gap: 8,
                           border: searchFocused
-                            ? "1px solid rgba(201,168,76,0.3)"
-                            : "1px solid transparent",
+                            ? "1px solid rgba(201,168,76,0.6)"
+                            : "1px solid rgba(255,255,255,0.15)",
                           transition: "border-color 0.2s",
                         },
                       },
-                      React.createElement(Icon, {
-                        name: "discover",
-                        size: 14,
-                        style: { color: tmdbSearching ? "var(--gold)" : "var(--muted)", flexShrink: 0, transition: "color 0.2s" },
-                      }),
+                      React.createElement("span", {
+                        style: { fontSize: 15, flexShrink: 0, color: tmdbSearching ? "#c9a84c" : "#888", transition: "color 0.2s", lineHeight: 1 },
+                      }, "\uD83D\uDD0D"),
                       React.createElement("input", {
                         type: "text",
                         placeholder: "Search films, TV, directors\u2026",
@@ -13562,7 +13560,7 @@
                           background: "none",
                           border: "none",
                           outline: "none",
-                          color: "var(--text)",
+                          color: "#111",
                           fontSize: 13,
                           fontFamily: "var(--ff-body)",
                         },
