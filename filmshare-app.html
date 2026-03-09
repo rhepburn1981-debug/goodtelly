@@ -9818,6 +9818,7 @@
               return value;
             }
             // ─── Streaming service data ────────────────────────────────────────────────────
+            let PROVIDER_LOGOS = {};
             const STREAMERS = {
               netflix: { label: "Netflix", bg: "#E50914", text: "#fff", short: "N" },
               prime: { label: "Prime", bg: "#00A8E1", text: "#fff", short: "P" },
@@ -10274,20 +10275,29 @@
             // ─── Streaming badges ──────────────────────────────────────────────────────────
             function StreamerBadges({ ids = [], size = "sm" }) {
               if (!ids || ids.length === 0) return null;
+              const iconSize = size === "lg" ? 24 : 20;
               const pad = size === "lg" ? "4px 9px" : "2px 7px";
               const fs = size === "lg" ? 10 : 9;
               return React.createElement(
                 "div",
                 {
-                  style: { display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 },
+                  style: { display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4, alignItems: "center" },
                 },
                 ids.map((id) => {
                   const s = STREAMERS[id];
                   if (!s) return null;
+                  if (s.logo) {
+                    return React.createElement("img", {
+                      key: id, src: s.logo, alt: s.label, title: s.label,
+                      style: { width: iconSize, height: iconSize, borderRadius: 5, objectFit: "cover",
+                               border: "1px solid rgba(255,255,255,0.12)", display: "block", flexShrink: 0 },
+                    });
+                  }
                   return React.createElement(
                     "span",
                     {
                       key: id,
+                      title: s.label,
                       style: {
                         background: s.bg,
                         color: s.text,
@@ -10297,6 +10307,7 @@
                         padding: pad,
                         letterSpacing: 0.3,
                         border: "1px solid rgba(255,255,255,0.08)",
+                        lineHeight: 1,
                       },
                     },
                     s.short,
@@ -11729,6 +11740,7 @@
                           : React.createElement("div", { style: { width: 50, height: 70, borderRadius: 8, background: film.color || "var(--surface3)", flexShrink: 0 } }),
                         React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                           React.createElement("div", { style: { fontSize: 16, fontWeight: 800, color: "var(--text)", lineHeight: 1.2, marginBottom: 4 } }, film.title),
+                          film.streamers && film.streamers.length > 0 && React.createElement(StreamerBadges, { ids: film.streamers }),
                           recNote
                             ? React.createElement("div", { style: { fontSize: 12, color: "var(--text2)", fontStyle: "italic", lineHeight: 1.4 } }, "“" + recNote + "” — " + friendName)
                             : film.description && React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" } }, film.description),
@@ -12903,7 +12915,8 @@
                   : React.createElement("div", { style: { width: 36, height: 52, borderRadius: 6, background: f.color || "var(--surface3)", flexShrink: 0 } }),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                   React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, f.title),
-                  React.createElement("div", { style: { fontSize: 12, color: "var(--text2)", marginTop: 2 } }, (f.year || "") + (f.genre ? " \u00b7 " + f.genre.split(",")[0] : ""))
+                  React.createElement("div", { style: { fontSize: 12, color: "var(--text2)", marginTop: 2 } }, (f.year || "") + (f.genre ? " \u00b7 " + f.genre.split(",")[0] : "")),
+                  f.streamers && f.streamers.length > 0 && React.createElement(StreamerBadges, { ids: f.streamers })
                 )
               );
 
@@ -14092,12 +14105,15 @@
               const authHeaders = token ? { Authorization: 'Bearer ' + token } : {};
 
               try {
-                const [filmsRes, friendsRes] = await Promise.all([
+                const [filmsRes, friendsRes, logosRes] = await Promise.all([
                   fetch(API_BASE + '/api/films').then(r => r.json()).catch(() => []),
                   fetch(API_BASE + '/api/legacy/friends').then(r => r.json()).catch(() => []),
+                  fetch(API_BASE + '/api/providers').then(r => r.json()).catch(() => ({})),
                 ]);
                 ALL_FILMS = Array.isArray(filmsRes) ? filmsRes : [];
                 FRIENDS_DATA = Array.isArray(friendsRes) ? friendsRes : [];
+                PROVIDER_LOGOS = logosRes || {};
+                Object.keys(PROVIDER_LOGOS).forEach(k => { if (STREAMERS[k]) STREAMERS[k].logo = PROVIDER_LOGOS[k]; });
 
                 if (token) {
                   const [meRes, wlRes] = await Promise.all([
