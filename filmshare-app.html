@@ -10319,9 +10319,9 @@
             // ─── Filter Pills ──────────────────────────────────────────────────────────────
             function WatchFilter({ value, onChange, unwatchedCount, watchedCount }) {
               const opts = [
-                { id: "all", label: "All", count: unwatchedCount + watchedCount },
                 { id: "unwatched", label: "To Watch", count: unwatchedCount },
                 { id: "watched", label: "Watched", count: watchedCount },
+                { id: "all", label: "All", count: unwatchedCount + watchedCount },
               ];
               return React.createElement(
                 "div",
@@ -11936,9 +11936,9 @@
                 return l;
               };
 
-              const tabCounts = [myList.length, toWatch.length, watched.length];
-              const tabIds = ["all", "unwatched", "watched"];
-              const tabLabels = ["All", "To Watch", "Watched"];
+              const tabCounts = [toWatch.length, watched.length, myList.length];
+              const tabIds = ["unwatched", "watched", "all"];
+              const tabLabels = ["To Watch", "Watched", "All"];
 
               const displayList = myListFilter === "watched" ? filterSort(watched)
                 : myListFilter === "unwatched" ? filterSort(toWatch)
