@@ -1040,6 +1040,37 @@ def discover_tv():
     return results
 
 
+@app.get("/api/trending/all")
+def trending_all():
+    """TMDB trending movies and TV shows this week."""
+    key = os.environ.get("TMDB_API_KEY", "")
+    if not key:
+        return []
+    import urllib.request, urllib.parse, json as _json
+    params = urllib.parse.urlencode({"api_key": key, "language": "en-US"})
+    url = f"https://api.themoviedb.org/3/trending/all/week?{params}"
+    try:
+        with urllib.request.urlopen(url, timeout=8) as resp:
+            data = _json.loads(resp.read())
+    except Exception:
+        return []
+    results = []
+    for s in (data.get("results") or [])[:20]:
+        poster = s.get("poster_path")
+        is_tv = s.get("media_type") == "tv"
+        results.append({
+            "id": s.get("id"),
+            "title": s.get("name") if is_tv else s.get("title"),
+            "poster": f"https://image.tmdb.org/t/p/w185{poster}" if poster else None,
+            "poster_large": f"https://image.tmdb.org/t/p/w342{poster}" if poster else None,
+            "overview": (s.get("overview") or "")[:200],
+            "rating": round(s.get("vote_average", 0) / 2, 2) if s.get("vote_average") else None,
+            "year": (s.get("release_date") or s.get("first_air_date") or "")[:4],
+            "media_type": s.get("media_type", "movie"),
+        })
+    return results
+
+
 @app.post("/api/me/recommendations", status_code=201)
 def record_recommendation(body: dict, current_user=Depends(require_user)):
     """Record that a film was recommended to the current user via a share link."""
