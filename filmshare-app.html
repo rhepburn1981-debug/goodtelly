@@ -12640,14 +12640,15 @@
                         },
                         React.createElement("div", {
                           style: {
-                            borderRadius: "50%", flexShrink: 0, marginBottom: 6,
-                            border: `2.5px solid ${activeFriend === getName(f) ? "var(--gold-bright)" : "rgba(255,255,255,0.1)"}`,
-                            boxShadow: activeFriend === getName(f) ? "0 0 14px rgba(201,168,76,0.35)" : "none",
+                            width: 60, height: 60, borderRadius: 20, flexShrink: 0, marginBottom: 8,
+                            background: f.color || "var(--gold)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 24, fontWeight: 900, color: "#fff",
+                            boxShadow: activeFriend === getName(f) ? "0 4px 14px rgba(201,168,76,0.45)" : "0 4px 14px rgba(0,0,0,0.4)",
+                            border: activeFriend === getName(f) ? "2px solid var(--gold-bright)" : "2px solid rgba(255,255,255,0.1)",
                             transition: "border-color 0.2s, box-shadow 0.2s",
                           },
-                        },
-                          React.createElement(Avatar, { name: getName(f), color: f.color, size: 64 }),
-                        ),
+                        }, getName(f).charAt(0).toUpperCase()),
                         React.createElement(
                           "div",
                           {
