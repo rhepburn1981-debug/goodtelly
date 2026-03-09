@@ -242,19 +242,26 @@ def _render_share_page(title="", year="", rating="", genre="", sender="A friend"
         html = fh.read()
     og_title = f"{sender} recommends {title}" if title else "Someone shared a pick on Reel."
     og_desc = note or (", ".join(filter(None, [genre, str(year) if year else "", f"★ {rating}" if rating else ""])) or "Watch the trailer and see what your friends are watching.")
-    html = html.replace(
+    # Replace OG tags — handle both old spaced and new compact formats
+    for _t in [
         '<meta property="og:title"       content="Your friend recommended a film on reel."/>',
-        f'<meta property="og:title"       content="{og_title}"/>',
-    )
-    html = html.replace(
+        '<meta property="og:title" content="Your friend recommended a film on reel."/>',
+        '<meta property="og:title" content="Your friend recommended a film on REEL."/>',
+    ]:
+        if _t in html:
+            html = html.replace(_t, f'<meta property="og:title" content="{og_title}"/>', 1); break
+    for _d in [
         '<meta property="og:description" content="Watch the trailer and see what your friends are watching."/>',
-        f'<meta property="og:description" content="{og_desc}"/>',
-    )
+    ]:
+        if _d in html:
+            html = html.replace(_d, f'<meta property="og:description" content="{og_desc}"/>', 1); break
     if poster:
-        html = html.replace(
+        for _i in [
             '<meta property="og:image"       content="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80"/>',
-            f'<meta property="og:image"       content="{poster}"/>',
-        )
+            '<meta property="og:image" content="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80"/>',
+        ]:
+            if _i in html:
+                html = html.replace(_i, f'<meta property="og:image" content="{poster}"/>', 1); break
     # Inject film data so the page JS can hydrate without URL params
     film_data = {
         "title": title, "year": year, "rating": rating, "genre": genre,
