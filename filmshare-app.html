@@ -11566,16 +11566,16 @@
                   .then(r => r.ok ? r.json() : []).then(setTrendingNow).catch(() => {});
               }, []);
               // Map external show to pseudo-film for FilmDetailPage
-              const extToFilm = (show, offset) => ({
+              const extToFilm = (show, offset, extra) => Object.assign({
                 id: -(offset + show.id),
                 title: show.title || show.name,
                 poster: show.poster_large || show.poster || show.image,
                 description: show.overview || show.summary || "",
                 genre: Array.isArray(show.genres) ? show.genres.slice(0, 2).join(", ") : (show.genres || ""),
-                year: show.year || (show.first_air_date ? show.first_air_date.slice(0, 4) : "") || (show.airtime ? show.airtime.slice(0, 4) : ""),
+                year: show.year || (show.first_air_date ? show.first_air_date.slice(0, 4) : ""),
                 rating: show.rating,
                 streamers: [], stills: [], _isExternal: true,
-              });
+              }, extra || {});
 
               const recommendedFilms = (friendsRecommendedFilms && friendsRecommendedFilms.length > 0)
                 ? friendsRecommendedFilms.filter(f => !addedIds.includes(f.id) && !watchedIds.includes(f.id)).slice(0, 6)
@@ -11702,7 +11702,7 @@
                     trendingNow.slice(0, 15).map(show =>
                       React.createElement("button", {
                         key: show.id,
-                        onClick: () => onFilmClick(extToFilm(show, 2000000)),
+                        onClick: () => onFilmClick(extToFilm(show, 2000000, show.media_type === "movie" ? { _fromTmdb: true, tmdb_id: show.id } : { _fromTmdbTv: true, tmdb_tv_id: show.id })),
                         style: { flexShrink: 0, width: 110, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
                       },
                         show.poster
@@ -11727,7 +11727,7 @@
                     tvSchedule.slice(0, 10).map((show, idx) =>
                       React.createElement("div", {
                         key: show.id,
-                        onClick: () => onFilmClick(extToFilm(show, 1000000)),
+                        onClick: () => onFilmClick(extToFilm(show, 1000000, { _fromTvmaze: true, tvmaze_id: show.id })),
                         style: {
                           display: "flex", alignItems: "center", gap: 12, padding: "10px 14px",
                           borderBottom: idx < Math.min(tvSchedule.length, 10) - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
@@ -11767,7 +11767,7 @@
                     discoverShows.slice(0, 12).map(show =>
                       React.createElement("button", {
                         key: show.id,
-                        onClick: () => onFilmClick(extToFilm(show, 3000000)),
+                        onClick: () => onFilmClick(extToFilm(show, 3000000, { _fromTmdbTv: true, tmdb_tv_id: show.id })),
                         style: { flexShrink: 0, width: 100, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
                       },
                         show.image
@@ -13226,6 +13226,11 @@
                     .catch(() => {});
                 } else if (film._fromTvmaze && film.tvmaze_id) {
                   fetch(API_BASE + "/api/tvmaze/enrich?id=" + film.tvmaze_id)
+                    .then(r => r.ok ? r.json() : null)
+                    .then(enriched => applyEnriched(film.id, enriched))
+                    .catch(() => {});
+                } else if (film._fromTmdbTv && film.tmdb_tv_id) {
+                  fetch(API_BASE + "/api/tmdb/tv/" + film.tmdb_tv_id)
                     .then(r => r.ok ? r.json() : null)
                     .then(enriched => applyEnriched(film.id, enriched))
                     .catch(() => {});

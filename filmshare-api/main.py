@@ -982,12 +982,19 @@ def tv_schedule():
             data = _json.loads(resp.read())
     except Exception:
         return []
+    DRAMA = {"Drama","Sports","Crime","Thriller","Action","Adventure","Science-Fiction","Fantasy","Mystery","Horror","War"}
+    SOAPS = {"Soap Opera"}
     seen = set()
     results = []
     for ep in data:
         show = ep.get("show", {})
         sid = show.get("id")
         if not sid or sid in seen:
+            continue
+        genres = show.get("genres", [])
+        if any(g in SOAPS for g in genres):
+            continue
+        if genres and not any(g in DRAMA for g in genres):
             continue
         seen.add(sid)
         img = show.get("image") or {}
@@ -1013,8 +1020,7 @@ def discover_tv():
     import urllib.request, urllib.parse, json as _json
     params = urllib.parse.urlencode({
         "api_key": key,
-        "with_original_language": "en",
-        "with_origin_country": "GB",
+        "watch_region": "GB",
         "sort_by": "popularity.desc",
         "page": 1,
     })
@@ -1038,6 +1044,52 @@ def discover_tv():
             "genres": s.get("genre_ids", []),
         })
     return results
+
+
+@app.get("/api/tmdb/tv/{tmdb_id}")
+def tmdb_tv_detail(tmdb_id: int):
+    """Fetch TMDB TV show details for the film detail page."""
+    key = os.environ.get("TMDB_API_KEY", "")
+    if not key:
+        raise HTTPException(status_code=503, detail="TMDB_API_KEY not configured")
+    import urllib.request, urllib.parse, json as _j
+    p = urllib.parse.urlencode({"api_key": key, "language": "en-US",
+                                "append_to_response": "videos,images,credits"})
+    url = f"https://api.themoviedb.org/3/tv/{tmdb_id}?{p}"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            data = _j.loads(resp.read())
+    except Exception:
+        raise HTTPException(status_code=404, detail="Show not found")
+    poster = data.get("poster_path")
+    backdrop = data.get("backdrop_path")
+    trailer_url = None
+    for v in (data.get("videos") or {}).get("results", []):
+        if v.get("site") == "YouTube" and v.get("type") == "Trailer":
+            trailer_url = "https://www.youtube.com/embed/" + v["key"]
+            break
+    backdrops = (data.get("images") or {}).get("backdrops", [])
+    stills = ["https://image.tmdb.org/t/p/w780" + b["file_path"]
+              for b in backdrops[:6] if b.get("file_path")]
+    cast_list = (data.get("credits") or {}).get("cast", [])
+    cast = ", ".join(c.get("name", "") for c in cast_list[:8]) if cast_list else None
+    genres = [g.get("name") for g in data.get("genres", []) if g.get("name")]
+    rt = data.get("episode_run_time", [])
+    vote = data.get("vote_average", 0)
+    year_str = (data.get("first_air_date") or "")[:4]
+    return {
+        "title": data.get("name", ""),
+        "description": data.get("overview", ""),
+        "poster": ("https://image.tmdb.org/t/p/w342" + poster) if poster else None,
+        "backdrop": ("https://image.tmdb.org/t/p/w1280" + backdrop) if backdrop else None,
+        "genre": ", ".join(genres[:2]) if genres else None,
+        "rating": round(vote / 2, 2) if vote else None,
+        "year": int(year_str) if year_str.isdigit() else None,
+        "runtime": (str(rt[0]) + "m") if rt else None,
+        "cast": cast,
+        "trailer_url": trailer_url,
+        "stills": stills,
+    }
 
 
 @app.get("/api/trending/all")
