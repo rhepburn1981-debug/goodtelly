@@ -1052,6 +1052,58 @@ def tv_schedule():
     return results[:20]
 
 
+@app.get("/api/trending/upcoming-tv")
+def upcoming_tv():
+    """UK TV shows airing in the next 7 days from TVmaze, deduplicated by show."""
+    import urllib.request, json as _json, datetime
+    SOAPS = {"EastEnders","Emmerdale","Hollyoaks","Coronation Street","Doctors",
+             "Home and Away","Neighbours","Fair City","Casualty","Waterloo Road"}
+    seen = set()
+    results = []
+    today = datetime.date.today()
+    for offset in range(1, 8):
+        day = (today + datetime.timedelta(days=offset)).isoformat()
+        url = f"https://api.tvmaze.com/schedule?country=GB&date={day}"
+        try:
+            with urllib.request.urlopen(url, timeout=8) as resp:
+                data = _json.loads(resp.read())
+        except Exception:
+            continue
+        for ep in data:
+            show = ep.get("show", {})
+            sid = show.get("id")
+            if not sid or sid in seen:
+                continue
+            show_type = show.get("type", "")
+            runtime = show.get("runtime") or show.get("averageRuntime") or 0
+            if show_type == "Sports":
+                pass
+            elif show_type == "Scripted" and runtime >= 45:
+                pass
+            else:
+                continue
+            if show.get("name", "") in SOAPS:
+                continue
+            seen.add(sid)
+            img = show.get("image") or {}
+            results.append({
+                "id": sid,
+                "name": show.get("name", ""),
+                "image": img.get("medium") or img.get("original"),
+                "channel": (show.get("network") or show.get("webChannel") or {}).get("name", ""),
+                "genres": show.get("genres", []),
+                "airdate": day,
+                "airtime": ep.get("airtime", ""),
+                "summary": (show.get("summary") or "").replace("<p>","").replace("</p>","").replace("<b>","").replace("</b>",""),
+                "rating": show.get("rating", {}).get("average"),
+            })
+            if len(results) >= 20:
+                break
+        if len(results) >= 20:
+            break
+    return results
+
+
 @app.get("/api/trending/discover-tv")
 def discover_tv():
     """Popular TV shows from TMDB."""
