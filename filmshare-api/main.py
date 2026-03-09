@@ -967,6 +967,29 @@ def tvmaze_enrich(id: int):
     data = _tvmaze.enrich_show(id)
     if not data:
         raise HTTPException(status_code=404, detail="No TVmaze match found")
+    # Try to add UK streaming providers via TMDB TV search
+    if not data.get("streamers"):
+        try:
+            PROVIDER_MAP = {8: "netflix", 9: "prime", 337: "disney", 350: "apple",
+                            1899: "hbo", 384: "hbo", 531: "paramount", 38: "bbc"}
+            title = data.get("description", "") and _tvmaze._get(f"/shows/{id}").get("name", "") if False else ""
+            # Find TMDB TV ID by title
+            show_resp = _tvmaze._get(f"/shows/{id}")
+            name = (show_resp or {}).get("name", "") if show_resp else ""
+            year = data.get("year")
+            if name:
+                sr = _tvmaze._tmdb_get("/search/tv", {"query": name, "language": "en-US"})
+                tmdb_tv = ((sr or {}).get("results") or [None])[0]
+                if tmdb_tv:
+                    tid = tmdb_tv["id"]
+                    prov = _tvmaze._tmdb_get(f"/tv/{tid}/watch/providers")
+                    gb = ((prov or {}).get("results") or {}).get("GB", {})
+                    flatrate = gb.get("flatrate") or []
+                    data["streamers"] = list(dict.fromkeys(
+                        PROVIDER_MAP[p["provider_id"]] for p in flatrate if p.get("provider_id") in PROVIDER_MAP
+                    ))
+        except Exception:
+            pass
     return data
 
 
@@ -1061,6 +1084,15 @@ def tmdb_tv_detail(tmdb_id: int):
     rt = data.get("episode_run_time", [])
     vote = data.get("vote_average", 0)
     year_str = (data.get("first_air_date") or "")[:4]
+    # UK streaming providers
+    PROVIDER_MAP = {8: "netflix", 9: "prime", 337: "disney", 350: "apple",
+                    1899: "hbo", 384: "hbo", 531: "paramount", 38: "bbc"}
+    prov_data = _tvmaze._tmdb_get(f"/tv/{tmdb_id}/watch/providers")
+    gb_prov = ((prov_data or {}).get("results") or {}).get("GB", {})
+    flatrate = gb_prov.get("flatrate") or []
+    streamers = list(dict.fromkeys(
+        PROVIDER_MAP[p["provider_id"]] for p in flatrate if p.get("provider_id") in PROVIDER_MAP
+    ))
     return {
         "title": data.get("name", ""),
         "description": data.get("overview", ""),
@@ -1073,6 +1105,7 @@ def tmdb_tv_detail(tmdb_id: int):
         "cast": cast,
         "trailer_url": trailer_url,
         "stills": stills,
+        "streamers": streamers,
     }
 
 

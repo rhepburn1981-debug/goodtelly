@@ -11553,9 +11553,12 @@
               onRecommend,
               userRatings,
               onFriendClick,
+              myListCount,
+              onGoToList,
             }) {
               const [tvSchedule, setTvSchedule] = React.useState([]);
               const [discoverShows, setDiscoverShows] = React.useState([]);
+              const [friendsOpen, setFriendsOpen] = React.useState(false);
               const [trendingNow, setTrendingNow] = React.useState([]);
               React.useEffect(() => {
                 fetch(API_BASE + "/api/trending/tv-schedule")
@@ -11596,14 +11599,58 @@
 
               return React.createElement("div", { style: { height: "100%", overflowY: "auto" } },
 
-                /* YOUR FRIENDS */
+                /* YOUR FRIENDS RIBBON */
                 (() => {
                   const homeFriends = (realFriends && realFriends.length > 0) ? realFriends : FRIENDS_DATA;
                   if (!homeFriends.length) return null;
                   return React.createElement(React.Fragment, null,
-                    sectionLabel("Your Friends", null),
+                    /* Ribbon button */
                     React.createElement("div", {
-                      style: { display: "flex", gap: 16, overflowX: "auto", padding: "0 16px 16px", scrollbarWidth: "none" },
+                      onClick: () => setFriendsOpen(!friendsOpen),
+                      style: {
+                        margin: "12px 16px 4px",
+                        background: "linear-gradient(90deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06))",
+                        border: "1px solid rgba(201,168,76,0.3)",
+                        borderRadius: 14,
+                        padding: "11px 16px",
+                        display: "flex", alignItems: "center", gap: 10, cursor: "pointer",
+                      },
+                    },
+                      /* Stacked mini avatars */
+                      React.createElement("div", { style: { display: "flex", flexShrink: 0 } },
+                        homeFriends.slice(0, 4).map((f, i) => {
+                          const n = f.display_name || f.username || f.name || "";
+                          return React.createElement("div", {
+                            key: f.username || f.id || i,
+                            style: {
+                              width: 28, height: 28, borderRadius: "50%",
+                              background: f.color || "var(--gold)",
+                              border: "2px solid #0D0D13",
+                              marginLeft: i > 0 ? -10 : 0,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              fontSize: 11, fontWeight: 800, color: "#fff",
+                              flexShrink: 0,
+                            },
+                          }, n.charAt(0).toUpperCase());
+                        }),
+                      ),
+                      /* Label */
+                      React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                        React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: "var(--gold-bright)" } }, "Your Friends"),
+                        React.createElement("div", { style: { fontSize: 10, color: "var(--muted)", marginTop: 1 } },
+                          homeFriends.length + " friend" + (homeFriends.length !== 1 ? "s" : "") + " on Reel"),
+                      ),
+                      /* Chevron */
+                      React.createElement("div", {
+                        style: {
+                          fontSize: 14, color: "var(--gold-bright)", transition: "transform 0.2s",
+                          transform: friendsOpen ? "rotate(90deg)" : "rotate(0deg)",
+                        },
+                      }, "\u203a"),
+                    ),
+                    /* Expanded friend list */
+                    friendsOpen && React.createElement("div", {
+                      style: { display: "flex", gap: 16, overflowX: "auto", padding: "8px 16px 12px", scrollbarWidth: "none" },
                     },
                       homeFriends.map(f => {
                         const dName = f.display_name || f.username || f.name || "";
@@ -11613,19 +11660,43 @@
                           style: { flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center" },
                         },
                           React.createElement("div", { style: { marginBottom: 6 } },
-                            React.createElement(Avatar, { name: dName, color: f.color, size: 64 }),
+                            React.createElement(Avatar, { name: dName, color: f.color, size: 56 }),
                           ),
-                          React.createElement("div", {
-                            style: { fontSize: 11, fontWeight: 600, color: "var(--text2)" },
-                          }, dName),
-                          React.createElement("div", {
-                            style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 1 },
-                          }, (f.count || 0) + " picks"),
+                          React.createElement("div", { style: { fontSize: 11, fontWeight: 600, color: "var(--text2)" } }, dName),
+                          React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 1 } }, (f.count || 0) + " picks"),
                         );
                       }),
                     ),
                   );
                 })(),
+
+                /* MY LIST RIBBON */
+                onGoToList && React.createElement("div", {
+                  onClick: onGoToList,
+                  style: {
+                    margin: "8px 16px 12px",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 14,
+                    padding: "11px 16px",
+                    display: "flex", alignItems: "center", gap: 12, cursor: "pointer",
+                  },
+                },
+                  React.createElement("div", {
+                    style: {
+                      width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+                      background: "rgba(255,255,255,0.08)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 15,
+                    },
+                  }, "\u2630"),
+                  React.createElement("div", { style: { flex: 1 } },
+                    React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: "var(--text)" } }, "My Watchlist"),
+                    React.createElement("div", { style: { fontSize: 10, color: "var(--muted)", marginTop: 1 } },
+                      (myListCount || 0) + " film" + ((myListCount || 0) !== 1 ? "s" : "") + " saved"),
+                  ),
+                  React.createElement("div", { style: { fontSize: 18, color: "var(--muted)" } }, "\u203a"),
+                ),
 
                 /* RECOMMENDED FOR YOU */
                 recommendedFilms.length > 0 && React.createElement(React.Fragment, null,
@@ -11673,7 +11744,7 @@
 
                 /* TRENDING & BANGING (local films) */
                 trendingFilms.length > 0 && React.createElement(React.Fragment, null,
-                  sectionLabel("Trending & Banging", null),
+                  sectionLabel("What Reel users are watching right now", null),
                   React.createElement("div", {
                     style: { display: "flex", gap: 12, overflowX: "auto", padding: "0 16px 16px", scrollbarWidth: "none" },
                   },
@@ -11688,6 +11759,7 @@
                           : React.createElement("div", { style: { width: 110, height: 160, borderRadius: 12, background: film.color || "var(--surface3)" } }),
                         React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--text)", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, film.title),
                         React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginTop: 2 } }, film.year),
+                        film.streamers && film.streamers.length > 0 && React.createElement(StreamerBadges, { ids: film.streamers }),
                       ),
                     ),
                   ),
@@ -13206,6 +13278,7 @@
                 if (enriched.backdrop) updates.backdrop = enriched.backdrop;
                 if (enriched.rating) updates.rating = enriched.rating;
                 if (enriched.stills && enriched.stills.length) updates.stills = enriched.stills;
+                if (enriched.streamers && enriched.streamers.length) updates.streamers = enriched.streamers;
                 setSelectedFilm(f => f && f.id === filmId ? Object.assign({}, f, updates) : f);
                 if (filmId < 0) tmdbFilmCacheRef.current[filmId] = Object.assign({}, tmdbFilmCacheRef.current[filmId] || {}, updates);
               };
@@ -13499,6 +13572,8 @@
                         userRatings: userRatings,
                         realFriends: realFriends,
                         onFriendClick: (name) => { setFriendsDefaultFriend(name); setTab("friends"); },
+                        myListCount: myList.length,
+                        onGoToList: () => setTab("list"),
                       }),
 
                     /* LIST */
