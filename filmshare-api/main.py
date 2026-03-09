@@ -1132,6 +1132,37 @@ def trending_all():
     return results
 
 
+@app.post("/api/admin/backfill-streamers")
+def backfill_streamers():
+    """Backfill film_streamers from TMDB watch/providers for all films with a tmdb_id."""
+    PROVIDER_MAP = {8: "netflix", 9: "prime", 337: "disney", 350: "apple",
+                    1899: "hbo", 384: "hbo", 531: "paramount", 38: "bbc"}
+    updated = []
+    skipped = []
+    with get_db() as conn:
+        films = conn.execute("SELECT id, title, tmdb_id FROM films WHERE tmdb_id IS NOT NULL").fetchall()
+        for film in films:
+            fid = film["id"]
+            tmdb_id = film["tmdb_id"]
+            try:
+                prov_data = _tvmaze._tmdb_get(f"/movie/{tmdb_id}/watch/providers")
+                gb_prov = ((prov_data or {}).get("results") or {}).get("GB", {})
+                flatrate = gb_prov.get("flatrate") or []
+                streamers = list(dict.fromkeys(
+                    PROVIDER_MAP[p["provider_id"]] for p in flatrate if p.get("provider_id") in PROVIDER_MAP
+                ))
+                if streamers:
+                    conn.execute("DELETE FROM film_streamers WHERE film_id = ?", (fid,))
+                    for s in streamers:
+                        conn.execute("INSERT OR IGNORE INTO film_streamers (film_id, streamer) VALUES (?, ?)", (fid, s))
+                    updated.append({"id": fid, "title": film["title"], "streamers": streamers})
+                else:
+                    skipped.append({"id": fid, "title": film["title"]})
+            except Exception as e:
+                skipped.append({"id": fid, "title": film["title"], "error": str(e)})
+    return {"updated": updated, "skipped": skipped}
+
+
 @app.post("/api/me/recommendations", status_code=201)
 def record_recommendation(body: dict, current_user=Depends(require_user)):
     """Record that a film was recommended to the current user via a share link."""
