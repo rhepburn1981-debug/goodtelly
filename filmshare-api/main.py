@@ -1019,18 +1019,8 @@ def tv_schedule():
 @app.get("/api/trending/discover-tv")
 def discover_tv():
     """Popular TV shows from TMDB."""
-    key = os.environ.get("TMDB_API_KEY", "")
-    if not key:
-        print("discover_tv: no TMDB key", flush=True)
-        return []
-    import urllib.request, urllib.parse, json as _json
-    params = urllib.parse.urlencode({"api_key": key, "language": "en-US", "page": 1})
-    url = f"https://api.themoviedb.org/3/tv/popular?{params}"
-    try:
-        with urllib.request.urlopen(url, timeout=8) as resp:
-            data = _json.loads(resp.read())
-    except Exception as e:
-        print(f"discover_tv error: {e}", flush=True)
+    data = _tvmaze._tmdb_get("/tv/popular", {"language": "en-US", "page": 1})
+    if not data:
         return []
     results = []
     for s in (data.get("results") or [])[:20]:
@@ -1045,24 +1035,15 @@ def discover_tv():
             "first_air_date": s.get("first_air_date", ""),
             "genres": s.get("genre_ids", []),
         })
-    print(f"discover_tv: returning {len(results)} shows", flush=True)
     return results
 
 
 @app.get("/api/tmdb/tv/{tmdb_id}")
 def tmdb_tv_detail(tmdb_id: int):
     """Fetch TMDB TV show details for the film detail page."""
-    key = os.environ.get("TMDB_API_KEY", "")
-    if not key:
-        raise HTTPException(status_code=503, detail="TMDB_API_KEY not configured")
-    import urllib.request, urllib.parse, json as _j
-    p = urllib.parse.urlencode({"api_key": key, "language": "en-US",
-                                "append_to_response": "videos,images,credits"})
-    url = f"https://api.themoviedb.org/3/tv/{tmdb_id}?{p}"
-    try:
-        with urllib.request.urlopen(url, timeout=10) as resp:
-            data = _j.loads(resp.read())
-    except Exception:
+    data = _tvmaze._tmdb_get(f"/tv/{tmdb_id}",
+                              {"language": "en-US", "append_to_response": "videos,images,credits"})
+    if not data:
         raise HTTPException(status_code=404, detail="Show not found")
     poster = data.get("poster_path")
     backdrop = data.get("backdrop_path")
@@ -1098,16 +1079,8 @@ def tmdb_tv_detail(tmdb_id: int):
 @app.get("/api/trending/all")
 def trending_all():
     """TMDB trending movies and TV shows this week."""
-    key = os.environ.get("TMDB_API_KEY", "")
-    if not key:
-        return []
-    import urllib.request, urllib.parse, json as _json
-    params = urllib.parse.urlencode({"api_key": key, "language": "en-US"})
-    url = f"https://api.themoviedb.org/3/trending/all/week?{params}"
-    try:
-        with urllib.request.urlopen(url, timeout=8) as resp:
-            data = _json.loads(resp.read())
-    except Exception:
+    data = _tvmaze._tmdb_get("/trending/all/week", {"language": "en-US"})
+    if not data:
         return []
     results = []
     for s in (data.get("results") or [])[:20]:
