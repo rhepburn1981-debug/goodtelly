@@ -772,6 +772,19 @@ def get_film_by_slug(slug: str):
             raise HTTPException(status_code=404, detail="Film not found")
         return get_film_by_id(conn, film["id"])
 
+@app.put("/api/films/{film_id}/streamers")
+def set_film_streamers(film_id: int, body: dict, current_user=Depends(require_user)):
+    """Manually set streaming services for a film."""
+    streamers = body.get("streamers", [])
+    with get_db() as conn:
+        if not conn.execute("SELECT id FROM films WHERE id=?", (film_id,)).fetchone():
+            raise HTTPException(status_code=404, detail="Film not found")
+        conn.execute("DELETE FROM film_streamers WHERE film_id=?", (film_id,))
+        for s in streamers:
+            conn.execute("INSERT OR IGNORE INTO film_streamers (film_id, streamer) VALUES (?,?)", (film_id, s))
+    return {"ok": True, "streamers": streamers}
+
+
 @app.post("/api/films/{film_id}/refresh")
 def refresh_film(film_id: int):
     """Re-enrich a film from TMDB/TVmaze to fill missing trailer, cast, stills etc."""
