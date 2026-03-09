@@ -982,8 +982,8 @@ def tv_schedule():
             data = _json.loads(resp.read())
     except Exception:
         return []
-    DRAMA = {"Drama","Sports","Crime","Thriller","Action","Adventure","Science-Fiction","Fantasy","Mystery","Horror","War"}
-    SOAPS = {"Soap Opera"}
+    SOAPS = {"EastEnders","Emmerdale","Hollyoaks","Coronation Street","Doctors",
+             "Home and Away","Neighbours","Fair City","Casualty","Waterloo Road"}
     seen = set()
     results = []
     for ep in data:
@@ -991,10 +991,15 @@ def tv_schedule():
         sid = show.get("id")
         if not sid or sid in seen:
             continue
-        genres = show.get("genres", [])
-        if any(g in SOAPS for g in genres):
+        show_type = show.get("type", "")
+        runtime = show.get("runtime") or show.get("averageRuntime") or 0
+        if show_type == "Sports":
+            pass
+        elif show_type == "Scripted" and runtime >= 45:
+            pass
+        else:
             continue
-        if genres and not any(g in DRAMA for g in genres):
+        if show.get("name", "") in SOAPS:
             continue
         seen.add(sid)
         img = show.get("image") or {}
