@@ -1109,6 +1109,23 @@ def tmdb_tv_detail(tmdb_id: int):
     }
 
 
+@app.get("/api/providers")
+def get_providers():
+    """Return TMDB logo URLs for our supported streaming providers (UK)."""
+    PROVIDER_MAP = {8: "netflix", 9: "prime", 337: "disney", 350: "apple",
+                    1899: "hbo", 384: "hbo", 531: "paramount", 38: "bbc"}
+    data = _tvmaze._tmdb_get("/watch/providers/movie", {"watch_region": "GB"})
+    result = {}
+    for p in (data or {}).get("results", []):
+        pid = p.get("provider_id")
+        if pid in PROVIDER_MAP:
+            key = PROVIDER_MAP[pid]
+            path = p.get("logo_path", "")
+            if path and key not in result:
+                result[key] = f"https://image.tmdb.org/t/p/w45{path}"
+    return result
+
+
 @app.get("/api/trending/all")
 def trending_all():
     """TMDB trending movies and TV shows this week."""
