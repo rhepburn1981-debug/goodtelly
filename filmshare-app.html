@@ -11699,11 +11699,29 @@
                           onClick: () => onFriendClick && onFriendClick(f.username || f.name || dName),
                           style: { flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center" },
                         },
-                          React.createElement("div", { style: { marginBottom: 6 } },
-                            React.createElement(Avatar, { name: dName, color: f.color, size: 56 }),
+                          React.createElement("div", { style: { marginBottom: 8, position: "relative" } },
+                            React.createElement("div", {
+                              style: {
+                                width: 60, height: 60, borderRadius: 20,
+                                background: f.color || "var(--gold)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                fontSize: 24, fontWeight: 900, color: "#fff",
+                                boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
+                                border: "2px solid rgba(255,255,255,0.15)",
+                              },
+                            }, dName.charAt(0).toUpperCase()),
+                            (f.count || 0) > 0 && React.createElement("div", {
+                              style: {
+                                position: "absolute", top: -4, right: -4,
+                                width: 20, height: 20, borderRadius: "50%",
+                                background: "var(--gold)", border: "2px solid #0D0D13",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                fontSize: 9, fontWeight: 900, color: "#000",
+                              },
+                            }, f.count || 0),
                           ),
-                          React.createElement("div", { style: { fontSize: 11, fontWeight: 600, color: "var(--text2)" } }, dName),
-                          React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 1 } }, (f.count || 0) + " picks"),
+                          React.createElement("div", { style: { fontSize: 11, fontWeight: 700, color: "var(--text)" } }, dName),
+                          React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 2 } }, (f.count || 0) + " picks"),
                         );
                       }),
                     ),
@@ -12455,7 +12473,7 @@
               const [genreFilter, setGenreFilter] = useState("All");
               const [sortBy, setSortBy] = useState("rating");
               const [friendSearch, setFriendSearch] = useState("");
-              const [watchFilter, setWatchFilter] = useState("all");
+              const [watchFilter, setWatchFilter] = useState("unwatched");
               const [friendFilmsCache, setFriendFilmsCache] = React.useState({});
               const [addFriendInput, setAddFriendInput] = React.useState("");
               const [addFriendStatus, setAddFriendStatus] = React.useState("");
@@ -12530,7 +12548,9 @@
                 if (watchFilter === "unwatched")
                   list = list.filter((f) => !watchedIds.includes(f.id));
                 return [...list].sort((a, b) =>
-                  sortBy === "rating" ? (b.rating || 0) - (a.rating || 0) : (b.year || 0) - (a.year || 0),
+                  sortBy === "alpha" ? (a.title || "").localeCompare(b.title || "") :
+                  sortBy === "friends_rating" ? (b.friendsRating || b.rating || 0) - (a.friendsRating || a.rating || 0) :
+                  (b.id || 0) - (a.id || 0),
                 );
               }, [
                 activeFriend,
@@ -12606,7 +12626,7 @@
                           onClick: () => {
                             setActiveFriend(getName(f));
                             setGenreFilter("All");
-                            setWatchFilter("all");
+                            setWatchFilter("unwatched");
                           },
                           style: {
                             textAlign: "center",
@@ -12738,45 +12758,25 @@
                       ),
                     ),
                   ),
-                  React.createElement(
-                    "div",
-                    { style: { display: "flex", gap: 8, marginTop: 8, alignItems: "center" } },
-                    React.createElement("input", {
-                      type: "text",
-                      placeholder: "Search films...",
-                      value: friendSearch,
-                      onChange: (e) => setFriendSearch(e.target.value),
-                      style: {
-                        flex: 1,
-                        background: "var(--surface3)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        borderRadius: 8,
-                        padding: "6px 10px",
-                        color: "var(--text)",
-                        fontSize: 12,
-                        outline: "none",
-                        fontFamily: "var(--ff-body)",
-                      },
-                    }),
-                    React.createElement(
-                      "select",
-                      {
-                        value: sortBy,
-                        onChange: (e) => setSortBy(e.target.value),
+                  React.createElement("div", {
+                    style: { display: "flex", gap: 8, marginTop: 8, overflowX: "auto", scrollbarWidth: "none" },
+                  },
+                    [
+                      { id: "added", label: "Recently Added" },
+                      { id: "friends_rating", label: "\uD83C\uDFAC Friends\u2019 Rating" },
+                      { id: "alpha", label: "A\u2013Z" },
+                    ].map(s =>
+                      React.createElement("button", {
+                        key: s.id,
+                        onClick: () => setSortBy(s.id),
                         style: {
-                          background: "var(--surface3)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          borderRadius: 8,
-                          padding: "6px 8px",
-                          color: "var(--text)",
-                          fontSize: 11,
-                          outline: "none",
-                          cursor: "pointer",
-                          fontFamily: "var(--ff-body)",
+                          flexShrink: 0, padding: "6px 12px", borderRadius: 20,
+                          border: sortBy === s.id ? "1px solid var(--gold)" : "1px solid rgba(255,255,255,0.1)",
+                          background: sortBy === s.id ? "rgba(201,168,76,0.12)" : "transparent",
+                          color: sortBy === s.id ? "var(--gold-bright)" : "var(--text2)",
+                          fontSize: 11, fontWeight: sortBy === s.id ? 700 : 500, cursor: "pointer",
                         },
-                      },
-                      React.createElement("option", { value: "rating" }, "Top rated"),
-                      React.createElement("option", { value: "year" }, "Newest"),
+                      }, s.label),
                     ),
                   ),
                 ),
@@ -13011,7 +13011,7 @@
               const [showAllPicks, setShowAllPicks] = useState(false);
               const [selectedFilm, setSelectedFilm] = useState(null);
               const [recommendFilm, setRecommendFilm] = useState(null);
-              const [myListFilter, setMyListFilter] = useState("all");
+              const [myListFilter, setMyListFilter] = useState("unwatched");
               const [friendsDefaultFriend, setFriendsDefaultFriend] = useState(null);
               const [listPublic, setListPublic] = useState(true);
               const [privateIds, setPrivateIds] = useState(new Set());
