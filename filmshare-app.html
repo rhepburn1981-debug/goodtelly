@@ -11979,7 +11979,7 @@
                           React.createElement("div", { style: { fontSize: 13, fontWeight: 700, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.name),
                           React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 5 } },
                             show.channel && React.createElement(ChannelBadge, { name: show.channel }),
-                            show.airdate ? new Date(show.airdate).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) : "")
+                            show.airdate ? new Date(show.airdate).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) : ""),
                           show.genres && show.genres.length > 0 && React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 2, opacity: 0.8 } }, show.genres.slice(0, 2).join(" / ")),
                         ),
                         show.rating && React.createElement("div", { style: { fontSize: 11, color: "var(--gold-bright)", fontWeight: 700, flexShrink: 0 } }, "\u2605 " + parseFloat(show.rating).toFixed(1)),
