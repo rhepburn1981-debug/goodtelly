@@ -1013,22 +1013,19 @@ def tv_schedule():
 
 @app.get("/api/trending/discover-tv")
 def discover_tv():
-    """Proxy TMDB discover TV for popular GB English shows."""
+    """Popular TV shows from TMDB."""
     key = os.environ.get("TMDB_API_KEY", "")
     if not key:
+        print("discover_tv: no TMDB key", flush=True)
         return []
     import urllib.request, urllib.parse, json as _json
-    params = urllib.parse.urlencode({
-        "api_key": key,
-        "watch_region": "GB",
-        "sort_by": "popularity.desc",
-        "page": 1,
-    })
-    url = f"https://api.themoviedb.org/3/discover/tv?{params}"
+    params = urllib.parse.urlencode({"api_key": key, "language": "en-US", "page": 1})
+    url = f"https://api.themoviedb.org/3/tv/popular?{params}"
     try:
         with urllib.request.urlopen(url, timeout=8) as resp:
             data = _json.loads(resp.read())
-    except Exception:
+    except Exception as e:
+        print(f"discover_tv error: {e}", flush=True)
         return []
     results = []
     for s in (data.get("results") or [])[:20]:
@@ -1043,6 +1040,7 @@ def discover_tv():
             "first_air_date": s.get("first_air_date", ""),
             "genres": s.get("genre_ids", []),
         })
+    print(f"discover_tv: returning {len(results)} shows", flush=True)
     return results
 
 
