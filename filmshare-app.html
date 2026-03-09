@@ -10461,12 +10461,8 @@
 
               const buildWAMsg = (shareUrl) => {
                 const actualNote = note.trim() || film.note || "Trust me on this one.";
-                return CURRENT_USER + " thinks you'd love *" + film.title + "*
-
-" +
-                  "“" + actualNote + "”
-
-" +
+                return CURRENT_USER + " thinks you'd love *" + film.title + "*\n\n" +
+                  "\u201C" + actualNote + "\u201D\n\n" +
                   "👉 " + shareUrl;
               };
 
