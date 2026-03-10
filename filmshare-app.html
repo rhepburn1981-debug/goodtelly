@@ -12855,8 +12855,8 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
             // ─── Auth Modal ─────────────────────────────────────────────────────────────
             const AVATAR_COLOURS = ["#c9a84c","#7c6bc9","#e07b6a","#4caf7c","#5b9bd5","#d96db3","#e09c4a","#52b8b0"];
 
-            function AuthModal({ onClose, onLogin }) {
-              const [mode, setMode] = React.useState("login");
+            function AuthModal({ onClose, onLogin, initialMode = "login" }) {
+              const [mode, setMode] = React.useState(initialMode);
               const [email, setEmail] = React.useState("");
               const [password, setPassword] = React.useState("");
               const [displayName, setDisplayName] = React.useState("");
@@ -13128,6 +13128,7 @@ function App() {
               const [currentUser, setCurrentUser] = useState(window.__AUTH_USER || null);
               const [authToken, setAuthToken] = useState(window.__AUTH_TOKEN || null);
               const [showAuth, setShowAuth] = useState(false);
+              const [authMode, setAuthMode] = useState("login");
               const [realFriends, setRealFriends] = useState([]);
               const [friendsRatings, setFriendsRatings] = useState({});
               const [friendsRecommendedFilms, setFriendsRecommendedFilms] = useState([]);
@@ -13509,12 +13510,13 @@ function App() {
               if (!currentUser) {
                 return React.createElement(React.Fragment, null,
                   React.createElement(LandingPage, {
-                    onJoin: () => setShowAuth(true),
-                    onLogin: () => setShowAuth(true),
+                    onJoin: () => { setAuthMode("register"); setShowAuth(true); },
+                    onLogin: () => { setAuthMode("login"); setShowAuth(true); },
                   }),
                   showAuth && React.createElement(AuthModal, {
                     onClose: () => setShowAuth(false),
                     onLogin: onLogin,
+                    initialMode: authMode,
                   }),
                 );
               }
