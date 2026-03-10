@@ -10461,9 +10461,13 @@
 
               const buildWAMsg = (shareUrl) => {
                 const actualNote = note.trim() || film.note || "Trust me on this one.";
-                return CURRENT_USER + " thinks you'd love *" + film.title + "*\n\n" +
-                  "\u201C" + actualNote + "\u201D\n\n" +
-                  "👉 " + shareUrl;
+                return "🎬 " + CURRENT_USER + " recommends" + "\n\n" +
+                  film.title + "\n\n" +
+                  "💬 \u201C" + actualNote + "\u201D\n\n" +
+                  "\u25B6 Watch the trailer\n" + shareUrl + "\n\n" +
+                  "—\n\n" +
+                  "Join " + CURRENT_USER + " on Reel.\n\n" +
+                  "Watch ONLY the good content.\nStop the scroll.";
               };
 
               const sendInApp = async (friend) => {
