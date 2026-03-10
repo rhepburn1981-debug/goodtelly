@@ -1238,6 +1238,7 @@ def trending_all():
     return results
 
 
+@app.get("/api/admin/backfill-streamers")
 @app.post("/api/admin/backfill-streamers")
 def backfill_streamers():
     """Backfill film_streamers from TMDB watch/providers for all films with a tmdb_id."""
