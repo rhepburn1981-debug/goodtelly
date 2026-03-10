@@ -1334,7 +1334,7 @@ def send_recommendation(body: dict, current_user=Depends(require_user)):
 
 
 @app.get("/api/users/find")
-def find_user(q: str, current_user=Depends(require_user)):
+def find_user(q: str, current_user=Depends(get_current_user)):
     """Find a user by email address, username, or display name (case-insensitive)."""
     with get_db() as conn:
         user = conn.execute(

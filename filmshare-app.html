@@ -12558,7 +12558,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                 try {
                   const headers = authToken ? { Authorization: "Bearer " + authToken } : {};
                   const findR = await fetch(API_BASE + "/api/users/find?q=" + encodeURIComponent(query), { headers });
-                  if (!findR.ok) { setAddFriendStatus("No user found with that email or username"); setAddFriendLoading(false); return; }
+                  if (!findR.ok) { setAddFriendStatus(findR.status === 404 ? "No account found with that email or username" : "Something went wrong — please try again"); setAddFriendLoading(false); return; }
                   const found = await findR.json();
                   const username = found.username;
                   const r = await fetch(API_BASE + "/api/friends/" + encodeURIComponent(username), { method: "POST", headers });
