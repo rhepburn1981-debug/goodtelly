@@ -133,6 +133,8 @@
       }
       /* Frosted-glass bottom nav */
       .nav-bar {
+        position: relative;
+        z-index: 90;
         background: rgba(13, 13, 20, 0.82);
         backdrop-filter: blur(24px) saturate(1.4);
         -webkit-backdrop-filter: blur(24px) saturate(1.4);
@@ -10934,6 +10936,7 @@
                     inset: 0,
                     background: "#0D0D13",
                     zIndex: 80,
+                    paddingBottom: 64,
                     overflowY: "auto",
                     overflowX: "hidden",
                     overscrollBehavior: "contain",
