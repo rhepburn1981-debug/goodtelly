@@ -133,17 +133,17 @@
       }
       /* Frosted-glass bottom nav */
       .nav-bar {
-        position: relative;
-        z-index: 90;
-        background: rgba(13, 13, 20, 0.82);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: rgba(13, 13, 20, 0.92);
         backdrop-filter: blur(24px) saturate(1.4);
         -webkit-backdrop-filter: blur(24px) saturate(1.4);
         border-top: 1px solid rgba(255, 255, 255, 0.06);
         display: flex;
         align-items: center;
-        flex-shrink: 0;
-        position: relative;
-        z-index: 10;
         padding-bottom: env(safe-area-inset-bottom, 0px);
         height: calc(72px + env(safe-area-inset-bottom, 0px));
       }
@@ -13692,6 +13692,7 @@ function App() {
                         overflowY: "auto",
                         overflowX: "hidden",
                         position: "relative",
+                        paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
                       },
                     },
 
