@@ -1271,21 +1271,22 @@ def backfill_streamers():
                         streamers = list(dict.fromkeys(
                             PROVIDER_MAP[p["provider_id"]] for p in flatrate if p.get("provider_id") in PROVIDER_MAP
                         ))
-                elif tvmaze_id:
-                    # TV show with no tmdb_id: find TMDB ID via name search
-                    show_resp = _tvmaze._get(f"/shows/{tvmaze_id}")
-                    name = (show_resp or {}).get("name", "")
-                    if name:
-                        sr = _tvmaze._tmdb_get("/search/tv", {"query": name, "language": "en-US"})
-                        tmdb_tv = ((sr or {}).get("results") or [None])[0]
-                        if tmdb_tv:
-                            tid = tmdb_tv["id"]
-                            prov = _tvmaze._tmdb_get(f"/tv/{tid}/watch/providers")
+                else:
+                    # No tmdb_id at all: search TMDB by title (try movie then TV)
+                    title = film["title"]
+                    for media in ("movie", "tv"):
+                        sr = _tvmaze._tmdb_get(f"/search/{media}", {"query": title, "language": "en-US"})
+                        result = ((sr or {}).get("results") or [None])[0]
+                        if result:
+                            tid = result["id"]
+                            prov = _tvmaze._tmdb_get(f"/{media}/{tid}/watch/providers")
                             gb = ((prov or {}).get("results") or {}).get("GB", {})
                             flatrate = gb.get("flatrate") or []
                             streamers = list(dict.fromkeys(
                                 PROVIDER_MAP[p["provider_id"]] for p in flatrate if p.get("provider_id") in PROVIDER_MAP
                             ))
+                            if streamers:
+                                break
                 if streamers:
                     conn.execute("DELETE FROM film_streamers WHERE film_id = ?", (fid,))
                     for s in streamers:
