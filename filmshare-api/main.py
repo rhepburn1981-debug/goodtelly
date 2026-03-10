@@ -532,6 +532,30 @@ def accept_friend_request(username: str, current_user=Depends(require_user)):
         return {"ok": True}
 
 
+@app.post("/api/friends/{username}/connect")
+def auto_connect_friend(username: str, current_user=Depends(require_user)):
+    """Immediately create an accepted friendship (used after share-link sign-up)."""
+    with get_db() as conn:
+        target = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+        if not target or target["id"] == current_user["id"]:
+            return {"ok": True}
+        existing = conn.execute(
+            "SELECT id, status FROM user_friends "
+            "WHERE (requester_id=? AND addressee_id=?) OR (requester_id=? AND addressee_id=?)",
+            (current_user["id"], target["id"], target["id"], current_user["id"])
+        ).fetchone()
+        if existing:
+            if existing["status"] != "accepted":
+                conn.execute("UPDATE user_friends SET status='accepted' WHERE id=?", (existing["id"],))
+        else:
+            conn.execute(
+                "INSERT INTO user_friends (requester_id, addressee_id, status) VALUES (?,?,'accepted')",
+                (current_user["id"], target["id"])
+            )
+        return {"ok": True, "status": "accepted"}
+
+
+
 @app.delete("/api/friends/{username}")
 def remove_friend(username: str, current_user=Depends(require_user)):
     with get_db() as conn:
