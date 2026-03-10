@@ -13034,7 +13034,95 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
             }
 
             // ─── Main App ──────────────────────────────────────────────────────────────────
-            function App() {
+            
+            function LandingPage({ onJoin, onLogin }) {
+              const sampleFilms = React.useMemo(() => {
+                const withPoster = ALL_FILMS.filter(f => f.poster);
+                return (withPoster.length >= 2 ? withPoster : ALL_FILMS).slice(0, 2);
+              }, []);
+
+              const demoCards = [
+                { film: sampleFilms[0], friend: "Jack", note: "You've got to watch this!" },
+                { film: sampleFilms[1], friend: "Jack", note: "Absolutely brilliant — trust me." },
+              ];
+
+              return React.createElement("div", {
+                style: { width: "100vw", minHeight: "100dvh", background: "linear-gradient(160deg,#1a0a2e 0%,#2d0a3e 40%,#1a0520 100%)", overflowY: "auto", fontFamily: "var(--ff-body,'DM Sans',sans-serif)", color: "#fff" },
+              },
+                React.createElement("div", { style: { padding: "18px 20px 0" } },
+                  React.createElement("div", { style: { fontFamily: "var(--ff-display,'Playfair Display',serif)", fontWeight: 900, fontSize: 28, color: "#e02020", letterSpacing: 1 } }, "REEL"),
+                ),
+                React.createElement("div", { style: { padding: "32px 24px 24px", textAlign: "center" } },
+                  React.createElement("h1", { style: { fontSize: 32, fontWeight: 900, lineHeight: 1.15, margin: "0 0 14px", fontFamily: "var(--ff-display,'Playfair Display',serif)" } },
+                    "TV recommended", React.createElement("br"), "by friends."
+                  ),
+                  React.createElement("p", { style: { fontSize: 15, color: "rgba(255,255,255,0.65)", lineHeight: 1.5, margin: "0 0 28px" } },
+                    "Stop scrolling through endless shows.", React.createElement("br"), "See what your friends actually recommend."
+                  ),
+                  React.createElement("button", {
+                    onClick: onJoin,
+                    style: { background: "linear-gradient(135deg,#d4a017,#f0c040)", color: "#1a0a2e", fontWeight: 900, fontSize: 17, border: "none", borderRadius: 32, padding: "16px 48px", cursor: "pointer", width: "100%", maxWidth: 340, display: "block", margin: "0 auto 10px" },
+                  }, "Join Reel"),
+                  React.createElement("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.4)" } }, "Free to join · Takes 10 seconds"),
+                ),
+                React.createElement("div", { style: { padding: "0 16px", display: "flex", flexDirection: "column", gap: 14 } },
+                  demoCards.map((card, i) => card.film && React.createElement("div", {
+                    key: i,
+                    style: { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, overflow: "hidden" },
+                  },
+                    card.film.stills && card.film.stills[0] && React.createElement("div", {
+                      style: { height: 100, backgroundImage: "url(" + card.film.stills[0] + ")", backgroundSize: "cover", backgroundPosition: "center", position: "relative" },
+                    },
+                      React.createElement("div", { style: { position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.85))" } }),
+                    ),
+                    React.createElement("div", { style: { padding: "12px 14px" } },
+                      React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8 } },
+                        React.createElement(Avatar, { name: card.friend, size: 24, color: "#d4a017" }),
+                        React.createElement("span", { style: { fontSize: 12, color: "rgba(255,255,255,0.6)" } },
+                          "Recommended by ", React.createElement("strong", { style: { color: "#fff" } }, card.friend)
+                        ),
+                      ),
+                      React.createElement("div", { style: { display: "flex", gap: 12, alignItems: "flex-start" } },
+                        card.film.poster && React.createElement("img", { src: card.film.poster, alt: card.film.title, style: { width: 52, height: 74, objectFit: "cover", borderRadius: 8, flexShrink: 0 } }),
+                        React.createElement("div", { style: { flex: 1 } },
+                          React.createElement("div", { style: { fontSize: 16, fontWeight: 800, marginBottom: 6 } }, card.film.title),
+                          React.createElement("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.55)", fontStyle: "italic", marginBottom: 10 } }, "“" + card.note + "”"),
+                          React.createElement("div", { style: { display: "flex", gap: 8 } },
+                            React.createElement("button", { onClick: onJoin, style: { flex: 1, background: "rgba(212,160,23,0.15)", border: "1px solid rgba(212,160,23,0.4)", borderRadius: 20, padding: "7px 10px", color: "#f0c040", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "▶ Watch Trailer"),
+                            React.createElement("button", { onClick: onJoin, style: { flex: 1, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: "7px 10px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "+ Add to Watchlist"),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )),
+                ),
+                React.createElement("div", { style: { padding: "32px 24px 8px" } },
+                  React.createElement("h2", { style: { fontSize: 20, fontWeight: 900, margin: "0 0 18px" } }, "Find ONLY the good content."),
+                  [
+                    "Stop wasting time searching Netflix",
+                    "Discover hidden gems from friends",
+                    "Build your own watchlist",
+                    "Share great TV with the people you know",
+                  ].map((item, i) => React.createElement("div", { key: i, style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 12, fontSize: 14 } },
+                    React.createElement("span", { style: { color: "#f0c040", fontWeight: 900, fontSize: 16 } }, "✓"),
+                    item,
+                  )),
+                ),
+                React.createElement("div", { style: { padding: "24px 24px 48px", textAlign: "center" } },
+                  React.createElement("button", {
+                    onClick: onJoin,
+                    style: { background: "linear-gradient(135deg,#d4a017,#f0c040)", color: "#1a0a2e", fontWeight: 900, fontSize: 17, border: "none", borderRadius: 32, padding: "16px 48px", cursor: "pointer", width: "100%", maxWidth: 340, display: "block", margin: "0 auto 10px" },
+                  }, "Create your account"),
+                  React.createElement("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginBottom: 20 } }, "Free to join · Takes 10 seconds"),
+                  React.createElement("div", { style: { fontSize: 13, color: "rgba(255,255,255,0.5)" } },
+                    "Already using Reel? ",
+                    React.createElement("span", { onClick: onLogin, style: { color: "#f0c040", cursor: "pointer", fontWeight: 700 } }, "Log in →"),
+                  ),
+                ),
+              );
+            }
+
+function App() {
               const [tab, setTab] = useState("home");
 
               const [currentUser, setCurrentUser] = useState(window.__AUTH_USER || null);
@@ -13417,6 +13505,19 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                 { id: "friends", label: "Friends", icon: "friends" },
                 { id: "profile", label: currentUser ? (currentUser.display_name || currentUser.username).split(" ")[0] : "Profile", icon: "person" },
               ];
+
+              if (!currentUser) {
+                return React.createElement(React.Fragment, null,
+                  React.createElement(LandingPage, {
+                    onJoin: () => setShowAuth(true),
+                    onLogin: () => setShowAuth(true),
+                  }),
+                  showAuth && React.createElement(AuthModal, {
+                    onClose: () => setShowAuth(false),
+                    onLogin: onLogin,
+                  }),
+                );
+              }
 
               return React.createElement(
                 "div",
