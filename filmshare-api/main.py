@@ -1349,6 +1349,20 @@ def find_user(q: str, current_user=Depends(get_current_user)):
 
 # ─── Friends ────────────────────────────────────────────────────────
 
+@app.get("/api/debug/find-email")
+def debug_find_email(q: str):
+    """Temporary debug: check what the DB has for this email."""
+    with get_db() as conn:
+        exact = conn.execute("SELECT id, username, display_name, email FROM users WHERE email=?", (q,)).fetchone()
+        lower = conn.execute("SELECT id, username, display_name, email FROM users WHERE LOWER(email)=LOWER(?)", (q,)).fetchone()
+        all_users = conn.execute("SELECT id, username, display_name, email FROM users").fetchall()
+        return {
+            "exact_match": dict(exact) if exact else None,
+            "lower_match": dict(lower) if lower else None,
+            "all_emails": [dict(u) for u in all_users],
+        }
+
+
 @app.get("/api/legacy/friends")
 def list_legacy_friends():
     """Legacy: seed-data friends from the friends table."""
