@@ -1333,11 +1333,11 @@ def send_recommendation(body: dict, current_user=Depends(require_user)):
 
 @app.get("/api/users/find")
 def find_user(q: str, current_user=Depends(require_user)):
-    """Find a user by email address or username."""
+    """Find a user by email address, username, or display name (case-insensitive)."""
     with get_db() as conn:
         user = conn.execute(
-            "SELECT id, username, display_name, avatar, color FROM users WHERE email=? OR username=?",
-            (q, q)
+            "SELECT id, username, display_name, avatar, color FROM users WHERE LOWER(email)=LOWER(?) OR LOWER(username)=LOWER(?) OR LOWER(display_name)=LOWER(?)",
+            (q, q, q)
         ).fetchone()
         if not user:
             raise HTTPException(status_code=404, detail="No user found")

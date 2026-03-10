@@ -11657,6 +11657,7 @@
               const [friendsOpen, setFriendsOpen] = React.useState(false);
               const [trendingNow, setTrendingNow] = React.useState([]);
               const [upcomingShows, setUpcomingShows] = React.useState([]);
+              const [upcomingExpanded, setUpcomingExpanded] = React.useState(false);
               React.useEffect(() => {
                 fetch(API_BASE + "/api/trending/upcoming-tv")
                   .then(r => r.ok ? r.json() : []).then(setUpcomingShows).catch(() => {});
@@ -11902,15 +11903,20 @@
 
                 /* ON TV THIS WEEK (TVmaze GB) */
 upcomingShows.length > 0 && React.createElement(React.Fragment, null,
-                  sectionLabel("Up & Coming in the UK this week", null),
+                  sectionLabel("Up & Coming in the UK this week",
+                    React.createElement("button", {
+                      onClick: () => setUpcomingExpanded(e => !e),
+                      style: { background: "none", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 20, padding: "4px 10px", color: "var(--text2)", fontSize: 11, cursor: "pointer" },
+                    }, upcomingExpanded ? "See less" : "See all"),
+                  ),
                   React.createElement("div", {
                     style: { margin: "0 16px 16px", background: "var(--surface2)", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" },
                   },
-                    upcomingShows.slice(0, 10).map((show, idx) =>
+                    (upcomingExpanded ? upcomingShows : upcomingShows.slice(0, 10)).map((show, idx) =>
                       React.createElement("div", {
                         key: show.id,
                         onClick: () => onFilmClick(extToFilm(show, 4000000, { _fromTvmaze: true, tvmaze_id: show.id })),
-                        style: { display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderBottom: idx < Math.min(upcomingShows.length, 10) - 1 ? "1px solid rgba(255,255,255,0.05)" : "none", cursor: "pointer" },
+                        style: { display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderBottom: idx < (upcomingExpanded ? upcomingShows.length : Math.min(upcomingShows.length, 10)) - 1 ? "1px solid rgba(255,255,255,0.05)" : "none", cursor: "pointer" },
                       },
                         show.image
                           ? React.createElement("img", { src: show.image, alt: show.name, style: { width: 44, height: 62, objectFit: "cover", borderRadius: 8, flexShrink: 0 } })
