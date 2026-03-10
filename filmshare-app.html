@@ -11808,7 +11808,7 @@
 
                 /* RECOMMENDED FOR YOU */
                 recommendedFilms.length > 0 && React.createElement(React.Fragment, null,
-                  sectionLabel("Your friend recommendations",
+                  sectionLabel("Your friends have recommended these to you",
                     React.createElement("button", {
                       onClick: () => {},
                       style: { background: "none", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 20, padding: "4px 10px", color: "var(--text2)", fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 },
@@ -11901,71 +11901,7 @@
                 ),
 
                 /* ON TV THIS WEEK (TVmaze GB) */
-                tvSchedule.length > 0 && React.createElement(React.Fragment, null,
-                  sectionLabel("On TV This Week", null),
-                  React.createElement("div", {
-                    style: { margin: "0 16px 16px", background: "var(--surface2)", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" },
-                  },
-                    tvSchedule.slice(0, 10).map((show, idx) =>
-                      React.createElement("div", {
-                        key: show.id,
-                        onClick: () => onFilmClick(extToFilm(show, 1000000, { _fromTvmaze: true, tvmaze_id: show.id })),
-                        style: {
-                          display: "flex", alignItems: "center", gap: 12, padding: "10px 14px",
-                          borderBottom: idx < Math.min(tvSchedule.length, 10) - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
-                          cursor: "pointer",
-                        },
-                      },
-                        React.createElement("div", {
-                          style: { fontSize: 13, fontWeight: 700, color: "var(--gold-bright)", width: 20, flexShrink: 0, textAlign: "center" },
-                        }, idx + 1),
-                        show.image
-                          ? React.createElement("img", { src: show.image, alt: show.name, style: { width: 44, height: 62, objectFit: "cover", borderRadius: 8, flexShrink: 0 } })
-                          : React.createElement("div", { style: { width: 44, height: 62, borderRadius: 8, background: "var(--surface3)", flexShrink: 0 } }),
-                        React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                          React.createElement("div", {
-                            style: { fontSize: 13, fontWeight: 700, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-                          }, show.name),
-                          React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 5 } },
-                            show.channel && React.createElement(ChannelBadge, { name: show.channel }),
-                            show.airtime || ""),
-                          show.genres && show.genres.length > 0 && React.createElement("div", {
-                            style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 2, opacity: 0.8 },
-                          }, show.genres.slice(0, 2).join(" / ")),
-                        ),
-                        show.rating && React.createElement("div", {
-                          style: { fontSize: 11, color: "var(--gold-bright)", fontWeight: 700, flexShrink: 0 },
-                        }, "★ " + parseFloat(show.rating).toFixed(1)),
-                      ),
-                    ),
-                  ),
-                ),
-
-                /* DISCOVER NEW SHOWS (TMDB GB popular) */
-                discoverShows.length > 0 && React.createElement(React.Fragment, null,
-                  sectionLabel("Discover New Shows", null),
-                  React.createElement("div", {
-                    style: { display: "flex", gap: 12, overflowX: "auto", padding: "0 16px 20px", scrollbarWidth: "none" },
-                  },
-                    discoverShows.slice(0, 12).map(show =>
-                      React.createElement("button", {
-                        key: show.id,
-                        onClick: () => onFilmClick(extToFilm(show, 3000000, { _fromTmdbTv: true, tmdb_tv_id: show.id })),
-                        style: { flexShrink: 0, width: 100, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
-                      },
-                        show.image
-                          ? React.createElement("img", { src: show.image, alt: show.name, style: { width: 100, height: 142, objectFit: "cover", borderRadius: 12, display: "block" } })
-                          : React.createElement("div", { style: { width: 100, height: 142, borderRadius: 12, background: "var(--surface3)" } }),
-                        React.createElement("div", { style: { fontSize: 11, fontWeight: 600, color: "var(--text)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.name),
-                        show.rating && parseFloat(show.rating) > 0 && React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 1 } },
-                          "★ " + parseFloat(show.rating).toFixed(1)),
-                      ),
-                    ),
-                  ),
-                ),
-
-                /* UP & COMING IN THE UK THIS WEEK */
-                upcomingShows.length > 0 && React.createElement(React.Fragment, null,
+comingShows.length > 0 && React.createElement(React.Fragment, null,
                   sectionLabel("Up & Coming in the UK this week", null),
                   React.createElement("div", {
                     style: { margin: "0 16px 16px", background: "var(--surface2)", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" },

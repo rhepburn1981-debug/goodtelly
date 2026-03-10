@@ -1301,7 +1301,7 @@ def get_recommendations(current_user=Depends(require_user)):
                 "SELECT still_url FROM film_stills WHERE film_id=? ORDER BY rowid", (fid,)
             ).fetchall()]
             d = row_to_film(row, streamers, stills)
-            d["_fromFriend"] = row["rec_from_username"] or row["rec_from_name"]
+            d["_fromFriend"] = row["rec_from_name"] or row["rec_from_username"]
             d["_recNote"] = row["rec_note"]
             d["_recRating"] = row["rec_rating"]
             result.append(d)
