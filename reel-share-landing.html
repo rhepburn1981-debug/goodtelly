@@ -59,6 +59,9 @@
     .modal-video iframe{width:100%;height:270px;border:none;display:block;}
     .modal-film-title{font-size:15px;color:#F0EDE8;margin-top:14px;text-align:center;font-weight:700;}
     .modal-cta{margin-top:14px;width:100%;max-width:480px;padding:14px;background:#D72B2B;border:none;border-radius:14px;font-size:14px;font-weight:800;color:#fff;cursor:pointer;}
+    .modal-bullets{margin-top:14px;width:100%;max-width:480px;display:flex;flex-direction:column;gap:8px;}
+    .modal-bullets div{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.75);}
+    .modal-bullets span{color:#4caf7d;font-weight:900;font-size:15px;flex-shrink:0;}
   </style>
 </head>
 <body>
@@ -92,7 +95,12 @@
   <button class="modal-close" onclick="closeTrailer()">&#x2715; Close</button>
   <div class="modal-video"><iframe id="trailerFrame" src="" allow="autoplay; fullscreen" allowfullscreen title="Trailer"></iframe></div>
   <div class="modal-film-title" id="modalTitle"></div>
-  <button class="modal-cta" onclick="closeTrailer();openSignIn('signup')">Save this film &mdash; join REEL free &#x2192;</button>
+  <button class="modal-cta" onclick="closeTrailer();openSignIn('signup')">Save this film &mdash; join REEL FREE &#x2192;</button>
+  <div class="modal-bullets">
+    <div><span>&#x2713;</span> Save to your watchlist</div>
+    <div><span>&#x2713;</span> Find out what great content is out there</div>
+    <div><span>&#x2713;</span> See what your friends are watching</div>
+  </div>
 </div>
 
 <div class="signin-modal" id="signinModal" onclick="if(event.target===this)closeSignIn()">
