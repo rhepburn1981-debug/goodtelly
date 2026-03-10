@@ -218,6 +218,7 @@ def _migrate():
             "ALTER TABLE user_recommendations ADD COLUMN rating REAL",
             "ALTER TABLE films ADD COLUMN slug TEXT",
             "ALTER TABLE films ADD COLUMN tmdb_id INTEGER",
+            "ALTER TABLE films ADD COLUMN tvmaze_id INTEGER",
         ]:
             try:
                 conn.execute(sql)
