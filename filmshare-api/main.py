@@ -40,7 +40,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
 
-DB_PATH = os.environ.get("DB_PATH", "/data/filmshare.db")
+DB_PATH = os.environ.get(DB_PATH, /data/filmshare.db)
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
