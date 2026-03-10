@@ -548,6 +548,19 @@ def remove_friend(username: str, current_user=Depends(require_user)):
 # User profiles
 
 
+@app.get("/api/users/find")
+def find_user(q: str, current_user=Depends(get_current_user)):
+    """Find a user by email address, username, or display name (case-insensitive)."""
+    with get_db() as conn:
+        user = conn.execute(
+            "SELECT id, username, display_name, avatar, color FROM users WHERE LOWER(email)=LOWER(?) OR LOWER(username)=LOWER(?) OR LOWER(display_name)=LOWER(?)",
+            (q, q, q)
+        ).fetchone()
+        if not user:
+            raise HTTPException(status_code=404, detail="No user found")
+        return dict(user)
+
+
 @app.get("/api/users/{username}")
 def get_user_profile(username: str, current_user=Depends(get_current_user)):
     with get_db() as conn:
@@ -1334,33 +1347,12 @@ def send_recommendation(body: dict, current_user=Depends(require_user)):
     return {"ok": True}
 
 
-@app.get("/api/users/find")
-def find_user(q: str, current_user=Depends(get_current_user)):
-    """Find a user by email address, username, or display name (case-insensitive)."""
-    with get_db() as conn:
-        user = conn.execute(
-            "SELECT id, username, display_name, avatar, color FROM users WHERE LOWER(email)=LOWER(?) OR LOWER(username)=LOWER(?) OR LOWER(display_name)=LOWER(?)",
-            (q, q, q)
-        ).fetchone()
-        if not user:
-            raise HTTPException(status_code=404, detail="No user found")
-        return dict(user)
+
 
 
 # ─── Friends ────────────────────────────────────────────────────────
 
-@app.get("/api/debug/find-email")
-def debug_find_email(q: str):
-    """Temporary debug: check what the DB has for this email."""
-    with get_db() as conn:
-        exact = conn.execute("SELECT id, username, display_name, email FROM users WHERE email=?", (q,)).fetchone()
-        lower = conn.execute("SELECT id, username, display_name, email FROM users WHERE LOWER(email)=LOWER(?)", (q,)).fetchone()
-        all_users = conn.execute("SELECT id, username, display_name, email FROM users").fetchall()
-        return {
-            "exact_match": dict(exact) if exact else None,
-            "lower_match": dict(lower) if lower else None,
-            "all_emails": [dict(u) for u in all_users],
-        }
+
 
 
 @app.get("/api/legacy/friends")
