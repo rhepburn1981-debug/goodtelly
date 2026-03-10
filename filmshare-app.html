@@ -12255,6 +12255,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
             // ─── Discover Tab ─────────────────────────────────────────────────────────────
             function DiscoverTab({ onFilmClick, addedIds, onAdd, onMarkWatched, onRecommend }) {
               const [genreFilter, setGenreFilter] = useState("All");
+              const [providerFilter, setProviderFilter] = useState("all");
               const [timePeriod, setTimePeriod] = useState("all");
 
               const GENRE_ICONS = { All: "+", Drama: "♡", Thriller: "↑", Horror: "◆", Comedy: "☺", "Sci-Fi": "✦", Action: "⚡", Romance: "♥" };
@@ -12276,9 +12277,10 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               const filtered = useMemo(() => {
                 let list = [...ALL_FILMS];
                 if (genreFilter !== "All") list = list.filter(f => (f.genre || "").includes(genreFilter));
+                if (providerFilter !== "all") list = list.filter(f => f.streamers && f.streamers.includes(providerFilter));
                 list = filterByTime(list);
                 return list.sort((a, b) => (b.trendingViews || 0) - (a.trendingViews || 0));
-              }, [genreFilter, timePeriod]);
+              }, [genreFilter, providerFilter, timePeriod]);
 
               const featuredFilm = filtered[0];
               const rankedList = filtered.slice(1, 20);
@@ -12323,6 +12325,31 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                     ),
                   ),
                 ),
+
+                /* Provider filter pills */
+                (() => {
+                  const usedProviders = [...new Set(ALL_FILMS.flatMap(f => f.streamers || []))];
+                  if (!usedProviders.length) return null;
+                  return React.createElement("div", {
+                    style: { display: "flex", gap: 8, overflowX: "auto", padding: "0 16px 10px", scrollbarWidth: "none", alignItems: "center" },
+                  },
+                    React.createElement("button", {
+                      onClick: () => setProviderFilter("all"),
+                      style: { flexShrink: 0, padding: "5px 12px", borderRadius: 20, border: providerFilter === "all" ? "1px solid var(--gold)" : "1px solid rgba(255,255,255,0.1)", background: providerFilter === "all" ? "rgba(201,168,76,0.12)" : "transparent", color: providerFilter === "all" ? "var(--gold-bright)" : "var(--text2)", fontSize: 11, fontWeight: providerFilter === "all" ? 700 : 400, cursor: "pointer" },
+                    }, "All Services"),
+                    usedProviders.map(id => {
+                      const s = STREAMERS[id];
+                      if (!s) return null;
+                      return React.createElement("button", {
+                        key: id, onClick: () => setProviderFilter(id),
+                        style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 20, border: providerFilter === id ? "1px solid var(--gold)" : "1px solid rgba(255,255,255,0.1)", background: providerFilter === id ? "rgba(201,168,76,0.12)" : "transparent", cursor: "pointer" },
+                      },
+                        s.logo ? React.createElement("img", { src: s.logo, style: { width: 14, height: 14, borderRadius: 3, objectFit: "cover" } }) : null,
+                        React.createElement("span", { style: { fontSize: 11, fontWeight: providerFilter === id ? 700 : 400, color: providerFilter === id ? "var(--gold-bright)" : "var(--text2)" } }, s.label),
+                      );
+                    }),
+                  );
+                })(),
 
                 /* Time period pills */
                 React.createElement("div", {
@@ -12530,6 +12557,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               const [activeFriend, setActiveFriend] = useState(defaultName);
               useEffect(() => { if (defaultFriend) setActiveFriend(defaultFriend); }, [defaultFriend]);
               const [genreFilter, setGenreFilter] = useState("All");
+              const [providerFilter, setProviderFilter] = useState("all");
               const [sortBy, setSortBy] = useState("rating");
               const [friendSearch, setFriendSearch] = useState("");
               const [watchFilter, setWatchFilter] = useState("unwatched");
@@ -12598,6 +12626,8 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                   : ALL_FILMS.filter((f) => ((fr && fr.watched) || []).includes(f.id));
                 if (genreFilter !== "All")
                   list = list.filter((f) => (f.genre || "").includes(genreFilter));
+                if (providerFilter !== "all")
+                  list = list.filter((f) => f.streamers && f.streamers.includes(providerFilter));
                 if (friendSearch.trim())
                   list = list.filter((f) =>
                     (f.title || "").toLowerCase().includes(friendSearch.toLowerCase()),
@@ -12614,6 +12644,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               }, [
                 activeFriend,
                 genreFilter,
+                providerFilter,
                 sortBy,
                 friendSearch,
                 watchFilter,
@@ -12813,6 +12844,30 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                       ),
                     ),
                   ),
+                  /* Provider filter pills */
+                  (() => {
+                    const usedProviders = [...new Set((friendFilmsCache[activeFriend] || []).flatMap(f => f.streamers || []))];
+                    if (!usedProviders.length) return null;
+                    return React.createElement("div", {
+                      style: { display: "flex", gap: 8, marginTop: 8, overflowX: "auto", scrollbarWidth: "none", alignItems: "center" },
+                    },
+                      React.createElement("button", {
+                        onClick: () => setProviderFilter("all"),
+                        style: { flexShrink: 0, padding: "4px 10px", borderRadius: 20, border: providerFilter === "all" ? "1px solid var(--gold)" : "1px solid rgba(255,255,255,0.1)", background: providerFilter === "all" ? "rgba(201,168,76,0.12)" : "transparent", color: providerFilter === "all" ? "var(--gold-bright)" : "var(--text2)", fontSize: 11, fontWeight: providerFilter === "all" ? 700 : 400, cursor: "pointer" },
+                      }, "All Services"),
+                      usedProviders.map(id => {
+                        const s = STREAMERS[id];
+                        if (!s) return null;
+                        return React.createElement("button", {
+                          key: id, onClick: () => setProviderFilter(id),
+                          style: { flexShrink: 0, display: "flex", alignItems: "center", gap: 5, padding: "4px 8px", borderRadius: 20, border: providerFilter === id ? "1px solid var(--gold)" : "1px solid rgba(255,255,255,0.1)", background: providerFilter === id ? "rgba(201,168,76,0.12)" : "transparent", cursor: "pointer" },
+                        },
+                          s.logo ? React.createElement("img", { src: s.logo, style: { width: 14, height: 14, borderRadius: 3, objectFit: "cover" } }) : null,
+                          React.createElement("span", { style: { fontSize: 11, fontWeight: providerFilter === id ? 700 : 400, color: providerFilter === id ? "var(--gold-bright)" : "var(--text2)" } }, s.label),
+                        );
+                      }),
+                    );
+                  })(),
                   React.createElement("div", {
                     style: { display: "flex", gap: 8, marginTop: 8, overflowX: "auto", scrollbarWidth: "none" },
                   },

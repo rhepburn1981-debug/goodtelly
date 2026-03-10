@@ -910,6 +910,7 @@ def create_film(film: FilmCreate, current_user=Depends(get_current_user)):
     tvmaze_id = film.tvmazeId or enriched.get("tvmaze_id")
 
     stills = film.stills or enriched.get("stills", [])
+    final_streamers = film.streamers or enriched.get("streamers", [])
 
     with get_db() as conn:
         slug = _unique_slug(conn, title)
@@ -922,7 +923,7 @@ def create_film(film: FilmCreate, current_user=Depends(get_current_user)):
              poster, backdrop, trailer_url, color, description, trending_views, tmdb_id, slug)
         )
         fid = cur.lastrowid
-        for s in film.streamers:
+        for s in final_streamers:
             conn.execute("INSERT INTO film_streamers (film_id, streamer) VALUES (?,?)", (fid, s))
         for still in stills:
             conn.execute("INSERT INTO film_stills (film_id, still_url) VALUES (?,?)", (fid, still))
@@ -1245,17 +1246,44 @@ def backfill_streamers():
     updated = []
     skipped = []
     with get_db() as conn:
-        films = conn.execute("SELECT id, title, tmdb_id FROM films WHERE tmdb_id IS NOT NULL").fetchall()
+        films = conn.execute("SELECT id, title, tmdb_id, tvmaze_id FROM films").fetchall()
         for film in films:
             fid = film["id"]
             tmdb_id = film["tmdb_id"]
+            tvmaze_id = film["tvmaze_id"]
             try:
-                prov_data = _tvmaze._tmdb_get(f"/movie/{tmdb_id}/watch/providers")
-                gb_prov = ((prov_data or {}).get("results") or {}).get("GB", {})
-                flatrate = gb_prov.get("flatrate") or []
-                streamers = list(dict.fromkeys(
-                    PROVIDER_MAP[p["provider_id"]] for p in flatrate if p.get("provider_id") in PROVIDER_MAP
-                ))
+                streamers = []
+                if tmdb_id:
+                    # Try as movie first
+                    prov_data = _tvmaze._tmdb_get(f"/movie/{tmdb_id}/watch/providers")
+                    gb_prov = ((prov_data or {}).get("results") or {}).get("GB", {})
+                    flatrate = gb_prov.get("flatrate") or []
+                    streamers = list(dict.fromkeys(
+                        PROVIDER_MAP[p["provider_id"]] for p in flatrate if p.get("provider_id") in PROVIDER_MAP
+                    ))
+                    if not streamers:
+                        # Try as TV show using same tmdb_id
+                        prov_data = _tvmaze._tmdb_get(f"/tv/{tmdb_id}/watch/providers")
+                        gb_prov = ((prov_data or {}).get("results") or {}).get("GB", {})
+                        flatrate = gb_prov.get("flatrate") or []
+                        streamers = list(dict.fromkeys(
+                            PROVIDER_MAP[p["provider_id"]] for p in flatrate if p.get("provider_id") in PROVIDER_MAP
+                        ))
+                elif tvmaze_id:
+                    # TV show with no tmdb_id: find TMDB ID via name search
+                    show_resp = _tvmaze._get(f"/shows/{tvmaze_id}")
+                    name = (show_resp or {}).get("name", "")
+                    if name:
+                        sr = _tvmaze._tmdb_get("/search/tv", {"query": name, "language": "en-US"})
+                        tmdb_tv = ((sr or {}).get("results") or [None])[0]
+                        if tmdb_tv:
+                            tid = tmdb_tv["id"]
+                            prov = _tvmaze._tmdb_get(f"/tv/{tid}/watch/providers")
+                            gb = ((prov or {}).get("results") or {}).get("GB", {})
+                            flatrate = gb.get("flatrate") or []
+                            streamers = list(dict.fromkeys(
+                                PROVIDER_MAP[p["provider_id"]] for p in flatrate if p.get("provider_id") in PROVIDER_MAP
+                            ))
                 if streamers:
                     conn.execute("DELETE FROM film_streamers WHERE film_id = ?", (fid,))
                     for s in streamers:
