@@ -1239,6 +1239,27 @@ def trending_all():
     return results
 
 
+@app.get("/api/admin/check-providers")
+def check_providers(title: str):
+    """Debug: show all UK streaming providers TMDB returns for a title."""
+    results = {}
+    for media in ("movie", "tv"):
+        sr = _tvmaze._tmdb_get(f"/search/{media}", {"query": title, "language": "en-US"})
+        hit = ((sr or {}).get("results") or [None])[0]
+        if hit:
+            tid = hit["id"]
+            prov = _tvmaze._tmdb_get(f"/{media}/{tid}/watch/providers")
+            gb = ((prov or {}).get("results") or {}).get("GB", {})
+            results[media] = {
+                "tmdb_id": tid,
+                "tmdb_title": hit.get("title") or hit.get("name"),
+                "flatrate": [{"id": p["provider_id"], "name": p["provider_name"]} for p in (gb.get("flatrate") or [])],
+                "rent": [{"id": p["provider_id"], "name": p["provider_name"]} for p in (gb.get("rent") or [])],
+            }
+    return results
+
+
+
 @app.get("/api/admin/backfill-streamers")
 @app.post("/api/admin/backfill-streamers")
 def backfill_streamers():
