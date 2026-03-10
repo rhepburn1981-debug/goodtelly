@@ -1104,8 +1104,10 @@ def upcoming_tv():
                 "summary": (show.get("summary") or "").replace("<p>","").replace("</p>","").replace("<b>","").replace("</b>",""),
                 "rating": show.get("rating", {}).get("average"),
             })
-            if len(results) >= 20:
+            if len(results) >= 30:
                 break
+        if len(results) >= 30:
+            break
         if len(results) >= 20:
             break
     return results
