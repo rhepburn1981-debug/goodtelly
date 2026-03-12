@@ -1021,6 +1021,31 @@ def tmdb_enrich(title: str, year: Optional[int] = None):
     return data
 
 
+@app.post("/api/films/{film_id}/reenrich")
+def reenrich_film(film_id: int, current_user=Depends(get_current_user)):
+    """Re-enrich a film from TMDB and update the DB entry."""
+    with get_db() as db:
+        row = db.execute("SELECT title, year FROM films WHERE id = ?", (film_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Film not found")
+        title, year = row["title"], row["year"]
+    enriched = _tmdb.enrich_film(title, year)
+    if not enriched:
+        raise HTTPException(status_code=404, detail="No TMDB match found")
+    with get_db() as db:
+        stills = enriched.pop("stills", [])
+        db.execute("""UPDATE films SET description=?, poster=?, backdrop=?, runtime=?, genre=?,
+            director=?, cast=?, trailer_url=?, rating=?, tmdb_id=? WHERE id=?""",
+            (enriched.get("description"), enriched.get("poster"), enriched.get("backdrop"),
+             enriched.get("runtime"), enriched.get("genre"), enriched.get("director"),
+             enriched.get("cast"), enriched.get("trailer_url"), enriched.get("rating"),
+             enriched.get("tmdb_id"), film_id))
+        db.execute("DELETE FROM film_stills WHERE film_id = ?", (film_id,))
+        for url in stills:
+            db.execute("INSERT INTO film_stills (film_id, url) VALUES (?, ?)", (film_id, url))
+    return {"ok": True, "film_id": film_id, "title": title}
+
+
 @app.get("/api/tvmaze/enrich")
 def tvmaze_enrich(id: int):
     """Return full TVmaze enrichment data for a show (for preview before saving)."""
