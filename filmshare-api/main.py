@@ -142,7 +142,8 @@ def init_db():
                 display_name TEXT,
                 avatar TEXT,
                 color TEXT,
-                created_at TEXT DEFAULT (datetime('now'))
+                created_at TEXT DEFAULT (datetime('now')),
+                last_login_at TEXT
             );
 
             CREATE TABLE IF NOT EXISTS user_friends (
@@ -1739,6 +1740,11 @@ def serve_admin():
 def admin_users_list(token: str = ""):
     _check_admin(token)
     with get_db() as conn:
+        # Ensure column exists (may be missing on older DBs before migration)
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN last_login_at TEXT")
+        except Exception:
+            pass
         rows = conn.execute("""
             SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name,
                    u.avatar, u.color, u.created_at, u.last_login_at,
