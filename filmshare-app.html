@@ -11715,7 +11715,7 @@
               const panelBorder = "1px solid rgba(255,255,255,0.09)";
               const panelShadow = "0 12px 28px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.04)";
               const formatCount = (n) => n >= 1000 ? (n / 1000).toFixed(1) + "K" : String(Math.round(n || 0));
-              const ribbonSubtitleStyle = { fontSize: 10, color: "rgba(255,255,255,0.48)", marginTop: 3, letterSpacing: 0.02 };
+              const ribbonSubtitleStyle = { fontSize: 9, color: "rgba(255,255,255,0.48)", marginTop: 2, letterSpacing: 0.02 };
               const sectionIcon = (kind) => {
                 if (kind === "new") {
                   return React.createElement("svg", { viewBox: "0 0 24 24", width: 17, height: 17, fill: "none", style: { flexShrink: 0 } },
@@ -11756,11 +11756,11 @@
                 React.createElement("div", {
                   style: {
                     display: "flex", alignItems: "center", justifyContent: "space-between",
-                    padding: "17px 16px 9px",
+                    padding: "12px 16px 8px",
                   },
                 },
                   React.createElement("div", {
-                    style: { fontSize: 17, fontWeight: 800, color: "var(--text)", letterSpacing: -0.3, display: "flex", alignItems: "center", gap: 7 },
+                    style: { fontSize: 15, fontWeight: 800, color: "var(--text)", letterSpacing: -0.2, display: "flex", alignItems: "center", gap: 6 },
                   }, text),
                   action,
                 );
@@ -11771,54 +11771,54 @@
                 onGoToList && React.createElement("div", {
                   onClick: onGoToList,
                   style: {
-                    margin: "14px 16px 6px",
+                    margin: "10px 16px 5px",
                     background: glassPanel,
                     border: panelBorder,
                     boxShadow: panelShadow,
-                    borderRadius: 16,
-                    padding: "13px 14px",
-                    display: "flex", alignItems: "center", gap: 14, cursor: "pointer",
+                    borderRadius: 15,
+                    padding: "11px 13px",
+                    display: "flex", alignItems: "center", gap: 12, cursor: "pointer",
                   },
                 },
                   React.createElement("div", {
                     style: {
-                      width: 42, height: 42, borderRadius: 13, flexShrink: 0,
+                      width: 38, height: 38, borderRadius: 12, flexShrink: 0,
                       background: "rgba(59,130,246,0.18)",
                       border: "1px solid rgba(59,130,246,0.3)",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 20,
+                      fontSize: 18,
                       color: "#60a5fa",
                     },
                   }, "\u2605"),
                   React.createElement("div", { style: { flex: 1 } },
-                    React.createElement("div", { style: { fontSize: 17, fontWeight: 800, color: "var(--text)" } }, "My Watchlist"),
+                    React.createElement("div", { style: { fontSize: 15, fontWeight: 800, color: "var(--text)" } }, "My Watchlist"),
                     React.createElement("div", { style: ribbonSubtitleStyle },
                       "Your saved films and shows to watch"),
                   ),
-                  React.createElement("div", { style: { fontSize: 20, color: "rgba(255,255,255,0.3)", fontWeight: 300 } }, "\u203a"),
+                  React.createElement("div", { style: { fontSize: 18, color: "rgba(255,255,255,0.3)", fontWeight: 300 } }, "\u203a"),
                 ),
 
                 /* FRIENDS WATCHLIST RIBBON */
                 React.createElement("div", {
                   onClick: () => onGoToFriends && onGoToFriends(),
                   style: {
-                    margin: "6px 16px 14px",
+                    margin: "5px 16px 10px",
                     background: glassPanel,
                     border: panelBorder,
                     boxShadow: panelShadow,
-                    borderRadius: 16,
-                    padding: "13px 14px",
-                    display: "flex", alignItems: "center", gap: 14, cursor: "pointer",
+                    borderRadius: 15,
+                    padding: "11px 13px",
+                    display: "flex", alignItems: "center", gap: 12, cursor: "pointer",
                   },
                 },
                   React.createElement("div", {
                     style: {
-                      width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
+                      width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
                       background: "rgba(255,255,255,0.1)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                     },
                   },
-                    React.createElement("svg", { viewBox: "0 0 24 24", width: 22, height: 22, fill: "none" },
+                    React.createElement("svg", { viewBox: "0 0 24 24", width: 20, height: 20, fill: "none" },
                       React.createElement("circle", { cx: 9, cy: 8, r: 3.5, fill: "rgba(255,255,255,0.5)", stroke: "rgba(255,255,255,0.7)", strokeWidth: 1.5 }),
                       React.createElement("path", { d: "M2.5 20.5C2.5 17.5 5.5 15 9 15C12.5 15 15.5 17.5 15.5 20.5", stroke: "rgba(255,255,255,0.7)", strokeWidth: 1.5, strokeLinecap: "round" }),
                       React.createElement("circle", { cx: 17.5, cy: 8, r: 2.5, stroke: "rgba(255,255,255,0.5)", strokeWidth: 1.4 }),
@@ -11826,11 +11826,11 @@
                     ),
                   ),
                   React.createElement("div", { style: { flex: 1 } },
-                    React.createElement("div", { style: { fontSize: 17, fontWeight: 800, color: "var(--text)" } }, "Friends Watchlist"),
+                    React.createElement("div", { style: { fontSize: 15, fontWeight: 800, color: "var(--text)" } }, "Friends Watchlist"),
                     React.createElement("div", { style: ribbonSubtitleStyle },
                       "See what your friends are watching"),
                   ),
-                  React.createElement("div", { style: { fontSize: 20, color: "rgba(255,255,255,0.3)", fontWeight: 300 } }, "\u203a"),
+                  React.createElement("div", { style: { fontSize: 18, color: "rgba(255,255,255,0.3)", fontWeight: 300 } }, "\u203a"),
                 ),
 
                 /* RECOMMENDED FOR YOU */
@@ -11842,11 +11842,11 @@
                     const hasTrailer = !!(film.trailer_url);
                     return React.createElement("div", {
                       key: film.id,
-                      style: { margin: idx === 0 ? "4px 16px 14px" : "0 16px 12px" },
+                      style: { margin: idx === 0 ? "2px 16px 10px" : "0 16px 10px" },
                     },
                       /* "[Friend] thinks you'll like..." header */
                       React.createElement("div", {
-                        style: { display: "flex", alignItems: "center", gap: 8, padding: "0 2px 8px" },
+                        style: { display: "flex", alignItems: "center", gap: 8, padding: "0 2px 6px" },
                       },
                         genericAvatar,
                         React.createElement("div", { style: { fontSize: 13, color: "var(--gold-bright)", fontWeight: 500 } },
@@ -11878,26 +11878,26 @@
                             background: "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.52))",
                           },
                         }),
-                        React.createElement("div", { style: { position: "relative", display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 12px 8px" } },
+                        React.createElement("div", { style: { position: "relative", display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 10px 7px" } },
                           film.poster
-                            ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 54, height: 82, objectFit: "cover", borderRadius: 8, flexShrink: 0, boxShadow: "0 6px 16px rgba(0,0,0,0.45)" } })
-                            : React.createElement("div", { style: { width: 54, height: 82, borderRadius: 8, background: film.color || "var(--surface3)", flexShrink: 0 } }),
+                            ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 46, height: 72, objectFit: "cover", borderRadius: 8, flexShrink: 0, boxShadow: "0 6px 16px rgba(0,0,0,0.45)" } })
+                            : React.createElement("div", { style: { width: 46, height: 72, borderRadius: 8, background: film.color || "var(--surface3)", flexShrink: 0 } }),
                           React.createElement("div", { style: { flex: 1, minWidth: 0, paddingTop: 2, textShadow: "0 2px 8px rgba(0,0,0,0.55)" } },
-                            React.createElement("div", { style: { fontSize: 17, fontWeight: 900, color: "var(--text)", lineHeight: 1.15, marginBottom: 2 } }, film.title),
-                            React.createElement("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.86)", marginBottom: 4 } }, film.year || ""),
-                            recNote && React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.74)", fontStyle: "italic", lineHeight: 1.35, marginTop: 2, maxWidth: 210 } }, recNote),
+                            React.createElement("div", { style: { fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1.1, marginBottom: 1 } }, film.title),
+                            React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.86)", marginBottom: 3 } }, film.year || ""),
+                            recNote && React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.74)", fontStyle: "italic", lineHeight: 1.28, marginTop: 1, maxWidth: 210 } }, recNote),
                           ),
                         ),
                         /* Action buttons */
                         React.createElement("div", {
-                          style: { position: "relative", display: "flex", gap: 8, padding: "0 12px 12px" },
+                          style: { position: "relative", display: "flex", gap: 8, padding: "0 10px 10px" },
                         },
                           hasTrailer && React.createElement("button", {
                             onClick: (e) => { e.stopPropagation(); window.open(film.trailer_url, "_blank"); },
                             style: {
-                              flex: 1, padding: "8px 12px", borderRadius: 18,
+                              flex: 1, padding: "7px 11px", borderRadius: 16,
                               background: "linear-gradient(180deg, rgba(28,28,34,0.84), rgba(14,14,19,0.84))", border: "1px solid rgba(255,255,255,0.16)",
-                              color: "var(--text)", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                              color: "var(--text)", fontSize: 10, fontWeight: 600, cursor: "pointer",
                               display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
                               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
                             },
@@ -11908,11 +11908,11 @@
                           React.createElement("button", {
                             onClick: (e) => { e.stopPropagation(); onAdd(film.id); },
                             style: {
-                              flex: 1, padding: "8px 12px", borderRadius: 18,
+                              flex: 1, padding: "7px 11px", borderRadius: 16,
                               background: addedIds.includes(film.id) ? "rgba(46,204,138,0.12)" : "linear-gradient(180deg, rgba(80,61,33,0.52), rgba(39,28,14,0.52))",
                               border: addedIds.includes(film.id) ? "1px solid rgba(46,204,138,0.35)" : "1px solid rgba(232,201,106,0.3)",
                               color: addedIds.includes(film.id) ? "var(--green)" : "var(--text)",
-                              fontSize: 11, fontWeight: 600, cursor: "pointer",
+                              fontSize: 10, fontWeight: 600, cursor: "pointer",
                               display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
                               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
                             },
@@ -11927,19 +11927,19 @@
                 trendingNow.length > 0 && React.createElement(React.Fragment, null,
                   sectionLabel(React.createElement(React.Fragment, null, sectionIcon("new"), "What\u2019s NEW"), null),
                   React.createElement("div", {
-                    style: { display: "flex", gap: 12, overflowX: "auto", padding: "0 16px 16px", scrollbarWidth: "none" },
+                    style: { display: "flex", gap: 10, overflowX: "auto", padding: "0 16px 12px", scrollbarWidth: "none" },
                   },
                     trendingNow.slice(0, 15).map(show => {
                       return React.createElement("button", {
                         key: show.id,
                         onClick: () => onFilmClick(extToFilm(show, 2000000, show.media_type === "movie" ? { _fromTmdb: true, tmdb_id: show.id } : { _fromTmdbTv: true, tmdb_tv_id: show.id })),
-                        style: { flexShrink: 0, width: 90, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
+                        style: { flexShrink: 0, width: 82, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
                       },
                         show.poster
-                          ? React.createElement("img", { src: show.poster, alt: show.title, style: { width: 90, height: 130, objectFit: "cover", borderRadius: 8, display: "block", boxShadow: "0 10px 20px rgba(0,0,0,0.28)" } })
-                          : React.createElement("div", { style: { width: 90, height: 130, borderRadius: 10, background: "var(--surface3)" } }),
-                        React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: "var(--text)", marginTop: 7, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.title),
-                        React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.58)", marginTop: 2, fontWeight: 500 } },
+                          ? React.createElement("img", { src: show.poster, alt: show.title, style: { width: 82, height: 118, objectFit: "cover", borderRadius: 7, display: "block", boxShadow: "0 10px 20px rgba(0,0,0,0.28)" } })
+                          : React.createElement("div", { style: { width: 82, height: 118, borderRadius: 9, background: "var(--surface3)" } }),
+                        React.createElement("div", { style: { fontSize: 11, fontWeight: 700, color: "var(--text)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.title),
+                        React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.58)", marginTop: 1, fontWeight: 500 } },
                           show.popularity && parseFloat(show.popularity) > 0 ? formatCount(parseFloat(show.popularity)) : (show.year || "")),
                       );
                     }),
@@ -11950,19 +11950,19 @@
                 trendingFilms.length > 0 && React.createElement(React.Fragment, null,
                   sectionLabel(React.createElement(React.Fragment, null, sectionIcon("watching"), "What Reel users are watching right now"), null),
                   React.createElement("div", {
-                    style: { display: "flex", gap: 12, overflowX: "auto", padding: "0 16px 16px", scrollbarWidth: "none" },
+                    style: { display: "flex", gap: 10, overflowX: "auto", padding: "0 16px 12px", scrollbarWidth: "none" },
                   },
                     trendingFilms.slice(0, 10).map(film =>
                       React.createElement("button", {
                         key: film.id,
                         onClick: () => onFilmClick(film),
-                        style: { flexShrink: 0, width: 90, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
+                        style: { flexShrink: 0, width: 82, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
                       },
                         film.poster
-                          ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 90, height: 130, objectFit: "cover", borderRadius: 8, display: "block", boxShadow: "0 10px 22px rgba(0,0,0,0.34)" } })
-                          : React.createElement("div", { style: { width: 90, height: 130, borderRadius: 10, background: film.color || "var(--surface3)" } }),
-                        React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: "var(--text)", marginTop: 7, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, film.title),
-                        React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.58)", marginTop: 2, fontWeight: 500 } }, formatCount(film.trendingViews || 0)),
+                          ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 82, height: 118, objectFit: "cover", borderRadius: 7, display: "block", boxShadow: "0 10px 22px rgba(0,0,0,0.34)" } })
+                          : React.createElement("div", { style: { width: 82, height: 118, borderRadius: 9, background: film.color || "var(--surface3)" } }),
+                        React.createElement("div", { style: { fontSize: 11, fontWeight: 700, color: "var(--text)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, film.title),
+                        React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.58)", marginTop: 1, fontWeight: 500 } }, formatCount(film.trendingViews || 0)),
                       ),
                     ),
                   ),
@@ -11977,9 +11977,9 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                         background: "rgba(255,255,255,0.02)",
                         border: "1px solid rgba(255,255,255,0.11)",
                         borderRadius: 999,
-                        padding: "5px 11px",
+                        padding: "4px 10px",
                         color: "rgba(255,255,255,0.64)",
-                        fontSize: 10,
+                        fontSize: 9,
                         fontWeight: 600,
                         cursor: "pointer",
                       },
@@ -11987,9 +11987,9 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                   ),
                   React.createElement("div", {
                     style: {
-                      margin: "0 16px 16px",
+                      margin: "0 16px 14px",
                       background: "linear-gradient(180deg, rgba(22,22,29,0.96), rgba(11,11,16,0.98))",
-                      borderRadius: 16,
+                      borderRadius: 15,
                       overflow: "hidden",
                       border: panelBorder,
                       boxShadow: panelShadow,
@@ -12002,24 +12002,24 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                         style: {
                           display: "flex",
                           alignItems: "center",
-                          gap: 11,
-                          padding: "10px 12px",
+                          gap: 10,
+                          padding: "8px 11px",
                           borderBottom: idx < (upcomingExpanded ? upcomingShows.length : Math.min(upcomingShows.length, 5)) - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
                           cursor: "pointer",
                         },
                       },
                         show.image
-                          ? React.createElement("img", { src: show.image, alt: show.name, style: { width: 42, height: 58, objectFit: "cover", borderRadius: 7, flexShrink: 0, boxShadow: "0 8px 18px rgba(0,0,0,0.3)" } })
-                          : React.createElement("div", { style: { width: 42, height: 58, borderRadius: 7, background: "var(--surface3)", flexShrink: 0 } }),
+                          ? React.createElement("img", { src: show.image, alt: show.name, style: { width: 38, height: 52, objectFit: "cover", borderRadius: 6, flexShrink: 0, boxShadow: "0 8px 18px rgba(0,0,0,0.3)" } })
+                          : React.createElement("div", { style: { width: 38, height: 52, borderRadius: 6, background: "var(--surface3)", flexShrink: 0 } }),
                         React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                          React.createElement("div", { style: { fontSize: 13, fontWeight: 700, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 2 } }, show.name),
-                          React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", gap: 5, minWidth: 0 } },
+                          React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 1 } }, show.name),
+                          React.createElement("div", { style: { fontSize: 9, color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", gap: 5, minWidth: 0 } },
                             show.channel && React.createElement(ChannelBadge, { name: show.channel }),
                             React.createElement("span", { style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } },
                               show.airdate ? new Date(show.airdate).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) : "")),
-                          show.genres && show.genres.length > 0 && React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.38)", marginTop: 2 } }, show.genres.slice(0, 2).join(" / ")),
+                          show.genres && show.genres.length > 0 && React.createElement("div", { style: { fontSize: 9, color: "rgba(255,255,255,0.38)", marginTop: 1 } }, show.genres.slice(0, 2).join(" / ")),
                         ),
-                        show.rating && React.createElement("div", { style: { fontSize: 11, color: "var(--gold-bright)", fontWeight: 800, flexShrink: 0, alignSelf: "center", paddingLeft: 4 } }, "\u2605" + parseFloat(show.rating).toFixed(1)),
+                        show.rating && React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)", fontWeight: 800, flexShrink: 0, alignSelf: "center", paddingLeft: 4 } }, "\u2605" + parseFloat(show.rating).toFixed(1)),
                       ),
                     ),
                   ),
