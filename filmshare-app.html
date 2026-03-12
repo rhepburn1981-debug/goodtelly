@@ -11884,7 +11884,7 @@
                             : React.createElement("div", { style: { width: 46, height: 72, borderRadius: 8, background: film.color || "var(--surface3)", flexShrink: 0 } }),
                           React.createElement("div", { style: { flex: 1, minWidth: 0, paddingTop: 2, textShadow: "0 2px 8px rgba(0,0,0,0.55)" } },
                             React.createElement("div", { style: { fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1.1, marginBottom: 1 } }, film.title),
-                            React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.86)", marginBottom: 3 } }, film.year || ""),
+                            film.year && !(film.title || "").includes(String(film.year)) && React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.86)", marginBottom: 3 } }, film.year),
                             recNote && React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.74)", fontStyle: "italic", lineHeight: 1.28, marginTop: 1, maxWidth: 210 } }, recNote),
                           ),
                         ),
