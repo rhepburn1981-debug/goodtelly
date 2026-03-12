@@ -295,11 +295,18 @@ function loadAll() {
 // ── Users sidebar + table ─────────────────────────────────────────────────────
 function loadUsers() {
   return fetch(API + '/api/admin/users?token=' + encodeURIComponent(TOKEN))
-    .then(r => r.ok ? r.json() : [])
+    .then(r => {
+      if (r.ok) return r.json();
+      return r.text().then(txt => { throw new Error(r.status + ': ' + txt); });
+    })
     .then(users => {
       ALL_USERS = users;
       renderSidebar(users);
       renderUsersTable(users);
+    })
+    .catch(err => {
+      document.getElementById('users-count').textContent = 'Error';
+      document.getElementById('tbl-users').innerHTML = '<tr class="empty-row"><td colspan="4" style="color:#e07b3a">API error: ' + err.message + '</td></tr>';
     });
 }
 
