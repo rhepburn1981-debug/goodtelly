@@ -119,7 +119,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <span class="brand-logo">🎬 Reel</span>
       <span class="brand-label">Admin</span>
     </div>
-    <input type="search" placeholder="Search users..." id="topbar-search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="filterSidebar(this.value)"/>
+    <input type="search" placeholder="Search users..." id="topbar-search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly')" oninput="filterSidebar(this.value)"/>
     <div class="topbar-right">
       <span class="admin-badge">Admin</span>
       <div class="admin-avatar">A</div>
@@ -273,9 +273,11 @@ function show(id) {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 function boot() {
   show('app');
-  // Clear any browser-autofilled value in the search box
+  // Clear search box immediately and after a delay (Chrome fills after JS runs)
   var sb = document.getElementById('topbar-search');
   if (sb) sb.value = '';
+  setTimeout(function() { if (sb) sb.value = ''; }, 200);
+  setTimeout(function() { if (sb) sb.value = ''; }, 600);
   initCharts();
   loadUsers().then(() => loadAll());
 }
