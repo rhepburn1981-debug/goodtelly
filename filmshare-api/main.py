@@ -1391,6 +1391,33 @@ def get_providers():
     return result
 
 
+@app.get("/api/trending/watchlist-recent")
+def trending_watchlist_recent():
+    """Films ordered by most recently added to any user's watchlist."""
+    with get_db() as conn:
+        rows = conn.execute("""
+            SELECT f.*, COUNT(uw.film_id) as watchlist_count, MAX(uw.created_at) as last_added
+            FROM films f
+            JOIN user_watchlist uw ON uw.film_id = f.id
+            WHERE f.poster IS NOT NULL AND f.poster != ''
+            GROUP BY f.id
+            ORDER BY last_added DESC
+            LIMIT 15
+        """).fetchall()
+        result = []
+        for row in rows:
+            streamers = [r["streamer"] for r in conn.execute(
+                "SELECT streamer FROM film_streamers WHERE film_id=?", (row["id"],)
+            ).fetchall()]
+            stills = [r["still_url"] for r in conn.execute(
+                "SELECT still_url FROM film_stills WHERE film_id=? ORDER BY rowid", (row["id"],)
+            ).fetchall()]
+            d = row_to_film(row, streamers, stills)
+            d["watchlistCount"] = row["watchlist_count"]
+            result.append(d)
+    return result
+
+
 @app.get("/api/trending/all")
 def trending_all():
     """TMDB trending movies and TV shows this week."""

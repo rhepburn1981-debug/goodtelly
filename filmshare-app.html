@@ -11687,6 +11687,7 @@
               const [trendingNow, setTrendingNow] = React.useState([]);
               const [upcomingShows, setUpcomingShows] = React.useState([]);
               const [upcomingExpanded, setUpcomingExpanded] = React.useState(false);
+              const [watchlistRecentFilms, setWatchlistRecentFilms] = React.useState([]);
               React.useEffect(() => {
                 fetch(API_BASE + "/api/trending/upcoming-tv")
                   .then(r => r.ok ? r.json() : []).then(setUpcomingShows).catch(() => {});
@@ -11696,6 +11697,8 @@
                   .then(r => r.ok ? r.json() : []).then(setDiscoverShows).catch(() => {});
                 fetch(API_BASE + "/api/trending/all")
                   .then(r => r.ok ? r.json() : []).then(setTrendingNow).catch(() => {});
+                fetch(API_BASE + "/api/trending/watchlist-recent")
+                  .then(r => r.ok ? r.json() : []).then(setWatchlistRecentFilms).catch(() => {});
               }, []);
               // Map external show to pseudo-film for FilmDetailPage
               const extToFilm = (show, offset, extra) => Object.assign({
@@ -13436,9 +13439,9 @@ function App() {
                 });
               };
 
-              const trendingFilms = [...ALL_FILMS]
-                .sort((a, b) => b.trendingViews - a.trendingViews)
-                .slice(0, 5);
+              const trendingFilms = watchlistRecentFilms.length > 0
+                ? watchlistRecentFilms
+                : [...ALL_FILMS].sort((a, b) => b.trendingViews - a.trendingViews).slice(0, 10);
               const friendPicks = ALL_FILMS.slice(0, 5);
               const visiblePicks = showAllPicks
                 ? friendPicks
