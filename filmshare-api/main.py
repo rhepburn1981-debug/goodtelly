@@ -1010,6 +1010,26 @@ def tmdb_search(q: str, year: Optional[int] = None):
     return tmdb_results + tvmaze_results
 
 
+@app.get("/api/debug/tmdb")
+def debug_tmdb():
+    """Debug: test TMDB connectivity and auth."""
+    import urllib.request, urllib.parse
+    token = os.environ.get("TMDB_READ_TOKEN", "")
+    key = os.environ.get("TMDB_API_KEY", "")
+    url = "https://api.themoviedb.org/3/search/movie?" + urllib.parse.urlencode({"query": "inception", "language": "en-US", "page": 1})
+    if not token:
+        url += f"&api_key={key}"
+    try:
+        req = urllib.request.Request(url)
+        if token:
+            req.add_header("Authorization", f"Bearer {token}")
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read())
+            return {"status": "ok", "results": len(data.get("results", [])), "token_used": bool(token), "key_used": bool(key)}
+    except Exception as e:
+        return {"status": "error", "error": str(e), "token_used": bool(token), "key_used": bool(key), "url_preview": url[:80]}
+
+
 @app.get("/api/tmdb/enrich")
 def tmdb_enrich(title: str, year: Optional[int] = None):
     """Return full TMDB enrichment data for a title (for preview before saving)."""
