@@ -119,7 +119,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <span class="brand-logo">🎬 Reel</span>
       <span class="brand-label">Admin</span>
     </div>
-    <input type="text" placeholder="Search users..." id="topbar-search" oninput="filterSidebar(this.value)"/>
+    <input type="text" placeholder="Search users..." id="topbar-search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="filterSidebar(this.value)"/>
     <div class="topbar-right">
       <span class="admin-badge">Admin</span>
       <div class="admin-avatar">A</div>
@@ -273,6 +273,9 @@ function show(id) {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 function boot() {
   show('app');
+  // Clear any browser-autofilled value in the search box
+  var sb = document.getElementById('topbar-search');
+  if (sb) sb.value = '';
   initCharts();
   loadUsers().then(() => loadAll());
 }
