@@ -1036,6 +1036,76 @@ def tmdb_search(q: str, year: Optional[int] = None):
     return tmdb_results + tvmaze_results
 
 
+@app.post("/api/admin/bulk-reenrich")
+def bulk_reenrich(current_user=Depends(require_user)):
+    """Re-enrich all films missing a poster by searching TMDB movie + TV."""
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT id, title, year, tmdb_id, tvmaze_id FROM films WHERE poster IS NULL OR poster = ''"
+        ).fetchall()
+
+    results = []
+    for row in rows:
+        fid, title, year, tmdb_id, tvmaze_id = row["id"], row["title"], row["year"], row["tmdb_id"], row["tvmaze_id"]
+        enriched = None
+
+        # Try TMDB movie search first
+        enriched = _tmdb.enrich_film(title, year)
+
+        # If no result, try TMDB TV search
+        if not enriched:
+            sr = _tvmaze._tmdb_get("/search/tv", {"query": title, "language": "en-US"})
+            tv_results = (sr or {}).get("results", [])
+            if tv_results:
+                tmdb_tv_id = tv_results[0]["id"]
+                tv_data = _tvmaze._tmdb_get(f"/tv/{tmdb_tv_id}",
+                    {"language": "en-US", "append_to_response": "videos,images,credits"})
+                if tv_data:
+                    poster = tv_data.get("poster_path")
+                    backdrop = tv_data.get("backdrop_path")
+                    trailer_url = None
+                    for v in (tv_data.get("videos") or {}).get("results", []):
+                        if v.get("site") == "YouTube" and v.get("type") == "Trailer":
+                            trailer_url = "https://www.youtube.com/embed/" + v["key"]
+                            break
+                    backdrops = (tv_data.get("images") or {}).get("backdrops", [])
+                    cast_list = (tv_data.get("credits") or {}).get("cast", [])
+                    genres = [g.get("name") for g in tv_data.get("genres", []) if g.get("name")]
+                    enriched = {
+                        "poster": ("https://image.tmdb.org/t/p/w342" + poster) if poster else None,
+                        "backdrop": ("https://image.tmdb.org/t/p/w1280" + backdrop) if backdrop else None,
+                        "trailer_url": trailer_url,
+                        "description": tv_data.get("overview"),
+                        "genre": ", ".join(genres[:2]) if genres else None,
+                        "cast": ", ".join(c.get("name", "") for c in cast_list[:8]) if cast_list else None,
+                        "rating": round(tv_data.get("vote_average", 0) / 2, 2) if tv_data.get("vote_average") else None,
+                        "stills": ["https://image.tmdb.org/t/p/w780" + b["file_path"] for b in backdrops[:6] if b.get("file_path")],
+                        "tmdb_id": tmdb_tv_id,
+                    }
+
+        if not enriched:
+            results.append({"id": fid, "title": title, "status": "not_found"})
+            continue
+
+        stills = enriched.pop("stills", [])
+        with get_db() as conn:
+            conn.execute("""UPDATE films SET description=COALESCE(?,description), poster=COALESCE(?,poster),
+                backdrop=COALESCE(?,backdrop), runtime=COALESCE(?,runtime), genre=COALESCE(?,genre),
+                director=COALESCE(?,director), cast=COALESCE(?,cast), trailer_url=COALESCE(?,trailer_url),
+                rating=COALESCE(?,rating), tmdb_id=COALESCE(?,tmdb_id) WHERE id=?""",
+                (enriched.get("description"), enriched.get("poster"), enriched.get("backdrop"),
+                 enriched.get("runtime"), enriched.get("genre"), enriched.get("director"),
+                 enriched.get("cast"), enriched.get("trailer_url"), enriched.get("rating"),
+                 enriched.get("tmdb_id"), fid))
+            if stills:
+                conn.execute("DELETE FROM film_stills WHERE film_id=?", (fid,))
+                for url in stills:
+                    conn.execute("INSERT INTO film_stills (film_id, url) VALUES (?,?)", (fid, url))
+        results.append({"id": fid, "title": title, "status": "ok"})
+
+    return {"enriched": len([r for r in results if r["status"] == "ok"]), "results": results}
+
+
 @app.get("/api/tmdb/enrich")
 def tmdb_enrich(title: str, year: Optional[int] = None):
     """Return full TMDB enrichment data for a title (for preview before saving)."""
