@@ -13515,6 +13515,7 @@ function App() {
                   };
                   if (tmdbFilm._fromTmdb) body.tmdbId = tmdbFilm.tmdb_id;
                   if (tmdbFilm._fromTvmaze) body.tvmazeId = tmdbFilm.tvmaze_id;
+                  if (tmdbFilm._fromTmdbTv) body.tmdbTvId = tmdbFilm.tmdb_tv_id;
                   fetch(API_BASE + '/api/films', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
