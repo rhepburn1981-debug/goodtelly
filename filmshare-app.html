@@ -10781,7 +10781,7 @@
               );
             }
 
-            const normalizeRating = (r) => { const n = parseFloat(r) || 0; return n > 5 ? parseFloat((n / 2).toFixed(2)) : n; };
+            const normalizeRating = (r) => { const n = parseFloat(r) || 0; const v = n > 5 ? n / 2 : n; return Math.round(v * 10) / 10; };
 
             function InlineStars({ rating, onRate, size = 14 }) {
               const [hov, setHov] = React.useState(0);
@@ -13035,12 +13035,12 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
 
             // ─── Auth Modal ─────────────────────────────────────────────────────────────
             const AVATAR_OPTIONS = [
-              { emoji: "🦊", color: "#e07b3a" }, { emoji: "🐸", color: "#4caf7c" },
-              { emoji: "🦁", color: "#c9a84c" }, { emoji: "🐙", color: "#9c6bb5" },
-              { emoji: "🐧", color: "#5b9bd5" }, { emoji: "🦄", color: "#d96db3" },
-              { emoji: "🐺", color: "#7c7c9c" }, { emoji: "🦅", color: "#8b6b3e" },
-              { emoji: "🐬", color: "#52b8b0" }, { emoji: "🦋", color: "#7c6bc9" },
-              { emoji: "🐼", color: "#5a5a6a" }, { emoji: "🦎", color: "#4caf6c" },
+              { emoji: "🌑", color: "#3a3a5c" }, { emoji: "⚡", color: "#e0b030" },
+              { emoji: "🔥", color: "#e07b3a" }, { emoji: "🌊", color: "#3a8fd9" },
+              { emoji: "💀", color: "#6a6a8c" }, { emoji: "💎", color: "#52b8d8" },
+              { emoji: "🌿", color: "#4caf7c" }, { emoji: "🎭", color: "#9c6bb5" },
+              { emoji: "🎸", color: "#c9a84c" }, { emoji: "👑", color: "#e8c96a" },
+              { emoji: "☁️", color: "#7c8fa0" }, { emoji: "🌙", color: "#5b5b9c" },
             ];
 
             function AuthModal({ onClose, onLogin, initialMode = "login" }) {
@@ -13086,7 +13086,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               const labelStyle = { fontSize: 11, color: "var(--text2)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6, display: "block" };
 
               return React.createElement("div", {
-                style: { position: "absolute", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(6px)" },
+                style: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, backdropFilter: "blur(6px)" },
                 onClick: (e) => { if (e.target === e.currentTarget) onClose(); },
               },
                 React.createElement("div", {
