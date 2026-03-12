@@ -1100,7 +1100,7 @@ def bulk_reenrich():
             if stills:
                 conn.execute("DELETE FROM film_stills WHERE film_id=?", (fid,))
                 for url in stills:
-                    conn.execute("INSERT INTO film_stills (film_id, url) VALUES (?,?)", (fid, url))
+                    conn.execute("INSERT INTO film_stills (film_id, still_url) VALUES (?,?)", (fid, url))
         results.append({"id": fid, "title": title, "status": "ok"})
 
     return {"enriched": len([r for r in results if r["status"] == "ok"]), "results": results}
