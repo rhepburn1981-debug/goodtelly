@@ -60,6 +60,41 @@ The `.env` file is auto-loaded by `main.py` on startup — no need to export env
 - Recommend button → RecommendModal → `sendViaWhatsApp()` → `wa.me/?text=` deeplink
 - Share URL: `window.location.origin + /share?title=...&from=...&poster=...&trailer=...`
 
+## Deployment
+- Git remote: `https://github.com/rhepburn1981-debug/goodtelly.git` (branch: `main`)
+- Railway auto-deploys on push to `main` — live at `https://goodtelly-production.up.railway.app/`
+- `GET /` serves `filmshare-app.html` directly (FastAPI `FileResponse`)
+- `GET /share` serves OG meta page (`reel-share-landing.html`)
+- DB path in production: `/data/filmshare.db` (set via `DB_PATH` env var)
+- To screenshot the live site: use `playwright` (installed) — see screenshot scripts in project root
+
+## Frontend UI design (matches mockup at `mockup.png`)
+The app is branded **Reel**. The home screen layout (top to bottom):
+1. **Header** — blue WiFi SVG icon + "Reel" (82px bold) + "TV recommended by friends" subtitle + golden popcorn bucket image (base64 PNG cropped from `mockup.png`)
+2. **Search bar** — dark pill shape (`rgba(255,255,255,0.07)`, borderRadius 22), dark text input (`color: var(--text)`)
+3. **My Watchlist** ribbon card — blue star icon, navigates to List tab
+4. **Friends Watchlist** ribbon card — grey person SVG, navigates to Friends tab
+5. **Recommendation cards** — "[Friend] thinks you'll like…" in gold italic, film card with backdrop + poster, Watch Trailer + Watchlist buttons
+6. **"🔥 What's NEW"** — TMDB trending, blue SVG flame icon, horizontally scrolling poster cards (90×130px, text below)
+7. **"🎬 What Reel users are watching right now"** — local trending films, same card style
+8. **"📈 Trending with Reel Users"** — TVmaze UK shows, list view with channel badge + date
+9. **Bottom nav** — Home, My List, Discover, Friends, [Username text only in gold — no icon]
+
+### CSS variables (defined in `<style>`)
+- `--ink: #070709` (near-black background)
+- `--surface: #0e0e14`, `--surface2: #13131c`, `--surface3: #1a1a26`
+- `--gold-bright: #e8c96a`, `--text: #eae6dc`, `--muted: #5a566a`
+- `--ff-body: "DM Sans"`, `--ff-display: "Cormorant Garamond"`
+- `html { font-size: 112% }` — affects rem but NOT px inline styles
+
+### Key frontend gotchas
+- Smart/curly quotes (U+201C/201D) break JS — use Python bulk replace if they appear
+- Validate JS syntax with: `python3 -c "extract scripts" && node --check check_temp.js`
+- Template literals cause issues in some editors — use string concatenation `"url(" + x + ")"` instead
+- `sectionLabel()` helper: fontSize 18, fontWeight 800
+- Poster cards: 90×130px, title + count text below image (NOT overlaid)
+- Popcorn image in header: base64 PNG embedded inline, cropped from `mockup.png` using Pillow
+
 ## Windows gotchas
 - Edit/Write tools throw EEXIST error on existing dirs — use `Bash` with Python scripts instead
 - Heredoc with single-quoted EOF fails in `bash -c` — use `python3 -c` with escaped strings
@@ -68,3 +103,8 @@ The `.env` file is auto-loaded by `main.py` on startup — no need to export env
 ## Backups
 Backend: `main.backup5.py`, `main.backup6.py`
 Frontend: `filmshare-app.backup5.html`, `filmshare-app.backup6.html`
+
+## Useful scripts / tools in project root
+- `mockup.png` — the reference design mockup (1024×1536px)
+- `screenshot_*.png` — playwright screenshots of the live site for comparison
+- Playwright is installed (`python3 -m playwright`) — use for live site screenshots
