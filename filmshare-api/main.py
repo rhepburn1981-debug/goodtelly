@@ -1257,6 +1257,7 @@ def trending_all():
             "poster_large": f"https://image.tmdb.org/t/p/w342{poster}" if poster else None,
             "overview": (s.get("overview") or "")[:200],
             "rating": round(s.get("vote_average", 0) / 2, 2) if s.get("vote_average") else None,
+            "popularity": round(s.get("popularity", 0), 1) if s.get("popularity") else None,
             "year": (s.get("release_date") or s.get("first_air_date") or "")[:4],
             "media_type": s.get("media_type", "movie"),
         })

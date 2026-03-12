@@ -11657,6 +11657,7 @@
               onFriendClick,
               myListCount,
               onGoToList,
+              onGoToFriends,
             }) {
               const [tvSchedule, setTvSchedule] = React.useState([]);
               const [discoverShows, setDiscoverShows] = React.useState([]);
@@ -11694,11 +11695,11 @@
                 React.createElement("div", {
                   style: {
                     display: "flex", alignItems: "center", justifyContent: "space-between",
-                    padding: "20px 16px 12px",
+                    padding: "20px 16px 10px",
                   },
                 },
                   React.createElement("div", {
-                    style: { fontSize: 13, fontWeight: 700, color: "var(--text)", letterSpacing: 0.2 },
+                    style: { fontSize: 15, fontWeight: 800, color: "var(--text)", letterSpacing: -0.2 },
                   }, text),
                   action,
                 );
@@ -11709,151 +11710,143 @@
                 onGoToList && React.createElement("div", {
                   onClick: onGoToList,
                   style: {
-                    margin: "12px 16px 4px",
+                    margin: "14px 16px 6px",
                     background: "rgba(255,255,255,0.04)",
                     border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: 14,
-                    padding: "11px 16px",
-                    display: "flex", alignItems: "center", gap: 12, cursor: "pointer",
+                    padding: "12px 16px",
+                    display: "flex", alignItems: "center", gap: 14, cursor: "pointer",
                   },
                 },
                   React.createElement("div", {
                     style: {
-                      width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                      background: "rgba(255,255,255,0.08)",
+                      width: 42, height: 42, borderRadius: 13, flexShrink: 0,
+                      background: "rgba(59,130,246,0.18)",
+                      border: "1px solid rgba(59,130,246,0.3)",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 18,
+                      fontSize: 20,
+                      color: "#60a5fa",
                     },
-                  }, "\u2630"),
+                  }, "\u2605"),
                   React.createElement("div", { style: { flex: 1 } },
                     React.createElement("div", { style: { fontSize: 15, fontWeight: 800, color: "var(--text)" } }, "My Watchlist"),
-                    React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 2 } },
-                      "Your saved films & shows →"),
+                    React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 3 } },
+                      "Your saved films & shows to watch"),
                   ),
-                  React.createElement("div", { style: { fontSize: 18, color: "var(--muted)" } }, "\u203a"),
+                  React.createElement("div", { style: { fontSize: 20, color: "rgba(255,255,255,0.3)", fontWeight: 300 } }, "\u203a"),
                 ),
 
-                /* YOUR FRIENDS RIBBON */
-                (() => {
-                  const homeFriends = (realFriends && realFriends.length > 0) ? realFriends : FRIENDS_DATA;
-                  if (!homeFriends.length) return null;
-                  return React.createElement(React.Fragment, null,
-                    /* Ribbon button */
-                    React.createElement("div", {
-                      onClick: () => setFriendsOpen(!friendsOpen),
-                      style: {
-                        margin: "8px 16px 12px",
-                        background: "linear-gradient(90deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06))",
-                        border: "1px solid rgba(201,168,76,0.3)",
-                        borderRadius: 14,
-                        padding: "11px 16px",
-                        display: "flex", alignItems: "center", gap: 10, cursor: "pointer",
-                      },
+                /* FRIENDS WATCHLIST RIBBON */
+                React.createElement("div", {
+                  onClick: () => onGoToFriends && onGoToFriends(),
+                  style: {
+                    margin: "6px 16px 14px",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 14,
+                    padding: "12px 16px",
+                    display: "flex", alignItems: "center", gap: 14, cursor: "pointer",
+                  },
+                },
+                  React.createElement("div", {
+                    style: {
+                      width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
+                      background: "rgba(255,255,255,0.1)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
                     },
-                      /* Friends icon */
-                      React.createElement("div", {
-                        style: {
-                          width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                          background: "rgba(201,168,76,0.2)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: 20,
-                        },
-                      }, "\uD83D\uDC65"),
-                      /* Label */
-                      React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                        React.createElement("div", { style: { fontSize: 15, fontWeight: 800, color: "var(--gold-bright)" } }, "Your Friends"),
-                        React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 2 } },
-                          "See what your friends are watching →"),
-                      ),
-                      /* Chevron */
-                      React.createElement("div", {
-                        style: {
-                          fontSize: 14, color: "var(--gold-bright)", transition: "transform 0.2s",
-                          transform: friendsOpen ? "rotate(90deg)" : "rotate(0deg)",
-                        },
-                      }, "\u203a"),
+                  },
+                    React.createElement("svg", { viewBox: "0 0 24 24", width: 22, height: 22, fill: "none" },
+                      React.createElement("circle", { cx: 9, cy: 8, r: 3.5, fill: "rgba(255,255,255,0.5)", stroke: "rgba(255,255,255,0.7)", strokeWidth: 1.5 }),
+                      React.createElement("path", { d: "M2.5 20.5C2.5 17.5 5.5 15 9 15C12.5 15 15.5 17.5 15.5 20.5", stroke: "rgba(255,255,255,0.7)", strokeWidth: 1.5, strokeLinecap: "round" }),
+                      React.createElement("circle", { cx: 17.5, cy: 8, r: 2.5, stroke: "rgba(255,255,255,0.5)", strokeWidth: 1.4 }),
+                      React.createElement("path", { d: "M20.5 19.5C20.5 17.3 19.2 15.5 17.5 15.5", stroke: "rgba(255,255,255,0.5)", strokeWidth: 1.4, strokeLinecap: "round" }),
                     ),
-                    /* Expanded friend list */
-                    friendsOpen && React.createElement("div", {
-                      style: { display: "flex", gap: 16, overflowX: "auto", padding: "8px 16px 12px", scrollbarWidth: "none" },
-                    },
-                      homeFriends.map(f => {
-                        const dName = f.display_name || f.username || f.name || "";
-                        return React.createElement("button", {
-                          key: f.username || f.name || f.id,
-                          onClick: () => onFriendClick && onFriendClick(f.username || f.name || dName),
-                          style: { flexShrink: 0, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center" },
-                        },
-                          React.createElement("div", { style: { marginBottom: 8, position: "relative" } },
-                            React.createElement("div", {
-                              style: {
-                                width: 60, height: 60, borderRadius: 20,
-                                background: f.color || "var(--gold)",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                fontSize: 24, fontWeight: 900, color: "#fff",
-                                boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
-                                border: "2px solid rgba(255,255,255,0.15)",
-                              },
-                            }, dName.charAt(0).toUpperCase()),
-                            (f.count || 0) > 0 && React.createElement("div", {
-                              style: {
-                                position: "absolute", top: -4, right: -4,
-                                width: 20, height: 20, borderRadius: "50%",
-                                background: "var(--gold)", border: "2px solid #0D0D13",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                fontSize: 9, fontWeight: 900, color: "#000",
-                              },
-                            }, f.count || 0),
-                          ),
-                          React.createElement("div", { style: { fontSize: 11, fontWeight: 700, color: "var(--text)" } }, dName),
-                          React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)", marginTop: 2 } }, (f.count || 0) + " picks"),
-                        );
-                      }),
-                    ),
-                  );
-                })(),
+                  ),
+                  React.createElement("div", { style: { flex: 1 } },
+                    React.createElement("div", { style: { fontSize: 15, fontWeight: 800, color: "var(--text)" } }, "Friends Watchlist"),
+                    React.createElement("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 3 } },
+                      "See what your friends are watching"),
+                  ),
+                  React.createElement("div", { style: { fontSize: 20, color: "rgba(255,255,255,0.3)", fontWeight: 300 } }, "\u203a"),
+                ),
 
                 /* RECOMMENDED FOR YOU */
                 recommendedFilms.length > 0 && React.createElement(React.Fragment, null,
-                  sectionLabel("Your friends have recommended these to you",
-                    React.createElement("button", {
-                      onClick: () => {},
-                      style: { background: "none", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 20, padding: "4px 10px", color: "var(--text2)", fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 },
-                    }, "See all →"),
-                  ),
-                  recommendedFilms.map(film => {
-                    const friendName = film._fromFriend || film.sharedBy || "A friend";
+                  recommendedFilms.map((film, idx) => {
+                    const friendName = film._fromFriend || film.sharedBy || “A friend”;
                     const recNote = film._recNote;
                     const recRating = film._recRating;
-                    return React.createElement("div", {
+                    const hasTrailer = !!(film.trailer_url);
+                    return React.createElement(“div”, {
                       key: film.id,
-                      onClick: () => onFilmClick(film),
-                      style: { margin: "0 16px 12px", background: "var(--surface2)", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)", cursor: "pointer" },
+                      style: { margin: idx === 0 ? “4px 16px 14px” : “0 16px 12px” },
                     },
-                      React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, padding: "10px 14px 8px" } },
-                        React.createElement(Avatar, { name: friendName, size: 24 }),
-                        React.createElement("div", { style: { flex: 1, fontSize: 12 } },
-                          React.createElement("span", { style: { fontWeight: 700, color: "var(--gold-bright)", marginRight: 4 } }, friendName),
-                          React.createElement("span", { style: { color: "var(--text2)" } }, " recommends this"),
-                        ),
-                        recRating && React.createElement("div", { style: { fontSize: 12, color: "var(--gold-bright)", fontWeight: 700, whiteSpace: "nowrap" } }, "⭐ " + parseFloat(recRating).toFixed(1)),
+                      /* “[Friend] thinks you'll like...” header */
+                      React.createElement(“div”, {
+                        style: { display: “flex”, alignItems: “center”, gap: 8, padding: “0 2px 8px” },
+                      },
+                        React.createElement(Avatar, { name: friendName, size: 26 }),
+                        React.createElement(“div”, { style: { fontSize: 13, color: “var(--gold-bright)”, fontWeight: 600, fontStyle: “italic” } },
+                          friendName + “ thinks you\u2019ll like\u2026”),
+                        recRating && React.createElement(“div”, { style: { fontSize: 12, color: “var(--gold-bright)”, fontWeight: 700, marginLeft: “auto”, whiteSpace: “nowrap” } }, “\u2B50 “ + parseFloat(recRating).toFixed(1)),
                       ),
-                      React.createElement("div", { style: { display: "flex", alignItems: "flex-start", gap: 12, padding: "0 14px 12px" } },
-                        film.poster
-                          ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 50, height: 70, objectFit: "cover", borderRadius: 8, flexShrink: 0 } })
-                          : React.createElement("div", { style: { width: 50, height: 70, borderRadius: 8, background: film.color || "var(--surface3)", flexShrink: 0 } }),
-                        React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                          React.createElement("div", { style: { fontSize: 16, fontWeight: 800, color: "var(--text)", lineHeight: 1.2, marginBottom: 4 } }, film.title),
-                          film.streamers && film.streamers.length > 0 && React.createElement(StreamerBadges, { ids: film.streamers }),
-                          recNote
-                            ? React.createElement("div", { style: { fontSize: 12, color: "var(--text2)", fontStyle: "italic", lineHeight: 1.4 } }, "“" + recNote + "” — " + friendName)
-                            : film.description && React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" } }, film.description),
+                      /* Film card */
+                      React.createElement(“div”, {
+                        onClick: () => onFilmClick(film),
+                        style: {
+                          background: “var(--surface2)”, borderRadius: 16, overflow: “hidden”,
+                          border: “1px solid rgba(255,255,255,0.08)”, cursor: “pointer”,
+                          position: “relative”,
+                        },
+                      },
+                        /* Backdrop image if available */
+                        film.backdrop && React.createElement(“div”, {
+                          style: {
+                            position: “absolute”, inset: 0,
+                            backgroundImage: "url(" + film.backdrop + ")",
+                            backgroundSize: “cover”, backgroundPosition: “center”,
+                            opacity: 0.18,
+                          },
+                        }),
+                        React.createElement(“div”, { style: { position: “relative”, display: “flex”, alignItems: “flex-start”, gap: 12, padding: “14px 14px 10px” } },
+                          film.poster
+                            ? React.createElement(“img”, { src: film.poster, alt: film.title, style: { width: 60, height: 86, objectFit: “cover”, borderRadius: 10, flexShrink: 0, boxShadow: “0 4px 14px rgba(0,0,0,0.5)” } })
+                            : React.createElement(“div”, { style: { width: 60, height: 86, borderRadius: 10, background: film.color || “var(--surface3)”, flexShrink: 0 } }),
+                          React.createElement(“div”, { style: { flex: 1, minWidth: 0, paddingTop: 2 } },
+                            React.createElement(“div”, { style: { fontSize: 18, fontWeight: 900, color: “var(--text)”, lineHeight: 1.2, marginBottom: 3 } }, film.title),
+                            React.createElement(“div”, { style: { fontSize: 12, color: “var(--muted)”, marginBottom: 6 } }, film.year || “”),
+                            film.streamers && film.streamers.length > 0 && React.createElement(StreamerBadges, { ids: film.streamers }),
+                            recNote && React.createElement(“div”, { style: { fontSize: 12, color: “var(--text2)”, fontStyle: “italic”, lineHeight: 1.4, marginTop: 4 } }, “\u201c” + recNote + “\u201d”),
+                          ),
                         ),
-                        React.createElement("button", {
-                          onClick: (e) => { e.stopPropagation(); onAdd(film.id); },
-                          style: { flexShrink: 0, alignSelf: "center", padding: "7px 12px", borderRadius: 20, border: addedIds.includes(film.id) ? "1px solid rgba(46,204,138,0.35)" : "1px solid rgba(201,168,76,0.4)", background: addedIds.includes(film.id) ? "rgba(46,204,138,0.08)" : "rgba(201,168,76,0.08)", color: addedIds.includes(film.id) ? "var(--green)" : "var(--gold-bright)", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
-                        }, addedIds.includes(film.id) ? "\u2713 Added" : "+ Watchlist"),
-
+                        /* Action buttons */
+                        React.createElement(“div”, {
+                          style: { position: “relative”, display: “flex”, gap: 8, padding: “0 14px 14px” },
+                        },
+                          hasTrailer && React.createElement(“button”, {
+                            onClick: (e) => { e.stopPropagation(); window.open(film.trailer_url, “_blank”); },
+                            style: {
+                              flex: 1, padding: “9px 12px”, borderRadius: 22,
+                              background: “rgba(255,255,255,0.08)”, border: “1px solid rgba(255,255,255,0.15)”,
+                              color: “var(--text)”, fontSize: 12, fontWeight: 600, cursor: “pointer”,
+                              display: “flex”, alignItems: “center”, justifyContent: “center”, gap: 5,
+                            },
+                          },
+                            React.createElement(“span”, { style: { fontSize: 10 } }, “\u25B6”),
+                            “Watch Trailer”,
+                          ),
+                          React.createElement(“button”, {
+                            onClick: (e) => { e.stopPropagation(); onAdd(film.id); },
+                            style: {
+                              flex: 1, padding: “9px 12px”, borderRadius: 22,
+                              background: addedIds.includes(film.id) ? “rgba(46,204,138,0.1)” : “rgba(255,255,255,0.07)”,
+                              border: addedIds.includes(film.id) ? “1px solid rgba(46,204,138,0.35)” : “1px solid rgba(255,255,255,0.15)”,
+                              color: addedIds.includes(film.id) ? “var(--green)” : “var(--text)”,
+                              fontSize: 12, fontWeight: 600, cursor: “pointer”,
+                              display: “flex”, alignItems: “center”, justifyContent: “center”, gap: 4,
+                            },
+                          }, addedIds.includes(film.id) ? “\u2713 Added” : “+ Watchlist”),
+                        ),
                       ),
                     );
                   }),
@@ -11882,14 +11875,15 @@
                   ),
                 ),
 
-                /* WHAT'S TRENDING NOW (TMDB all/week) */
+                /* WHAT'S NEW (TMDB all/week) */
                 trendingNow.length > 0 && React.createElement(React.Fragment, null,
-                  sectionLabel("What's Trending Now", null),
+                  sectionLabel("\uD83D\uDD25 What\u2019s NEW", null),
                   React.createElement("div", {
                     style: { display: "flex", gap: 12, overflowX: "auto", padding: "0 16px 16px", scrollbarWidth: "none" },
                   },
-                    trendingNow.slice(0, 15).map(show =>
-                      React.createElement("button", {
+                    trendingNow.slice(0, 15).map(show => {
+                      const fmtPop = (n) => n >= 1000 ? (n / 1000).toFixed(1) + "K" : (n ? String(Math.round(n)) : "");
+                      return React.createElement("button", {
                         key: show.id,
                         onClick: () => onFilmClick(extToFilm(show, 2000000, show.media_type === "movie" ? { _fromTmdb: true, tmdb_id: show.id } : { _fromTmdbTv: true, tmdb_tv_id: show.id })),
                         style: { flexShrink: 0, width: 110, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
@@ -11898,18 +11892,20 @@
                           ? React.createElement("img", { src: show.poster, alt: show.title, style: { width: 110, height: 160, objectFit: "cover", borderRadius: 12, display: "block" } })
                           : React.createElement("div", { style: { width: 110, height: 160, borderRadius: 12, background: "var(--surface3)" } }),
                         React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--text)", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.title),
-                        React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 2 } },
-                          React.createElement("div", { style: { fontSize: 11, color: "var(--muted)" } }, show.year),
-                          show.rating && parseFloat(show.rating) > 0 && React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)" } }, "★ " + parseFloat(show.rating).toFixed(1)),
+                        React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 3 } },
+                          show.popularity && parseFloat(show.popularity) > 0
+                            ? React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", fontWeight: 600 } }, fmtPop(show.popularity))
+                            : React.createElement("div", { style: { fontSize: 11, color: "var(--muted)" } }, show.year),
+                          show.rating && parseFloat(show.rating) > 0 && React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)" } }, "\u2605 " + parseFloat(show.rating).toFixed(1)),
                         ),
-                      ),
-                    ),
+                      );
+                    }),
                   ),
                 ),
 
                 /* ON TV THIS WEEK (TVmaze GB) */
 upcomingShows.length > 0 && React.createElement(React.Fragment, null,
-                  sectionLabel("Up & Coming in the UK this week",
+                  sectionLabel("\uD83D\uDCC8 Trending with Reel Users",
                     React.createElement("button", {
                       onClick: () => setUpcomingExpanded(e => !e),
                       style: { background: "none", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 20, padding: "4px 10px", color: "var(--text2)", fontSize: 11, cursor: "pointer" },
@@ -13615,67 +13611,57 @@ function App() {
                         alignItems: "center",
                         justifyContent: "space-between",
                         padding: "0 18px",
-                        height: 56,
-                        background: "var(--surface2)",
+                        height: 76,
+                        background: "var(--ink)",
                         borderBottom: "1px solid rgba(255,255,255,0.05)",
                         flexShrink: 0,
+                        overflow: "visible",
+                        position: "relative",
                       },
                     },
-                    React.createElement(
-                      "div",
-                      { style: { display: "flex", alignItems: "center", gap: 0 } },
-                      React.createElement(
-                        "div",
-                        {
+                    /* Left: signal icon + Reel + subtitle */
+                    React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 2 } },
+                      React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
+                        /* WiFi / broadcast icon */
+                        React.createElement("svg", {
+                          viewBox: "0 0 28 22", width: 28, height: 22, fill: "none",
+                          style: { flexShrink: 0, marginBottom: 2 },
+                        },
+                          React.createElement("path", { d: "M14 18a2 2 0 1 1 0 4 2 2 0 0 1 0-4z", fill: "white" }),
+                          React.createElement("path", { d: "M8.2 14.2a8.2 8.2 0 0 1 11.6 0", stroke: "white", strokeWidth: 2.2, strokeLinecap: "round", fill: "none" }),
+                          React.createElement("path", { d: "M3.5 9.5a14 14 0 0 1 21 0", stroke: "white", strokeWidth: 2.2, strokeLinecap: "round", strokeOpacity: 0.6, fill: "none" }),
+                          React.createElement("path", { d: "M0 5a19.5 19.5 0 0 1 28 0", stroke: "white", strokeWidth: 2.2, strokeLinecap: "round", strokeOpacity: 0.3, fill: "none" }),
+                        ),
+                        React.createElement("div", {
                           style: {
-                            fontFamily: "'Arial Black', 'Arial Bold', Gadget, sans-serif",
-                            fontSize: 30,
+                            fontFamily: "var(--ff-body)",
+                            fontSize: 32,
                             fontWeight: 900,
-                            color: "#E8000D",
+                            color: "var(--text)",
                             letterSpacing: -1,
                             lineHeight: 1,
                           },
-                        },
-                        "REEL",
+                        }, "Reel"),
                       ),
-                      React.createElement(
-                        "div",
-                        {
-                          style: {
-                            fontSize: 11,
-                            color: "rgba(255,255,255,0.6)",
-                            letterSpacing: 0.3,
-                            marginLeft: 10,
-                            marginBottom: -2,
-                            alignSelf: "flex-end",
-                          },
+                      React.createElement("div", {
+                        style: {
+                          fontSize: 11,
+                          color: "rgba(255,255,255,0.45)",
+                          letterSpacing: 0.2,
+                          paddingLeft: 2,
                         },
-                        "Friends share the best TV & films",
-                      ),
+                      }, "TV recommended by friends"),
                     ),
-                    currentUser
-                      ? React.createElement(Avatar, {
-                          name: currentUser.display_name || currentUser.username,
-                          color: currentUser.color || "var(--gold)",
-                          size: 34,
-                        })
-                      : React.createElement(
-                          "button",
-                          {
-                            onClick: () => setShowAuth(true),
-                            style: {
-                              background: "none",
-                              border: "1px solid rgba(201,168,76,0.3)",
-                              borderRadius: 20,
-                              padding: "5px 12px",
-                              color: "var(--gold-bright)",
-                              fontSize: 11,
-                              fontWeight: 600,
-                              cursor: "pointer",
-                            },
-                          },
-                          "Sign in",
-                        ),
+                    /* Right: popcorn */
+                    React.createElement("div", {
+                      style: {
+                        fontSize: 44,
+                        lineHeight: 1,
+                        marginTop: -10,
+                        filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))",
+                        userSelect: "none",
+                      },
+                    }, "\uD83C\uDF7F"),
                   ),
 
                   /* Search bar */
@@ -13836,6 +13822,7 @@ function App() {
                         onFriendClick: (name) => { setFriendsDefaultFriend(name); setTab("friends"); },
                         myListCount: myList.length,
                         onGoToList: () => setTab("list"),
+                        onGoToFriends: () => setTab("friends"),
                       }),
 
                     /* LIST */
