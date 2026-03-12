@@ -11773,79 +11773,79 @@
                 /* RECOMMENDED FOR YOU */
                 recommendedFilms.length > 0 && React.createElement(React.Fragment, null,
                   recommendedFilms.map((film, idx) => {
-                    const friendName = film._fromFriend || film.sharedBy || “A friend”;
+                    const friendName = film._fromFriend || film.sharedBy || "A friend";
                     const recNote = film._recNote;
                     const recRating = film._recRating;
                     const hasTrailer = !!(film.trailer_url);
-                    return React.createElement(“div”, {
+                    return React.createElement("div", {
                       key: film.id,
-                      style: { margin: idx === 0 ? “4px 16px 14px” : “0 16px 12px” },
+                      style: { margin: idx === 0 ? "4px 16px 14px" : "0 16px 12px" },
                     },
-                      /* “[Friend] thinks you'll like...” header */
-                      React.createElement(“div”, {
-                        style: { display: “flex”, alignItems: “center”, gap: 8, padding: “0 2px 8px” },
+                      /* "[Friend] thinks you'll like..." header */
+                      React.createElement("div", {
+                        style: { display: "flex", alignItems: "center", gap: 8, padding: "0 2px 8px" },
                       },
                         React.createElement(Avatar, { name: friendName, size: 26 }),
-                        React.createElement(“div”, { style: { fontSize: 13, color: “var(--gold-bright)”, fontWeight: 600, fontStyle: “italic” } },
-                          friendName + “ thinks you\u2019ll like\u2026”),
-                        recRating && React.createElement(“div”, { style: { fontSize: 12, color: “var(--gold-bright)”, fontWeight: 700, marginLeft: “auto”, whiteSpace: “nowrap” } }, “\u2B50 “ + parseFloat(recRating).toFixed(1)),
+                        React.createElement("div", { style: { fontSize: 13, color: "var(--gold-bright)", fontWeight: 600, fontStyle: "italic" } },
+                          friendName + " thinks you\u2019ll like\u2026"),
+                        recRating && React.createElement("div", { style: { fontSize: 12, color: "var(--gold-bright)", fontWeight: 700, marginLeft: "auto", whiteSpace: "nowrap" } }, "\u2B50 " + parseFloat(recRating).toFixed(1)),
                       ),
                       /* Film card */
-                      React.createElement(“div”, {
+                      React.createElement("div", {
                         onClick: () => onFilmClick(film),
                         style: {
-                          background: “var(--surface2)”, borderRadius: 16, overflow: “hidden”,
-                          border: “1px solid rgba(255,255,255,0.08)”, cursor: “pointer”,
-                          position: “relative”,
+                          background: "var(--surface2)", borderRadius: 16, overflow: "hidden",
+                          border: "1px solid rgba(255,255,255,0.08)", cursor: "pointer",
+                          position: "relative",
                         },
                       },
                         /* Backdrop image if available */
-                        film.backdrop && React.createElement(“div”, {
+                        film.backdrop && React.createElement("div", {
                           style: {
-                            position: “absolute”, inset: 0,
+                            position: "absolute", inset: 0,
                             backgroundImage: "url(" + film.backdrop + ")",
-                            backgroundSize: “cover”, backgroundPosition: “center”,
+                            backgroundSize: "cover", backgroundPosition: "center",
                             opacity: 0.18,
                           },
                         }),
-                        React.createElement(“div”, { style: { position: “relative”, display: “flex”, alignItems: “flex-start”, gap: 12, padding: “14px 14px 10px” } },
+                        React.createElement("div", { style: { position: "relative", display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 14px 10px" } },
                           film.poster
-                            ? React.createElement(“img”, { src: film.poster, alt: film.title, style: { width: 60, height: 86, objectFit: “cover”, borderRadius: 10, flexShrink: 0, boxShadow: “0 4px 14px rgba(0,0,0,0.5)” } })
-                            : React.createElement(“div”, { style: { width: 60, height: 86, borderRadius: 10, background: film.color || “var(--surface3)”, flexShrink: 0 } }),
-                          React.createElement(“div”, { style: { flex: 1, minWidth: 0, paddingTop: 2 } },
-                            React.createElement(“div”, { style: { fontSize: 18, fontWeight: 900, color: “var(--text)”, lineHeight: 1.2, marginBottom: 3 } }, film.title),
-                            React.createElement(“div”, { style: { fontSize: 12, color: “var(--muted)”, marginBottom: 6 } }, film.year || “”),
+                            ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 60, height: 86, objectFit: "cover", borderRadius: 10, flexShrink: 0, boxShadow: "0 4px 14px rgba(0,0,0,0.5)" } })
+                            : React.createElement("div", { style: { width: 60, height: 86, borderRadius: 10, background: film.color || "var(--surface3)", flexShrink: 0 } }),
+                          React.createElement("div", { style: { flex: 1, minWidth: 0, paddingTop: 2 } },
+                            React.createElement("div", { style: { fontSize: 18, fontWeight: 900, color: "var(--text)", lineHeight: 1.2, marginBottom: 3 } }, film.title),
+                            React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", marginBottom: 6 } }, film.year || ""),
                             film.streamers && film.streamers.length > 0 && React.createElement(StreamerBadges, { ids: film.streamers }),
-                            recNote && React.createElement(“div”, { style: { fontSize: 12, color: “var(--text2)”, fontStyle: “italic”, lineHeight: 1.4, marginTop: 4 } }, “\u201c” + recNote + “\u201d”),
+                            recNote && React.createElement("div", { style: { fontSize: 12, color: "var(--text2)", fontStyle: "italic", lineHeight: 1.4, marginTop: 4 } }, "\u201c" + recNote + "\u201d"),
                           ),
                         ),
                         /* Action buttons */
-                        React.createElement(“div”, {
-                          style: { position: “relative”, display: “flex”, gap: 8, padding: “0 14px 14px” },
+                        React.createElement("div", {
+                          style: { position: "relative", display: "flex", gap: 8, padding: "0 14px 14px" },
                         },
-                          hasTrailer && React.createElement(“button”, {
-                            onClick: (e) => { e.stopPropagation(); window.open(film.trailer_url, “_blank”); },
+                          hasTrailer && React.createElement("button", {
+                            onClick: (e) => { e.stopPropagation(); window.open(film.trailer_url, "_blank"); },
                             style: {
-                              flex: 1, padding: “9px 12px”, borderRadius: 22,
-                              background: “rgba(255,255,255,0.08)”, border: “1px solid rgba(255,255,255,0.15)”,
-                              color: “var(--text)”, fontSize: 12, fontWeight: 600, cursor: “pointer”,
-                              display: “flex”, alignItems: “center”, justifyContent: “center”, gap: 5,
+                              flex: 1, padding: "9px 12px", borderRadius: 22,
+                              background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
+                              color: "var(--text)", fontSize: 12, fontWeight: 600, cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
                             },
                           },
-                            React.createElement(“span”, { style: { fontSize: 10 } }, “\u25B6”),
-                            “Watch Trailer”,
+                            React.createElement("span", { style: { fontSize: 10 } }, "\u25B6"),
+                            "Watch Trailer",
                           ),
-                          React.createElement(“button”, {
+                          React.createElement("button", {
                             onClick: (e) => { e.stopPropagation(); onAdd(film.id); },
                             style: {
-                              flex: 1, padding: “9px 12px”, borderRadius: 22,
-                              background: addedIds.includes(film.id) ? “rgba(46,204,138,0.1)” : “rgba(255,255,255,0.07)”,
-                              border: addedIds.includes(film.id) ? “1px solid rgba(46,204,138,0.35)” : “1px solid rgba(255,255,255,0.15)”,
-                              color: addedIds.includes(film.id) ? “var(--green)” : “var(--text)”,
-                              fontSize: 12, fontWeight: 600, cursor: “pointer”,
-                              display: “flex”, alignItems: “center”, justifyContent: “center”, gap: 4,
+                              flex: 1, padding: "9px 12px", borderRadius: 22,
+                              background: addedIds.includes(film.id) ? "rgba(46,204,138,0.1)" : "rgba(255,255,255,0.07)",
+                              border: addedIds.includes(film.id) ? "1px solid rgba(46,204,138,0.35)" : "1px solid rgba(255,255,255,0.15)",
+                              color: addedIds.includes(film.id) ? "var(--green)" : "var(--text)",
+                              fontSize: 12, fontWeight: 600, cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
                             },
-                          }, addedIds.includes(film.id) ? “\u2713 Added” : “+ Watchlist”),
+                          }, addedIds.includes(film.id) ? "\u2713 Added" : "+ Watchlist"),
                         ),
                       ),
                     );
@@ -13148,7 +13148,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                         card.film.poster && React.createElement("img", { src: card.film.poster, alt: card.film.title, style: { width: 52, height: 74, objectFit: "cover", borderRadius: 8, flexShrink: 0 } }),
                         React.createElement("div", { style: { flex: 1 } },
                           React.createElement("div", { style: { fontSize: 16, fontWeight: 800, marginBottom: 6 } }, card.film.title),
-                          React.createElement("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.55)", fontStyle: "italic", marginBottom: 10 } }, "“" + card.note + "”"),
+                          React.createElement("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.55)", fontStyle: "italic", marginBottom: 10 } }, "\u201c" + card.note + "\u201d"),
                           React.createElement("div", { style: { display: "flex", gap: 8 } },
                             React.createElement("button", { onClick: onJoin, style: { flex: 1, background: "rgba(212,160,23,0.15)", border: "1px solid rgba(212,160,23,0.4)", borderRadius: 20, padding: "7px 10px", color: "#f0c040", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "▶ Watch Trailer"),
                             React.createElement("button", { onClick: onJoin, style: { flex: 1, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: "7px 10px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "+ Add to Watchlist"),
