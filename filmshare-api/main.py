@@ -1013,7 +1013,7 @@ def tmdb_search(q: str, year: Optional[int] = None):
 @app.get("/api/tmdb/enrich")
 def tmdb_enrich(title: str, year: Optional[int] = None):
     """Return full TMDB enrichment data for a title (for preview before saving)."""
-    if not os.environ.get("TMDB_API_KEY", ""):
+    if not os.environ.get("TMDB_API_KEY", "") and not os.environ.get("TMDB_READ_TOKEN", ""):
         raise HTTPException(status_code=503, detail="TMDB_API_KEY not configured")
     data = _tmdb.enrich_film(title, year)
     if not data:

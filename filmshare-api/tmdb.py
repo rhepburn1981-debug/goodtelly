@@ -69,7 +69,7 @@ def get_film_details(tmdb_id: int) -> dict:
 def enrich_film(title: str, year: Optional[int] = None) -> dict:
     """Search TMDB for title and return enriched fields for the films table.
     Returns empty dict if TMDB is unavailable or no match found."""
-    if not os.environ.get("TMDB_API_KEY", ""):
+    if not os.environ.get("TMDB_API_KEY", "") and not os.environ.get("TMDB_READ_TOKEN", ""):
         return {}
 
     match = search_film(title, year)
