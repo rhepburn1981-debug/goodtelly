@@ -11862,11 +11862,11 @@
                       React.createElement("button", {
                         key: film.id,
                         onClick: () => onFilmClick(film),
-                        style: { flexShrink: 0, width: 120, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
+                        style: { flexShrink: 0, width: 90, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
                       },
                         film.poster
-                          ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 120, height: 170, objectFit: "cover", borderRadius: 10, display: "block" } })
-                          : React.createElement("div", { style: { width: 120, height: 170, borderRadius: 10, background: film.color || "var(--surface3)" } }),
+                          ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 90, height: 130, objectFit: "cover", borderRadius: 10, display: "block" } })
+                          : React.createElement("div", { style: { width: 90, height: 130, borderRadius: 10, background: film.color || "var(--surface3)" } }),
                         React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: "var(--text)", marginTop: 7, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, film.title),
                         React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginTop: 2 } }, film.year),
                         film.streamers && film.streamers.length > 0 && React.createElement("div", { style: { marginTop: 4 } }, React.createElement(StreamerBadges, { ids: film.streamers })),
@@ -11877,7 +11877,13 @@
 
                 /* WHAT'S NEW (TMDB all/week) */
                 trendingNow.length > 0 && React.createElement(React.Fragment, null,
-                  sectionLabel("\uD83D\uDD25 What\u2019s NEW", null),
+                  sectionLabel(React.createElement(React.Fragment, null,
+                    React.createElement("svg", { viewBox: "0 0 24 24", width: 20, height: 20, fill: "none", style: { marginRight: 6, verticalAlign: "middle", marginBottom: 2 } },
+                      React.createElement("path", { d: "M12 2C12 2 9 6 9 10c0 1.5.5 3 1.5 4C9 13 7.5 11 7.5 9 7.5 9 5 12 5 15a7 7 0 0 0 14 0c0-5-4-9-7-13z", fill: "#4ab8ff", opacity: 0.9 }),
+                      React.createElement("path", { d: "M12 8c0 0-2 3-2 5.5a2 2 0 0 0 4 0C14 11 12 8 12 8z", fill: "#a0deff" }),
+                    ),
+                    "What\u2019s NEW",
+                  ), null),
                   React.createElement("div", {
                     style: { display: "flex", gap: 12, overflowX: "auto", padding: "0 16px 16px", scrollbarWidth: "none" },
                   },
@@ -11886,11 +11892,11 @@
                       return React.createElement("button", {
                         key: show.id,
                         onClick: () => onFilmClick(extToFilm(show, 2000000, show.media_type === "movie" ? { _fromTmdb: true, tmdb_id: show.id } : { _fromTmdbTv: true, tmdb_tv_id: show.id })),
-                        style: { flexShrink: 0, width: 120, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
+                        style: { flexShrink: 0, width: 90, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
                       },
                         show.poster
-                          ? React.createElement("img", { src: show.poster, alt: show.title, style: { width: 120, height: 170, objectFit: "cover", borderRadius: 10, display: "block" } })
-                          : React.createElement("div", { style: { width: 120, height: 170, borderRadius: 10, background: "var(--surface3)" } }),
+                          ? React.createElement("img", { src: show.poster, alt: show.title, style: { width: 90, height: 130, objectFit: "cover", borderRadius: 10, display: "block" } })
+                          : React.createElement("div", { style: { width: 90, height: 130, borderRadius: 10, background: "var(--surface3)" } }),
                         React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: "var(--text)", marginTop: 7, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.title),
                         React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 2 } },
                           show.popularity && parseFloat(show.popularity) > 0
@@ -13653,15 +13659,18 @@ function App() {
                       }, "TV recommended by friends"),
                     ),
                     /* Right: popcorn */
-                    React.createElement("div", {
+                    React.createElement("img", {
+                      src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTIwIj4KICA8ZGVmcz4KICAgIDxyYWRpYWxHcmFkaWVudCBpZD0icGcxIiBjeD0iNDAlIiBjeT0iNDAlIiByPSI2MCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZjVlZGMwIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2M4YTg0MCIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmtnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwZjA4MDAiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMWExMDAwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8IS0tIFBvcGNvcm4gcGllY2VzIC0gYmFjayBsYXllciAtLT4KICA8ZWxsaXBzZSBjeD0iMTgiIGN5PSI0NiIgcng9IjEzIiByeT0iMTEiIGZpbGw9IiNkZGQwYTAiIG9wYWNpdHk9IjAuODUiLz4KICA8ZWxsaXBzZSBjeD0iMzMiIGN5PSI0MCIgcng9IjE0IiByeT0iMTIiIGZpbGw9IiNlOGRjYTgiLz4KICA8ZWxsaXBzZSBjeD0iNTAiIGN5PSIzNyIgcng9IjE1IiByeT0iMTMiIGZpbGw9IiNlZGUwYWMiLz4KICA8ZWxsaXBzZSBjeD0iNjciIGN5PSI0MCIgcng9IjE0IiByeT0iMTIiIGZpbGw9IiNlOGRjYTgiLz4KICA8ZWxsaXBzZSBjeD0iODIiIGN5PSI0NiIgcng9IjEzIiByeT0iMTEiIGZpbGw9IiNkZGQwYTAiIG9wYWNpdHk9IjAuODUiLz4KICA8IS0tIFBvcGNvcm4gcGllY2VzIC0gZnJvbnQgbGF5ZXIgLS0+CiAgPGVsbGlwc2UgY3g9IjI2IiBjeT0iNTEiIHJ4PSIxMiIgcnk9IjEwIiBmaWxsPSIjZjVlZWNjIi8+CiAgPGVsbGlwc2UgY3g9IjQzIiBjeT0iNDYiIHJ4PSIxMyIgcnk9IjExIiBmaWxsPSIjZjhmMmQ4Ii8+CiAgPGVsbGlwc2UgY3g9IjU4IiBjeT0iNDYiIHJ4PSIxMyIgcnk9IjExIiBmaWxsPSIjZjhmMmQ4Ii8+CiAgPGVsbGlwc2UgY3g9Ijc1IiBjeT0iNTEiIHJ4PSIxMiIgcnk9IjEwIiBmaWxsPSIjZjVlZWNjIi8+CiAgPCEtLSBCdWNrZXQgbWFpbiBib2R5IC0tPgogIDxwYXRoIGQ9Ik0xMCA1OCBMOTAgNTggTDgwIDExNCBMMjAgMTE0IFoiIGZpbGw9InVybCgjYmtnKSIvPgogIDwhLS0gR29sZGVuIHN0cmlwZXMgb24gYnVja2V0IC0tPgogIDxwYXRoIGQ9Ik0xOSA1OCBMMTUgMTE0IEwyMyAxMTQgTDI2IDU4IFoiIGZpbGw9IiM5YTY4MDgiIG9wYWNpdHk9IjAuOSIvPgogIDxwYXRoIGQ9Ik0zMyA1OCBMMzAgMTE0IEwzOCAxMTQgTDQwIDU4IFoiIGZpbGw9IiM5YTY4MDgiIG9wYWNpdHk9IjAuOSIvPgogIDxwYXRoIGQ9Ik00NyA1OCBMNDUgMTE0IEw1MyAxMTQgTDU0IDU4IFoiIGZpbGw9IiM5YTY4MDgiIG9wYWNpdHk9IjAuOSIvPgogIDxwYXRoIGQ9Ik02MSA1OCBMNjAgMTE0IEw2OCAxMTQgTDY4IDU4IFoiIGZpbGw9IiM5YTY4MDgiIG9wYWNpdHk9IjAuOSIvPgogIDxwYXRoIGQ9Ik03NSA1OCBMNzUgMTE0IEw4MyAxMTQgTDgyIDU4IFoiIGZpbGw9IiM5YTY4MDgiIG9wYWNpdHk9IjAuOSIvPgogIDwhLS0gUmltL2JhbmQgYXQgdG9wIC0tPgogIDxwYXRoIGQ9Ik04IDU2IEw5MiA1NiBMOTAgNjMgTDEwIDYzIFoiIGZpbGw9IiNiMDc4MTAiLz4KICA8cGF0aCBkPSJNOCA1NiBMOTIgNTYgTDkxIDYwIEw5IDYwIFoiIGZpbGw9IiNjODkwMjAiLz4KICA8IS0tIEhpZ2hsaWdodCBvbiByaW0gLS0+CiAgPHBhdGggZD0iTTEwIDU2IEw5MCA1NiBMOTAgNTggTDEwIDU4IFoiIGZpbGw9IiNkNGEwMzAiIG9wYWNpdHk9IjAuNiIvPgo8L3N2Zz4=",
+                      alt: "",
                       style: {
-                        fontSize: 80,
-                        lineHeight: 1,
-                        marginTop: -12,
-                        filter: "drop-shadow(0 4px 18px rgba(0,0,0,0.6))",
+                        height: 100,
+                        width: "auto",
+                        marginTop: -14,
+                        filter: "drop-shadow(0 4px 18px rgba(0,0,0,0.7))",
                         userSelect: "none",
+                        flexShrink: 0,
                       },
-                    }, "\uD83C\uDF7F"),
+                    }),
                   ),
 
                   /* Search bar */
@@ -13706,7 +13715,7 @@ function App() {
                           background: "none",
                           border: "none",
                           outline: "none",
-                          color: "#111",
+                          color: "var(--text)",
                           fontSize: 13,
                           fontFamily: "var(--ff-body)",
                         },
