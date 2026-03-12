@@ -1039,7 +1039,6 @@ def tmdb_search(q: str, year: Optional[int] = None):
 @app.post("/api/admin/bulk-reenrich")
 def bulk_reenrich():
     """Re-enrich all films missing a poster by searching TMDB movie + TV."""
-    try:
     with get_db() as conn:
         rows = [dict(r) for r in conn.execute(
             "SELECT id, title, year, tmdb_id, tvmaze_id FROM films WHERE poster IS NULL OR poster = ''"
