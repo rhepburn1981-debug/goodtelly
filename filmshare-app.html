@@ -11903,7 +11903,7 @@
                           style: { position: "relative", display: "flex", gap: 8, padding: "0 10px 10px" },
                         },
                           React.createElement("button", {
-                            onClick: (e) => { e.stopPropagation(); if (hasTrailer) window.open(film.trailerUrl, "_blank"); },
+                            onClick: (e) => { e.stopPropagation(); if (hasTrailer) setTrailerOverlayUrl(film.trailerUrl); },
                             style: {
                               flex: 1, padding: "7px 11px", borderRadius: 16,
                               background: hasTrailer ? "linear-gradient(180deg, rgba(28,28,34,0.84), rgba(14,14,19,0.84))" : "rgba(255,255,255,0.03)",
@@ -13302,6 +13302,7 @@ function App() {
               const [myList, setMyList] = useState(INITIAL_WATCHLIST);
               const [sharedCount, setSharedCount] = useState(0);
               const [toast, setToast] = useState(null);
+              const [trailerOverlayUrl, setTrailerOverlayUrl] = useState(null);
               const [search, setSearch] = useState("");
               const [searchFocused, setSearchFocused] = useState(false);
               const [showAllPicks, setShowAllPicks] = useState(false);
@@ -13702,6 +13703,39 @@ function App() {
                   "div",
                   { className: "app-inner" },
 
+                  /* Trailer overlay */
+                  trailerOverlayUrl && React.createElement("div", {
+                    onClick: () => setTrailerOverlayUrl(null),
+                    style: {
+                      position: "fixed", inset: 0, zIndex: 9999,
+                      background: "rgba(0,0,0,0.92)",
+                      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                    },
+                  },
+                    React.createElement("div", {
+                      onClick: e => e.stopPropagation(),
+                      style: { width: "100%", maxWidth: 480, padding: "0 12px" },
+                    },
+                      React.createElement("iframe", {
+                        src: (() => {
+                          const base = trailerOverlayUrl.includes("/embed/") ? trailerOverlayUrl : trailerOverlayUrl.replace("watch?v=", "embed/");
+                          return base.split("?")[0] + "?rel=0&modestbranding=1&autoplay=1&playsinline=1";
+                        })(),
+                        style: { width: "100%", aspectRatio: "16/9", border: "none", borderRadius: 12 },
+                        allow: "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; autoplay",
+                        allowFullScreen: true,
+                        title: "trailer",
+                      }),
+                      React.createElement("button", {
+                        onClick: () => setTrailerOverlayUrl(null),
+                        style: {
+                          marginTop: 14, display: "block", width: "100%", padding: "10px",
+                          background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)",
+                          borderRadius: 10, color: "var(--text)", fontSize: 14, cursor: "pointer",
+                        },
+                      }, "Close"),
+                    ),
+                  ),
 
                   /* Header */
                   React.createElement(
