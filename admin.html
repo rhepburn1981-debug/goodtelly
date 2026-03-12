@@ -3,600 +3,472 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reel Admin Dashboard</title>
+<title>Reel — Admin Panel</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #222; min-height: 100vh; display: flex; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a202c;min-height:100vh;display:flex;flex-direction:column}
 
-  /* Sidebar */
-  #sidebar {
-    width: 240px; min-width: 240px; background: #1e2030; color: #fff;
-    height: 100vh; overflow-y: auto; position: fixed; left: 0; top: 0;
-    display: flex; flex-direction: column;
-  }
-  #sidebar h2 {
-    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
-    color: #8890a8; padding: 20px 16px 12px;
-  }
-  .sidebar-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 16px; cursor: pointer; transition: background 0.15s;
-    border-radius: 0; font-size: 14px;
-  }
-  .sidebar-item:hover { background: rgba(255,255,255,0.07); }
-  .sidebar-item.active { background: #38b2ac22; border-left: 3px solid #38b2ac; }
-  .sidebar-item.active .sidebar-name { color: #38b2ac; }
-  .sidebar-item.show-all { font-weight: 600; color: #eee; font-size: 14px; }
-  .sidebar-avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0;
-  }
-  .sidebar-name { font-size: 14px; color: #dde; font-weight: 500; }
-  .sidebar-sub { font-size: 12px; color: #6b7594; margin-top: 1px; }
+/* Top bar */
+#topbar{background:#1e2030;height:56px;display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;margin-right:20px}
+.brand-logo{font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.5px}
+.brand-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#38b2ac;padding:3px 8px;border:1px solid #38b2ac44;border-radius:4px}
+#topbar input{flex:1;max-width:280px;padding:7px 14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;color:#fff;font-size:13px;outline:none}
+#topbar input::placeholder{color:#8890a8}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.admin-badge{font-size:11px;color:#8890a8;text-transform:uppercase;letter-spacing:1px}
+.admin-avatar{width:32px;height:32px;border-radius:50%;background:#38b2ac;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
 
-  /* Main */
-  #main { margin-left: 240px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+/* Layout */
+#layout{display:flex;flex:1;min-height:0}
 
-  /* Top bar */
-  #topbar {
-    background: #fff; padding: 0 24px; height: 60px;
-    display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10;
-  }
-  #topbar .brand { display: flex; align-items: center; gap: 10px; }
-  #topbar .brand-logo { font-size: 22px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px; }
-  #topbar .brand-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #8890a8; }
-  #topbar .topbar-right { display: flex; align-items: center; gap: 12px; }
-  #topbar input[type=text] {
-    padding: 7px 14px; border-radius: 20px; border: 1px solid #e2e8f0;
-    font-size: 13px; background: #f7f8fa; outline: none; width: 200px; color: #222;
-  }
-  .admin-avatar {
-    width: 36px; height: 36px; border-radius: 50%; background: #38b2ac;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 14px; color: #fff;
-  }
+/* Sidebar */
+#sidebar{width:220px;min-width:220px;background:#1e2030;color:#fff;overflow-y:auto;flex-shrink:0}
+#sidebar h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#8890a8;padding:16px 14px 8px}
+.s-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:background 0.12s}
+.s-item:hover{background:rgba(255,255,255,0.06)}
+.s-item.active{background:#38b2ac18;border-left:3px solid #38b2ac}
+.s-item.active .s-name{color:#38b2ac}
+.s-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.s-name{font-size:13px;color:#ccd;font-weight:500;line-height:1.2}
+.s-sub{font-size:11px;color:#6b7594}
+.show-all-row{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent}
+.show-all-row.active{border-left-color:#38b2ac;background:#38b2ac18}
+.show-all-row .s-name{font-weight:600}
 
-  /* Content */
-  #content { padding: 24px; flex: 1; }
+/* Main content */
+#content{flex:1;overflow-y:auto;padding:20px}
 
-  /* Stat cards */
-  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .stat-card {
-    background: #fff; border-radius: 10px; padding: 20px 22px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .stat-label { font-size: 12px; font-weight: 600; color: #8890a8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-  .stat-value { font-size: 32px; font-weight: 800; color: #1a1a2e; line-height: 1; }
+/* Two-column: tables left, charts right */
+.main-grid{display:flex;gap:20px;align-items:flex-start}
+.col-tables{flex:1;min-width:0;display:flex;flex-direction:column;gap:16px}
+.col-charts{width:300px;min-width:300px;display:flex;flex-direction:column;gap:16px}
 
-  /* Showing label */
-  .showing-label { font-size: 13px; color: #8890a8; margin-bottom: 16px; }
-  .showing-label span { color: #38b2ac; font-weight: 600; }
+/* Cards */
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08);overflow:hidden}
+.card-header{padding:14px 16px 10px;border-bottom:1px solid #f0f2f5;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:14px;font-weight:700;color:#1a202c}
+.card-sub{font-size:11px;color:#8890a8}
 
-  /* Charts row */
-  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-  .chart-card {
-    background: #fff; border-radius: 10px; padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .chart-card h3 { font-size: 13px; font-weight: 700; color: #4a5568; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.8px; }
-  .chart-card canvas { max-height: 180px; }
+/* Tables */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{padding:8px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:#8890a8;background:#fafbfc;border-bottom:1px solid #eef0f3}
+.data-table td{padding:9px 12px;border-bottom:1px solid #f4f6f9;color:#374151;vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:#fafbfc}
+.empty-row td{text-align:center;color:#a0aec0;padding:20px;font-style:italic}
 
-  /* Middle row */
-  .middle-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+/* Badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-watched{background:#d1fae5;color:#065f46}
+.badge-towatch{background:#fef3c7;color:#92400e}
+.badge-inapp{background:#dbeafe;color:#1e40af}
+.badge-whatsapp{background:#d1fae5;color:#065f46}
+.badge-recommended{background:#ede9fe;color:#5b21b6}
 
-  /* Panel card */
-  .panel-card {
-    background: #fff; border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden;
-  }
-  .panel-header {
-    padding: 16px 20px 12px; border-bottom: 1px solid #f0f2f5;
-    font-size: 13px; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 0.8px;
-  }
+/* User row clickable */
+.user-row{cursor:pointer}
+.user-row:hover td{background:#f0f9ff !important}
+.user-row.selected td{background:#e0f7fa !important;color:#00695c}
 
-  /* Table */
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #8890a8; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid #f0f2f5; }
-  td { padding: 10px 14px; border-bottom: 1px solid #f7f8fa; color: #333; vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #fafbff; }
+/* Chart card */
+.chart-card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:14px 16px}
+.chart-title{font-size:13px;font-weight:700;color:#1a202c;margin-bottom:10px}
+.chart-wrap{position:relative;height:120px}
 
-  /* Badge */
-  .badge {
-    display: inline-block; padding: 2px 8px; border-radius: 20px;
-    font-size: 11px; font-weight: 600; background: #38b2ac22; color: #38b2ac;
-  }
-  .badge.grey { background: #f0f2f5; color: #8890a8; }
+/* Filter bar */
+#filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 14px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08);font-size:13px}
+#filter-bar strong{color:#1a202c}
+#filter-bar span{color:#8890a8}
+#clear-filter{margin-left:auto;padding:4px 12px;background:#f0f2f5;border:none;border-radius:6px;cursor:pointer;font-size:12px;color:#4a5568;font-weight:600}
+#clear-filter:hover{background:#e2e8f0}
 
-  /* Friends list */
-  .friend-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 16px; border-bottom: 1px solid #f7f8fa; cursor: pointer;
-  }
-  .friend-row:last-child { border-bottom: none; }
-  .friend-row:hover { background: #fafbff; }
-  .friend-name { font-size: 13px; font-weight: 500; color: #333; }
-  .friend-since { font-size: 11px; color: #aaa; }
-  .chevron { margin-left: auto; color: #ccc; font-size: 14px; }
+/* Login screen */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f0f2f5}
+.login-box{background:#fff;border-radius:14px;padding:36px 32px;box-shadow:0 4px 24px rgba(0,0,0,0.1);width:340px;text-align:center}
+.login-box h2{font-size:22px;font-weight:800;margin-bottom:6px;color:#1a202c}
+.login-box p{font-size:13px;color:#718096;margin-bottom:24px}
+.login-box input{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-bottom:12px;outline:none}
+.login-box input:focus{border-color:#38b2ac}
+.login-box button{width:100%;padding:12px;background:#38b2ac;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+.login-box button:hover{background:#2c9a94}
+.login-error{font-size:12px;color:#e53e3e;margin-top:8px}
 
-  /* Activity log */
-  .activity-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 24px; }
-
-  /* Login screen */
-  #login-screen {
-    position: fixed; inset: 0; background: #f0f2f5;
-    display: flex; align-items: center; justify-content: center; z-index: 100;
-  }
-  .login-box {
-    background: #fff; border-radius: 14px; padding: 40px 36px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.10); width: 340px; text-align: center;
-  }
-  .login-box h1 { font-size: 28px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
-  .login-box p { font-size: 13px; color: #8890a8; margin-bottom: 24px; }
-  .login-box input[type=password] {
-    width: 100%; padding: 11px 14px; border-radius: 8px; border: 1px solid #e2e8f0;
-    font-size: 14px; outline: none; margin-bottom: 12px; color: #222;
-  }
-  .login-box input[type=password]:focus { border-color: #38b2ac; }
-  .login-box button {
-    width: 100%; padding: 11px; border-radius: 8px; background: #38b2ac; border: none;
-    color: #fff; font-size: 14px; font-weight: 700; cursor: pointer;
-  }
-  .login-box button:hover { background: #2c9a95; }
-  .login-error { color: #e53e3e; font-size: 13px; margin-top: 8px; min-height: 18px; }
-
-  /* Loading spinner */
-  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid #e2e8f0; border-top-color: #38b2ac; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .empty-row { text-align: center; color: #aaa; padding: 24px; font-size: 13px; }
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#cbd5e0;border-radius:3px}
 </style>
 </head>
 <body>
 
-<!-- Login Screen -->
-<div id="login-screen" style="display:none;">
+<div id="login-screen" style="display:none">
   <div class="login-box">
-    <h1>REEL</h1>
-    <p>Admin Dashboard — enter your token to continue</p>
-    <input type="password" id="token-input" placeholder="Admin token" autocomplete="off" />
-    <button onclick="doLogin()">Sign In</button>
-    <div class="login-error" id="login-error"></div>
+    <h2>Reel Admin</h2>
+    <p>Enter your admin token to continue</p>
+    <input type="password" id="token-input" placeholder="Admin token" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button onclick="doLogin()">Access Dashboard</button>
+    <div class="login-error" id="login-err"></div>
   </div>
 </div>
 
-<!-- Sidebar -->
-<div id="sidebar">
-  <h2>Users</h2>
-  <div id="sidebar-list">
-    <div class="sidebar-item show-all active" id="show-all-btn" onclick="selectUser(null)">
-      <div class="sidebar-avatar" style="background:#38b2ac;">A</div>
-      <div>
-        <div class="sidebar-name">Show all</div>
-        <div class="sidebar-sub">Platform overview</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Main Content -->
-<div id="main">
+<div id="app" style="display:none;flex-direction:column;min-height:100vh">
   <div id="topbar">
     <div class="brand">
-      <div class="brand-logo">REEL</div>
-      <div class="brand-label">Admin Dashboard</div>
+      <span class="brand-logo">🎬 Reel</span>
+      <span class="brand-label">Admin</span>
     </div>
+    <input type="text" placeholder="Search users..." id="topbar-search" oninput="filterSidebar(this.value)"/>
     <div class="topbar-right">
-      <input type="text" placeholder="Search users..." id="search-input" oninput="filterSidebar(this.value)" />
+      <span class="admin-badge">Admin</span>
       <div class="admin-avatar">A</div>
     </div>
   </div>
 
-  <div id="content">
-    <div class="stat-row" id="stat-row">
-      <div class="stat-card"><div class="stat-label">Loading</div><div class="stat-value"><span class="spinner"></span></div></div>
-      <div class="stat-card"><div class="stat-label">Loading</div><div class="stat-value"><span class="spinner"></span></div></div>
-      <div class="stat-card"><div class="stat-label">Loading</div><div class="stat-value"><span class="spinner"></span></div></div>
-      <div class="stat-card"><div class="stat-label">Loading</div><div class="stat-value"><span class="spinner"></span></div></div>
+  <div id="layout">
+    <div id="sidebar">
+      <h3>Users</h3>
+      <div class="show-all-row active" id="show-all-btn" onclick="selectUser(null)">
+        <div class="s-avatar" style="background:#38b2ac;font-size:14px">⊞</div>
+        <div><div class="s-name">Show all</div></div>
+      </div>
+      <div id="user-list"></div>
     </div>
 
-    <div class="showing-label" id="showing-label">Showing platform-wide data</div>
+    <div id="content">
+      <div id="filter-bar" style="display:none">
+        Showing data for <strong id="filter-label"></strong>
+        <button id="clear-filter" onclick="selectUser(null)">✕ Show all</button>
+      </div>
 
-    <div class="charts-row">
-      <div class="chart-card">
-        <h3>Active Users by Day</h3>
-        <canvas id="chart-dau"></canvas>
-      </div>
-      <div class="chart-card">
-        <h3>Recommendations by Day</h3>
-        <canvas id="chart-recs"></canvas>
-      </div>
-    </div>
+      <div class="main-grid">
+        <div class="col-tables">
 
-    <div class="middle-row">
-      <div class="panel-card">
-        <div class="panel-header">Programs Recommended</div>
-        <div id="recs-table-wrap">
-          <table>
-            <thead><tr><th>Film</th><th>From</th><th>To</th><th>Note</th><th>Status</th></tr></thead>
-            <tbody id="recs-tbody"><tr><td colspan="5" class="empty-row"><span class="spinner"></span></td></tr></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="panel-card">
-        <div class="panel-header">Friends</div>
-        <div id="friends-list"><div class="empty-row"><span class="spinner"></span></div></div>
-      </div>
-    </div>
+          <!-- Table 1: Users -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Table 1. Users</span>
+              <span class="card-sub" id="users-count"></span>
+            </div>
+            <table class="data-table">
+              <thead><tr>
+                <th>Username</th>
+                <th>Last Login</th>
+                <th>Friends</th>
+                <th>Watchlisted</th>
+              </tr></thead>
+              <tbody id="tbl-users"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+            </table>
+          </div>
 
-    <div class="activity-card">
-      <div class="panel-header">Activity Log</div>
-      <table>
-        <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Film</th><th>Channel</th></tr></thead>
-        <tbody id="activity-tbody"><tr><td colspan="5" class="empty-row"><span class="spinner"></span></td></tr></tbody>
-      </table>
-    </div>
-  </div>
-</div>
+          <!-- Table 2: Programs Recommended -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Table 2. Programs Recommended</span>
+              <span class="card-sub" id="recs-count"></span>
+            </div>
+            <table class="data-table">
+              <thead><tr>
+                <th>Film</th>
+                <th>Recommended To</th>
+                <th>Comments</th>
+                <th>Status</th>
+              </tr></thead>
+              <tbody id="tbl-recs"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+            </table>
+          </div>
+
+          <!-- Table 3: Activity Log -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Table 3. Activity Log / Events</span>
+              <span class="card-sub" id="activity-count"></span>
+            </div>
+            <table class="data-table">
+              <thead><tr>
+                <th>Time</th>
+                <th>Username</th>
+                <th>Activity</th>
+                <th>Program</th>
+                <th>Recommended To</th>
+                <th>Channel</th>
+              </tr></thead>
+              <tbody id="tbl-activity"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+            </table>
+          </div>
+
+          <!-- Table 4: Friends -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Table 4. Friends</span>
+              <span class="card-sub" id="friends-count"></span>
+            </div>
+            <table class="data-table">
+              <thead><tr>
+                <th>Username</th>
+                <th>Friend</th>
+                <th>Connected</th>
+              </tr></thead>
+              <tbody id="tbl-friends"><tr class="empty-row"><td colspan="3">Loading…</td></tr></tbody>
+            </table>
+          </div>
+
+        </div><!-- /col-tables -->
+
+        <div class="col-charts">
+          <div class="chart-card">
+            <div class="chart-title">Users Active by Day</div>
+            <div class="chart-wrap"><canvas id="chart-dau"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Searches by Day</div>
+            <div class="chart-wrap"><canvas id="chart-searches"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">New Accounts by Day</div>
+            <div class="chart-wrap"><canvas id="chart-accounts"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Tabs Usage by Day</div>
+            <div class="chart-wrap"><canvas id="chart-tabs"></canvas></div>
+          </div>
+        </div><!-- /col-charts -->
+
+      </div><!-- /main-grid -->
+    </div><!-- /content -->
+  </div><!-- /layout -->
+</div><!-- /app -->
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────────
-var TOKEN = '';
-var SELECTED_USER = null;
-var ALL_USERS = [];
-var chartDAU = null;
-var chartRecs = null;
+const API = '';
+let TOKEN = '';
+let SELECTED_USER = null;
+let ALL_USERS = [];
+let charts = {};
 
-// ── Token / Auth ───────────────────────────────────────────────────────────────
-function getToken() {
-  // 1. URL param
-  var params = new URLSearchParams(window.location.search);
-  var t = params.get('token');
-  if (t) { sessionStorage.setItem('admin_token', t); return t; }
-  // 2. sessionStorage
-  return sessionStorage.getItem('admin_token') || '';
-}
+// ── Auth ──────────────────────────────────────────────────────────────────────
+(function init() {
+  const p = new URLSearchParams(window.location.search);
+  const t = p.get('token') || sessionStorage.getItem('reel_admin_token');
+  if (t) { TOKEN = t; sessionStorage.setItem('reel_admin_token', t); boot(); }
+  else { show('login-screen'); }
+})();
 
 function doLogin() {
-  var val = document.getElementById('token-input').value.trim();
-  if (!val) { document.getElementById('login-error').textContent = 'Please enter a token.'; return; }
-  sessionStorage.setItem('admin_token', val);
-  TOKEN = val;
-  document.getElementById('login-error').textContent = '';
-  // Verify token
-  fetch('/api/admin/users?token=' + encodeURIComponent(TOKEN))
-    .then(function(r) {
-      if (r.status === 401) {
-        sessionStorage.removeItem('admin_token');
-        TOKEN = '';
-        document.getElementById('login-error').textContent = 'Invalid token. Try again.';
-      } else {
-        document.getElementById('login-screen').style.display = 'none';
-        return r.json().then(function(data) { bootstrapApp(data); });
-      }
-    })
-    .catch(function() { document.getElementById('login-error').textContent = 'Connection error.'; });
+  const t = document.getElementById('token-input').value.trim();
+  if (!t) return;
+  TOKEN = t;
+  fetch(API + '/api/admin/users?token=' + encodeURIComponent(t))
+    .then(r => { if (!r.ok) throw new Error('bad'); return r.json(); })
+    .then(() => { sessionStorage.setItem('reel_admin_token', t); boot(); })
+    .catch(() => { document.getElementById('login-err').textContent = 'Invalid token'; });
 }
 
-// ── Bootstrap ──────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', function() {
-  TOKEN = getToken();
-  if (!TOKEN) {
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('token-input').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') doLogin();
-    });
-    return;
-  }
-  // Try fetching users to validate token
-  fetch('/api/admin/users?token=' + encodeURIComponent(TOKEN))
-    .then(function(r) {
-      if (r.status === 401) {
-        sessionStorage.removeItem('admin_token');
-        document.getElementById('login-screen').style.display = 'flex';
-        document.getElementById('token-input').addEventListener('keydown', function(e) {
-          if (e.key === 'Enter') doLogin();
-        });
-      } else {
-        return r.json().then(bootstrapApp);
-      }
-    })
-    .catch(function() {
-      document.getElementById('login-screen').style.display = 'flex';
-    });
-});
+function show(id) {
+  document.getElementById('login-screen').style.display = id === 'login-screen' ? 'flex' : 'none';
+  document.getElementById('app').style.display = id === 'app' ? 'flex' : 'none';
+}
 
-function bootstrapApp(users) {
-  ALL_USERS = users || [];
-  renderSidebar(ALL_USERS);
+// ── Boot ──────────────────────────────────────────────────────────────────────
+function boot() {
+  show('app');
   initCharts();
-  loadDashboard(null);
+  loadUsers().then(() => loadAll());
 }
 
-// ── Sidebar ────────────────────────────────────────────────────────────────────
-function avatarColor(user) {
-  return user.color || '#38b2ac';
+// ── Load helpers ──────────────────────────────────────────────────────────────
+function q(path) {
+  const sep = path.includes('?') ? '&' : '?';
+  const uid = SELECTED_USER ? '&user_id=' + SELECTED_USER.id : '';
+  return fetch(API + path + sep + 'token=' + encodeURIComponent(TOKEN) + uid).then(r => r.ok ? r.json() : []);
 }
 
-function avatarInitial(user) {
-  var n = user.display_name || user.username || '?';
-  return n.charAt(0).toUpperCase();
+function loadAll() {
+  q('/api/admin/stats').then(renderStats);
+  q('/api/admin/chart').then(updateCharts);
+  q('/api/admin/recommendations').then(renderRecs);
+  q('/api/admin/activity').then(renderActivity);
+  q('/api/admin/friends').then(renderFriends);
+}
+
+// ── Users sidebar + table ─────────────────────────────────────────────────────
+function loadUsers() {
+  return fetch(API + '/api/admin/users?token=' + encodeURIComponent(TOKEN))
+    .then(r => r.ok ? r.json() : [])
+    .then(users => {
+      ALL_USERS = users;
+      renderSidebar(users);
+      renderUsersTable(users);
+    });
 }
 
 function renderSidebar(users) {
-  var list = document.getElementById('sidebar-list');
-  // Keep "Show all" row, rebuild rest
-  list.innerHTML = '';
-  var showAll = document.createElement('div');
-  showAll.className = 'sidebar-item show-all' + (SELECTED_USER === null ? ' active' : '');
-  showAll.id = 'show-all-btn';
-  showAll.onclick = function() { selectUser(null); };
-  showAll.innerHTML = '<div class="sidebar-avatar" style="background:#38b2ac;">A</div>' +
-    '<div><div class="sidebar-name">Show all</div><div class="sidebar-sub">Platform overview</div></div>';
-  list.appendChild(showAll);
-
-  users.forEach(function(u) {
-    var item = document.createElement('div');
-    item.className = 'sidebar-item' + (SELECTED_USER && SELECTED_USER.id === u.id ? ' active' : '');
-    item.setAttribute('data-uid', u.id);
-    item.setAttribute('data-name', (u.display_name || u.username || '').toLowerCase());
-    item.onclick = function() { selectUser(u); };
-    item.innerHTML =
-      '<div class="sidebar-avatar" style="background:' + avatarColor(u) + ';">' + avatarInitial(u) + '</div>' +
-      '<div>' +
-        '<div class="sidebar-name">' + esc(u.display_name || u.username) + '</div>' +
-        '<div class="sidebar-sub">' + (u.friend_count || 0) + ' friends</div>' +
-      '</div>';
-    list.appendChild(item);
-  });
+  const el = document.getElementById('user-list');
+  el.innerHTML = users.map(u => {
+    const init = (u.display_name || u.username || '?')[0].toUpperCase();
+    const col = u.color || '#718096';
+    return '<div class="s-item" id="s-' + u.id + '" onclick="selectUser(' + JSON.stringify(u).replace(/"/g, '&quot;') + ')">' +
+      '<div class="s-avatar" style="background:' + col + '">' + (u.avatar || init) + '</div>' +
+      '<div><div class="s-name">' + esc(u.display_name || u.username) + '</div>' +
+      '<div class="s-sub">' + u.friend_count + ' friends</div></div></div>';
+  }).join('');
 }
 
 function filterSidebar(q) {
-  q = q.toLowerCase();
-  var items = document.querySelectorAll('#sidebar-list .sidebar-item');
-  items.forEach(function(item) {
-    if (item.id === 'show-all-btn') return;
-    var name = item.getAttribute('data-name') || '';
-    item.style.display = name.includes(q) ? '' : 'none';
+  const ql = q.toLowerCase();
+  document.querySelectorAll('#user-list .s-item').forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(ql) ? '' : 'none';
   });
 }
 
+function renderUsersTable(users) {
+  const tbody = document.getElementById('tbl-users');
+  document.getElementById('users-count').textContent = users.length + ' users';
+  if (!users.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No users</td></tr>'; return; }
+  tbody.innerHTML = users.map(u => {
+    const login = u.last_login_at ? fmtDate(u.last_login_at) : '—';
+    const cls = SELECTED_USER && SELECTED_USER.id === u.id ? 'user-row selected' : 'user-row';
+    return '<tr class="' + cls + '" onclick="selectUser(' + JSON.stringify(u).replace(/"/g, '&quot;') + ')">' +
+      '<td><strong>' + esc(u.display_name || u.username) + '</strong><br><span style="font-size:11px;color:#a0aec0">@' + esc(u.username) + '</span></td>' +
+      '<td>' + login + '</td>' +
+      '<td>' + u.friend_count + '</td>' +
+      '<td>' + u.watchlist_count + '</td></tr>';
+  }).join('');
+}
+
+// ── Select user ───────────────────────────────────────────────────────────────
 function selectUser(user) {
   SELECTED_USER = user;
-  // Update active state
-  document.querySelectorAll('#sidebar-list .sidebar-item').forEach(function(el) {
-    el.classList.remove('active');
-  });
-  if (user === null) {
-    var sa = document.getElementById('show-all-btn');
-    if (sa) sa.classList.add('active');
-  } else {
-    var el = document.querySelector('[data-uid="' + user.id + '"]');
+  // Update sidebar highlight
+  document.querySelectorAll('.s-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('show-all-btn').classList.toggle('active', !user);
+  if (user) {
+    const el = document.getElementById('s-' + user.id);
     if (el) el.classList.add('active');
   }
-  loadDashboard(user);
+  // Update filter bar
+  const fb = document.getElementById('filter-bar');
+  fb.style.display = user ? '' : 'none';
+  if (user) document.getElementById('filter-label').textContent = user.display_name || user.username;
+  // Update users table highlight
+  renderUsersTable(ALL_USERS);
+  // Reload all panels
+  loadAll();
 }
 
-// ── Dashboard Load ─────────────────────────────────────────────────────────────
-function loadDashboard(user) {
-  var uid = user ? user.id : null;
-  var qs = '?token=' + encodeURIComponent(TOKEN) + (uid ? '&user_id=' + uid : '');
-
-  // Update showing label
-  var label = document.getElementById('showing-label');
-  if (uid) {
-    label.innerHTML = 'Showing data for <span>' + esc(user.display_name || user.username) + '</span>';
-  } else {
-    label.textContent = 'Showing platform-wide data';
-  }
-
-  // Stat cards - show loading
-  renderStats(null);
-  // Charts - show loading
-  renderChartLoading();
-
-  Promise.all([
-    fetch('/api/admin/stats' + qs).then(function(r) { return r.json(); }),
-    fetch('/api/admin/chart' + qs).then(function(r) { return r.json(); }),
-    fetch('/api/admin/recommendations' + qs).then(function(r) { return r.json(); }),
-    fetch('/api/admin/activity' + qs).then(function(r) { return r.json(); }),
-    fetch('/api/admin/friends' + qs).then(function(r) { return r.json(); }),
-  ]).then(function(results) {
-    renderStats(results[0]);
-    renderCharts(results[1]);
-    renderRecs(results[2]);
-    renderActivity(results[3]);
-    renderFriends(results[4]);
-  }).catch(function(err) {
-    console.error('Dashboard load error', err);
-  });
-}
-
-// ── Stats ──────────────────────────────────────────────────────────────────────
+// ── Stats ─────────────────────────────────────────────────────────────────────
 function renderStats(stats) {
-  var row = document.getElementById('stat-row');
-  if (!stats) {
-    row.innerHTML =
-      '<div class="stat-card"><div class="stat-label">Loading</div><div class="stat-value"><span class="spinner"></span></div></div>'.repeat(4);
-    return;
-  }
-  row.innerHTML = stats.map(function(s) {
-    return '<div class="stat-card">' +
-      '<div class="stat-label">' + esc(s.label) + '</div>' +
-      '<div class="stat-value">' + s.value + '</div>' +
-    '</div>';
+  // Stats are shown inline in the filter bar label — could add a stat strip here if needed
+}
+
+// ── Recommendations ───────────────────────────────────────────────────────────
+function renderRecs(recs) {
+  const tbody = document.getElementById('tbl-recs');
+  document.getElementById('recs-count').textContent = recs.length + ' records';
+  if (!recs.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No recommendations yet</td></tr>'; return; }
+  tbody.innerHTML = recs.map(r => {
+    const status = r.rating ? '<span class="badge badge-watched">Rated ' + parseFloat(r.rating).toFixed(1) + '</span>' : '<span class="badge badge-towatch">Pending</span>';
+    return '<tr><td><strong>' + esc(trunc(r.film_title)) + '</strong></td>' +
+      '<td>' + esc(r.to_name || '—') + '</td>' +
+      '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#718096">' + esc(r.note || '—') + '</td>' +
+      '<td>' + status + '</td></tr>';
   }).join('');
 }
 
-// ── Charts ─────────────────────────────────────────────────────────────────────
-function initCharts() {
-  var ctxDAU = document.getElementById('chart-dau').getContext('2d');
-  var ctxRecs = document.getElementById('chart-recs').getContext('2d');
+// ── Activity ──────────────────────────────────────────────────────────────────
+function renderActivity(events) {
+  const tbody = document.getElementById('tbl-activity');
+  document.getElementById('activity-count').textContent = events.length + ' events';
+  if (!events.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No activity yet</td></tr>'; return; }
+  tbody.innerHTML = events.map(e => {
+    const channelBadge = e.channel === 'WhatsApp'
+      ? '<span class="badge badge-whatsapp">WhatsApp</span>'
+      : '<span class="badge badge-inapp">In-App</span>';
+    const actBadge = e.action === 'Recommended'
+      ? '<span class="badge badge-recommended">Recommended</span>'
+      : e.action === 'Marked Watched'
+        ? '<span class="badge badge-watched">Watched</span>'
+        : '<span style="color:#374151">' + esc(e.action) + '</span>';
+    return '<tr>' +
+      '<td style="white-space:nowrap;color:#718096">' + fmtTime(e.ts) + '</td>' +
+      '<td><strong>' + esc(e.user_name || '—') + '</strong></td>' +
+      '<td>' + actBadge + '</td>' +
+      '<td>' + esc(trunc(e.film || '—')) + '</td>' +
+      '<td>' + esc(e.to_user || '—') + '</td>' +
+      '<td>' + channelBadge + '</td></tr>';
+  }).join('');
+}
 
-  var commonOptions = {
-    responsive: true,
+// ── Friends ───────────────────────────────────────────────────────────────────
+function renderFriends(friends) {
+  const tbody = document.getElementById('tbl-friends');
+  document.getElementById('friends-count').textContent = friends.length + ' records';
+  if (!friends.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No friends data</td></tr>'; return; }
+  tbody.innerHTML = friends.map(f => {
+    const since = f.since ? fmtDate(f.since) : (f.friend_count !== undefined ? f.friend_count + ' connections' : '—');
+    return '<tr><td>' + esc(f.name) + '</td><td>' + esc(f.name) + '</td><td style="color:#8890a8">' + since + '</td></tr>';
+  }).join('');
+}
+
+// ── Charts ────────────────────────────────────────────────────────────────────
+const CHART_COLOR = '#38b2ac';
+const chartDefaults = {
+  type: 'line',
+  options: {
+    responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
     plugins: { legend: { display: false } },
     scales: {
-      x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#8890a8' } },
-      y: { grid: { color: '#f0f2f5' }, ticks: { font: { size: 11 }, color: '#8890a8', stepSize: 1 }, beginAtZero: true }
-    },
-    elements: { point: { radius: 3, backgroundColor: '#38b2ac' } }
-  };
+      x: { grid: { color: '#f0f2f5' }, ticks: { font: { size: 10 }, color: '#a0aec0', maxRotation: 0 } },
+      y: { grid: { color: '#f0f2f5' }, ticks: { font: { size: 10 }, color: '#a0aec0', precision: 0, stepSize: 1 }, beginAtZero: true, min: 0 }
+    }
+  }
+};
 
-  chartDAU = new Chart(ctxDAU, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        data: [],
-        borderColor: '#38b2ac',
-        backgroundColor: 'rgba(56,178,172,0.08)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.3,
-      }]
-    },
-    options: JSON.parse(JSON.stringify(commonOptions))
-  });
+function makeDataset(data) {
+  return { data, borderColor: CHART_COLOR, backgroundColor: CHART_COLOR + '18', fill: true, tension: 0.35, pointRadius: 3, pointBackgroundColor: CHART_COLOR, borderWidth: 2 };
+}
 
-  chartRecs = new Chart(ctxRecs, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        data: [],
-        borderColor: '#667eea',
-        backgroundColor: 'rgba(102,126,234,0.08)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.3,
-      }]
-    },
-    options: JSON.parse(JSON.stringify(commonOptions))
+function initCharts() {
+  const ids = ['chart-dau','chart-searches','chart-accounts','chart-tabs'];
+  ids.forEach(id => {
+    charts[id] = new Chart(document.getElementById(id), {
+      ...chartDefaults,
+      data: { labels: [], datasets: [makeDataset([])] }
+    });
   });
 }
 
-function renderChartLoading() {
-  if (!chartDAU || !chartRecs) return;
-  chartDAU.data.labels = [];
-  chartDAU.data.datasets[0].data = [];
-  chartDAU.update();
-  chartRecs.data.labels = [];
-  chartRecs.data.datasets[0].data = [];
-  chartRecs.update();
+function updateCharts(data) {
+  const labels = data.labels || [];
+  [
+    ['chart-dau', data.dau || []],
+    ['chart-searches', data.searches || []],
+    ['chart-accounts', data.new_accounts || []],
+    ['chart-tabs', data.tab_views || []],
+  ].forEach(([id, vals]) => {
+    const c = charts[id];
+    if (!c) return;
+    c.data.labels = labels;
+    c.data.datasets[0].data = vals;
+    c.update();
+  });
 }
 
-function renderCharts(data) {
-  if (!chartDAU || !chartRecs || !data) return;
-  var labels = data.labels || [];
-  chartDAU.data.labels = labels;
-  chartDAU.data.datasets[0].data = data.dau || [];
-  chartDAU.update();
-  chartRecs.data.labels = labels;
-  chartRecs.data.datasets[0].data = data.recommendations || [];
-  chartRecs.update();
-}
-
-// ── Recommendations Table ──────────────────────────────────────────────────────
-function renderRecs(recs) {
-  var tbody = document.getElementById('recs-tbody');
-  if (!recs || recs.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-row">No recommendations found</td></tr>';
-    return;
-  }
-  tbody.innerHTML = recs.map(function(r) {
-    var title = (r.film_title || '').length > 20 ? r.film_title.slice(0, 20) + '...' : (r.film_title || '—');
-    var note = r.note ? ((r.note.length > 22 ? r.note.slice(0, 22) + '...' : r.note)) : '';
-    return '<tr>' +
-      '<td><strong>' + esc(title) + '</strong></td>' +
-      '<td>' + esc(r.from_name || 'Unknown') + '</td>' +
-      '<td>' + esc(r.to_name || '—') + '</td>' +
-      '<td style="color:#8890a8;font-style:italic;">' + esc(note) + '</td>' +
-      '<td><span class="badge">' + (r.rating ? ('★ ' + r.rating) : 'Sent') + '</span></td>' +
-    '</tr>';
-  }).join('');
-}
-
-// ── Friends Panel ──────────────────────────────────────────────────────────────
-function renderFriends(friends) {
-  var wrap = document.getElementById('friends-list');
-  if (!friends || friends.length === 0) {
-    wrap.innerHTML = '<div class="empty-row">No friends data</div>';
-    return;
-  }
-  wrap.innerHTML = friends.map(function(f) {
-    var name = f.name || f.username || '?';
-    var sub = f.since ? ('Since ' + fmtDate(f.since)) : ((f.friend_count || 0) + ' friends');
-    return '<div class="friend-row">' +
-      '<div class="sidebar-avatar" style="background:' + (f.color || '#38b2ac') + ';width:30px;height:30px;font-size:12px;">' +
-        (name.charAt(0).toUpperCase()) +
-      '</div>' +
-      '<div>' +
-        '<div class="friend-name">' + esc(name) + '</div>' +
-        '<div class="friend-since">' + esc(sub) + '</div>' +
-      '</div>' +
-      '<div class="chevron">&#8250;</div>' +
-    '</div>';
-  }).join('');
-}
-
-// ── Activity Log ───────────────────────────────────────────────────────────────
-function renderActivity(events) {
-  var tbody = document.getElementById('activity-tbody');
-  if (!events || events.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-row">No activity found</td></tr>';
-    return;
-  }
-  tbody.innerHTML = events.map(function(e) {
-    var film = (e.film || '').length > 20 ? e.film.slice(0, 20) + '...' : (e.film || '—');
-    var actionBadge = e.action === 'Recommended'
-      ? '<span class="badge">Recommended</span>'
-      : e.action === 'Marked Watched'
-        ? '<span class="badge grey">Watched</span>'
-        : '<span class="badge grey">Watchlisted</span>';
-    return '<tr>' +
-      '<td style="color:#8890a8;white-space:nowrap;">' + fmtTs(e.ts) + '</td>' +
-      '<td><strong>' + esc(e.user_name || '—') + '</strong></td>' +
-      '<td>' + actionBadge + '</td>' +
-      '<td>' + esc(film) + '</td>' +
-      '<td>' + esc(e.channel || 'In-App') + '</td>' +
-    '</tr>';
-  }).join('');
-}
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(s) {
-  if (!s) return '';
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
-function fmtTs(ts) {
-  if (!ts) return '—';
-  try {
-    var d = new Date(ts.replace(' ', 'T') + (ts.includes('T') ? '' : 'Z'));
-    if (isNaN(d.getTime())) return ts;
-    var hh = String(d.getHours()).padStart(2, '0');
-    var mm = String(d.getMinutes()).padStart(2, '0');
-    var dd = String(d.getDate()).padStart(2, '0');
-    var mo = String(d.getMonth() + 1).padStart(2, '0');
-    return hh + ':' + mm + ' \u2022 ' + dd + '/' + mo;
-  } catch(e) { return ts; }
-}
-
+function trunc(s, n) { n = n || 22; return s && s.length > n ? s.slice(0, n) + '…' : (s || ''); }
 function fmtDate(ts) {
   if (!ts) return '—';
-  try {
-    var d = new Date(ts.replace(' ', 'T') + (ts.includes('T') ? '' : 'Z'));
-    if (isNaN(d.getTime())) return ts;
-    return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
-  } catch(e) { return ts; }
+  const d = new Date(ts.replace(' ','T') + (ts.includes('T') ? '' : 'Z'));
+  return d.toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+function fmtTime(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts.replace(' ','T') + (ts.includes('T') ? '' : 'Z'));
+  return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }) + ' · ' + d.toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit' });
 }
 </script>
 </body>

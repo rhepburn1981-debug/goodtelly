@@ -13526,6 +13526,8 @@ function App() {
                 }
                 setTmdbSearching(true);
                 const timer = setTimeout(() => {
+                  const tok = window.__AUTH_TOKEN || localStorage.getItem("filmshare_token");
+                  fetch(API_BASE + "/api/log/search", { method: "POST", headers: Object.assign({"Content-Type":"application/json"}, tok ? {Authorization:"Bearer "+tok} : {}), body: JSON.stringify({query: search.trim()}) }).catch(() => {});
                   fetch(API_BASE + '/api/tmdb/search?q=' + encodeURIComponent(search.trim()))
                     .then(r => r.ok ? r.json() : [])
                     .then(results => {
@@ -14144,6 +14146,8 @@ function App() {
                             setTab(t.id);
                             setSearch("");
                             setSelectedFilm(null);
+                            const _tok = window.__AUTH_TOKEN || localStorage.getItem("filmshare_token");
+                            fetch(API_BASE + "/api/log/tab", { method: "POST", headers: Object.assign({"Content-Type":"application/json"}, _tok ? {Authorization:"Bearer "+_tok} : {}), body: JSON.stringify({tab: t.id}) }).catch(() => {});
                           },
                           className: "nav-btn",
                         },

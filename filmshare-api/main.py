@@ -219,11 +219,24 @@ def _migrate():
             "ALTER TABLE films ADD COLUMN slug TEXT",
             "ALTER TABLE films ADD COLUMN tmdb_id INTEGER",
             "ALTER TABLE films ADD COLUMN tvmaze_id INTEGER",
+            "ALTER TABLE users ADD COLUMN last_login_at TEXT",
+            """CREATE TABLE IF NOT EXISTS search_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                query TEXT NOT NULL,
+                created_at TEXT DEFAULT (datetime('now'))
+            )""",
+            """CREATE TABLE IF NOT EXISTS tab_views (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                tab_name TEXT NOT NULL,
+                created_at TEXT DEFAULT (datetime('now'))
+            )""",
         ]:
             try:
                 conn.execute(sql)
             except Exception:
-                pass  # column already exists
+                pass  # column/table already exists
 
 _migrate()
 
@@ -436,6 +449,7 @@ def login(form: OAuth2PasswordRequestForm = Depends()):
         ).fetchone()
         if not user or not verify_password(form.password, user["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
+        conn.execute("UPDATE users SET last_login_at=datetime('now') WHERE id=?", (user["id"],))
         user_dict = {k: user[k] for k in user.keys() if k != "password_hash"}
     token = create_access_token({"sub": str(user["id"])})
     return {"access_token": token, "token_type": "bearer", "user": user_dict}
@@ -1727,7 +1741,7 @@ def admin_users_list(token: str = ""):
     with get_db() as conn:
         rows = conn.execute("""
             SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name,
-                   u.avatar, u.color, u.created_at,
+                   u.avatar, u.color, u.created_at, u.last_login_at,
                    COUNT(DISTINCT uf.id) as friend_count,
                    COUNT(DISTINCT uw.film_id) as watchlist_count
             FROM users u
@@ -1798,11 +1812,34 @@ def admin_chart(token: str = "", user_id: Optional[int] = None):
             rec_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM user_recommendations WHERE created_at >= datetime('now','-14 days') GROUP BY day").fetchall()
         rec_data = {r["day"]: r["c"] for r in rec_rows}
 
+        # Searches by day
+        if user_id:
+            srch_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM search_logs WHERE user_id=? AND created_at >= datetime('now','-14 days') GROUP BY day", (user_id,)).fetchall()
+        else:
+            srch_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM search_logs WHERE created_at >= datetime('now','-14 days') GROUP BY day").fetchall()
+        srch_data = {r["day"]: r["c"] for r in srch_rows}
+
+        # New accounts by day (always platform-wide; per-user: 1 on join date)
+        if user_id:
+            acct_rows = conn.execute("SELECT date(created_at) as day, 1 as c FROM users WHERE id=? AND created_at >= datetime('now','-14 days')", (user_id,)).fetchall()
+        else:
+            acct_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM users WHERE created_at >= datetime('now','-14 days') GROUP BY day").fetchall()
+        acct_data = {r["day"]: r["c"] for r in acct_rows}
+
+        # Tabs usage by day
+        if user_id:
+            tab_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM tab_views WHERE user_id=? AND created_at >= datetime('now','-14 days') GROUP BY day", (user_id,)).fetchall()
+        else:
+            tab_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM tab_views WHERE created_at >= datetime('now','-14 days') GROUP BY day").fetchall()
+        tab_data = {r["day"]: r["c"] for r in tab_rows}
+
         labels = [d[5:] for d in days]
         return {
             "labels": labels,
             "dau": [dau_data.get(d, 0) for d in days],
-            "recommendations": [rec_data.get(d, 0) for d in days],
+            "searches": [srch_data.get(d, 0) for d in days],
+            "new_accounts": [acct_data.get(d, 0) for d in days],
+            "tab_views": [tab_data.get(d, 0) for d in days],
         }
 
 
@@ -1901,6 +1938,42 @@ def admin_friends_list(token: str = "", user_id: Optional[int] = None):
                 GROUP BY u.id ORDER BY friend_count DESC LIMIT 15
             """).fetchall()
         return [dict(r) for r in rows]
+
+
+# ─── Event logging (search + tab) ─────────────────────────────────────────────
+
+@app.post("/api/log/search", status_code=201)
+def log_search(body: dict, token: str = Depends(oauth2_scheme)):
+    query = (body.get("query") or "").strip()
+    if not query:
+        return {"ok": True}
+    user_id = None
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            user_id = int(payload.get("sub", 0)) or None
+        except Exception:
+            pass
+    with get_db() as conn:
+        conn.execute("INSERT INTO search_logs (user_id, query) VALUES (?,?)", (user_id, query))
+    return {"ok": True}
+
+
+@app.post("/api/log/tab", status_code=201)
+def log_tab(body: dict, token: str = Depends(oauth2_scheme)):
+    tab = (body.get("tab") or "").strip()
+    if not tab:
+        return {"ok": True}
+    user_id = None
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            user_id = int(payload.get("sub", 0)) or None
+        except Exception:
+            pass
+    with get_db() as conn:
+        conn.execute("INSERT INTO tab_views (user_id, tab_name) VALUES (?,?)", (user_id, tab))
+    return {"ok": True}
 
 
 # ─── Streamers config ──────────────────────────────────────────────────────────
