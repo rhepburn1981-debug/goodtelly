@@ -1037,7 +1037,7 @@ def tmdb_search(q: str, year: Optional[int] = None):
 
 
 @app.post("/api/admin/bulk-reenrich")
-def bulk_reenrich(current_user=Depends(require_user)):
+def bulk_reenrich():
     """Re-enrich all films missing a poster by searching TMDB movie + TV."""
     with get_db() as conn:
         rows = conn.execute(
