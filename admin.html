@@ -308,11 +308,18 @@ function renderSidebar(users) {
   el.innerHTML = users.map(u => {
     const init = (u.display_name || u.username || '?')[0].toUpperCase();
     const col = u.color || '#718096';
-    return '<div class="s-item" id="s-' + u.id + '" onclick="selectUser(' + JSON.stringify(u).replace(/"/g, '&quot;') + ')">' +
-      '<div class="s-avatar" style="background:' + col + '">' + (u.avatar || init) + '</div>' +
+    return '<div class="s-item" id="s-' + u.id + '" data-uid="' + u.id + '">' +
+      '<div class="s-avatar" style="background:' + esc(col) + '">' + esc(u.avatar || init) + '</div>' +
       '<div><div class="s-name">' + esc(u.display_name || u.username) + '</div>' +
       '<div class="s-sub">' + u.friend_count + ' friends</div></div></div>';
   }).join('');
+  // Attach click handlers via data-uid (safe — no JSON in HTML attributes)
+  el.querySelectorAll('.s-item').forEach(item => {
+    item.addEventListener('click', function() {
+      const uid = parseInt(this.getAttribute('data-uid'));
+      selectUser(ALL_USERS.find(u => u.id === uid) || null);
+    });
+  });
 }
 
 function filterSidebar(q) {
@@ -329,12 +336,18 @@ function renderUsersTable(users) {
   tbody.innerHTML = users.map(u => {
     const login = u.last_login_at ? fmtDate(u.last_login_at) : '—';
     const cls = SELECTED_USER && SELECTED_USER.id === u.id ? 'user-row selected' : 'user-row';
-    return '<tr class="' + cls + '" onclick="selectUser(' + JSON.stringify(u).replace(/"/g, '&quot;') + ')">' +
+    return '<tr class="' + cls + '" data-uid="' + u.id + '">' +
       '<td><strong>' + esc(u.display_name || u.username) + '</strong><br><span style="font-size:11px;color:#a0aec0">@' + esc(u.username) + '</span></td>' +
       '<td>' + login + '</td>' +
       '<td>' + u.friend_count + '</td>' +
       '<td>' + u.watchlist_count + '</td></tr>';
   }).join('');
+  tbody.querySelectorAll('tr[data-uid]').forEach(row => {
+    row.addEventListener('click', function() {
+      const uid = parseInt(this.getAttribute('data-uid'));
+      selectUser(ALL_USERS.find(u => u.id === uid) || null);
+    });
+  });
 }
 
 // ── Select user ───────────────────────────────────────────────────────────────
