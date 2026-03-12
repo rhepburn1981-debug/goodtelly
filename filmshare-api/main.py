@@ -392,6 +392,7 @@ class RegisterRequest(BaseModel):
     display_name: Optional[str] = None
     username: Optional[str] = None
     color: Optional[str] = None
+    avatar: Optional[str] = None
 
 
 def _generate_username(display_name: str, conn) -> str:
@@ -416,12 +417,12 @@ def register(req: RegisterRequest):
             raise HTTPException(status_code=409, detail="Username already taken")
         hashed = hash_password(req.password)
         cur = conn.execute(
-            "INSERT INTO users (username, email, password_hash, display_name, color) VALUES (?,?,?,?,?)",
-            (username, req.email, hashed, display, req.color)
+            "INSERT INTO users (username, email, password_hash, display_name, color, avatar) VALUES (?,?,?,?,?,?)",
+            (username, req.email, hashed, display, req.color, req.avatar)
         )
         user_id = cur.lastrowid
         user = {"id": user_id, "username": username, "email": req.email,
-                "display_name": display, "color": req.color, "avatar": None}
+                "display_name": display, "color": req.color, "avatar": req.avatar}
     token = create_access_token({"sub": str(user_id)})
     return {"access_token": token, "token_type": "bearer", "user": user}
 
