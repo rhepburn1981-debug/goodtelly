@@ -961,7 +961,7 @@ def tmdb_search(q: str, year: Optional[int] = None):
     from concurrent.futures import ThreadPoolExecutor
 
     def search_tmdb():
-        if not os.environ.get("TMDB_API_KEY", ""):
+        if not os.environ.get("TMDB_API_KEY", "") and not os.environ.get("TMDB_READ_TOKEN", ""):
             return []
         params = {"query": q, "language": "en-US", "page": 1}
         if year:
