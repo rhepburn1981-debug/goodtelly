@@ -11862,14 +11862,18 @@
                       React.createElement("button", {
                         key: film.id,
                         onClick: () => onFilmClick(film),
-                        style: { flexShrink: 0, width: 110, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
+                        style: { flexShrink: 0, width: 140, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
                       },
-                        film.poster
-                          ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 110, height: 160, objectFit: "cover", borderRadius: 12, display: "block" } })
-                          : React.createElement("div", { style: { width: 110, height: 160, borderRadius: 12, background: film.color || "var(--surface3)" } }),
-                        React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--text)", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, film.title),
-                        React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginTop: 2 } }, film.year),
-                        film.streamers && film.streamers.length > 0 && React.createElement(StreamerBadges, { ids: film.streamers }),
+                        React.createElement("div", { style: { position: "relative", width: 140, height: 200, borderRadius: 12, overflow: "hidden" } },
+                          film.poster
+                            ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 140, height: 200, objectFit: "cover", display: "block" } })
+                            : React.createElement("div", { style: { width: 140, height: 200, background: film.color || "var(--surface3)" } }),
+                          React.createElement("div", { style: { position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0) 100%)", padding: "28px 8px 8px" } },
+                            React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, film.title),
+                            React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.55)", marginTop: 2 } }, film.year),
+                          ),
+                        ),
+                        film.streamers && film.streamers.length > 0 && React.createElement("div", { style: { marginTop: 5 } }, React.createElement(StreamerBadges, { ids: film.streamers })),
                       ),
                     ),
                   ),
@@ -11886,17 +11890,21 @@
                       return React.createElement("button", {
                         key: show.id,
                         onClick: () => onFilmClick(extToFilm(show, 2000000, show.media_type === "movie" ? { _fromTmdb: true, tmdb_id: show.id } : { _fromTmdbTv: true, tmdb_tv_id: show.id })),
-                        style: { flexShrink: 0, width: 110, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
+                        style: { flexShrink: 0, width: 140, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" },
                       },
-                        show.poster
-                          ? React.createElement("img", { src: show.poster, alt: show.title, style: { width: 110, height: 160, objectFit: "cover", borderRadius: 12, display: "block" } })
-                          : React.createElement("div", { style: { width: 110, height: 160, borderRadius: 12, background: "var(--surface3)" } }),
-                        React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: "var(--text)", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.title),
-                        React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 3 } },
-                          show.popularity && parseFloat(show.popularity) > 0
-                            ? React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", fontWeight: 600 } }, fmtPop(show.popularity))
-                            : React.createElement("div", { style: { fontSize: 11, color: "var(--muted)" } }, show.year),
-                          show.rating && parseFloat(show.rating) > 0 && React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)" } }, "\u2605 " + parseFloat(show.rating).toFixed(1)),
+                        React.createElement("div", { style: { position: "relative", width: 140, height: 200, borderRadius: 12, overflow: "hidden" } },
+                          show.poster
+                            ? React.createElement("img", { src: show.poster, alt: show.title, style: { width: 140, height: 200, objectFit: "cover", display: "block" } })
+                            : React.createElement("div", { style: { width: 140, height: 200, background: "var(--surface3)" } }),
+                          React.createElement("div", { style: { position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0) 100%)", padding: "28px 8px 8px" } },
+                            React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.title),
+                            React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 2 } },
+                              show.popularity && parseFloat(show.popularity) > 0
+                                ? React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.6)", fontWeight: 600 } }, fmtPop(show.popularity))
+                                : React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.55)" } }, show.year),
+                              show.rating && parseFloat(show.rating) > 0 && React.createElement("div", { style: { fontSize: 10, color: "var(--gold-bright)" } }, "\u2605 " + parseFloat(show.rating).toFixed(1)),
+                            ),
+                          ),
                         ),
                       );
                     }),
@@ -13915,22 +13923,33 @@ function App() {
                           },
                           className: "nav-btn",
                         },
-                        React.createElement(Icon, {
-                          name: t.icon,
-                          size: 23,
-                          style: {
-                            color:
-                              tab === t.id ? "var(--gold-bright)" : "var(--muted)",
-                            transition: "color 0.2s, filter 0.2s, transform 0.2s",
-                            transform:
-                              tab === t.id ? "translateY(-1px)" : "translateY(0)",
-                            filter:
-                              tab === t.id
-                                ? "drop-shadow(0 2px 8px rgba(232,201,106,0.35))"
-                                : "none",
-                          },
-                        }),
-                        React.createElement(
+                        t.id === "profile"
+                          ? React.createElement("span", {
+                              style: {
+                                fontSize: 13,
+                                fontWeight: 800,
+                                color: tab === t.id ? "var(--gold-bright)" : "var(--muted)",
+                                letterSpacing: -0.3,
+                                lineHeight: 1,
+                                transition: "color 0.2s",
+                              },
+                            }, t.label)
+                          : React.createElement(Icon, {
+                              name: t.icon,
+                              size: 23,
+                              style: {
+                                color:
+                                  tab === t.id ? "var(--gold-bright)" : "var(--muted)",
+                                transition: "color 0.2s, filter 0.2s, transform 0.2s",
+                                transform:
+                                  tab === t.id ? "translateY(-1px)" : "translateY(0)",
+                                filter:
+                                  tab === t.id
+                                    ? "drop-shadow(0 2px 8px rgba(232,201,106,0.35))"
+                                    : "none",
+                              },
+                            }),
+                        t.id !== "profile" && React.createElement(
                           "span",
                           {
                             className: "nav-label",
