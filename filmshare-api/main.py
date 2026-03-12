@@ -1705,6 +1705,204 @@ def unmark_watched(film_id: int):
         return {"ok": True}
 
 
+# ─── Admin ────────────────────────────────────────────────────────────────────
+
+ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "reel-admin-2024")
+ADMIN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "admin.html")
+
+
+def _check_admin(token: str = ""):
+    if not token or token != ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+
+@app.get("/admin", include_in_schema=False)
+def serve_admin():
+    return FileResponse(ADMIN_FILE)
+
+
+@app.get("/api/admin/users")
+def admin_users_list(token: str = ""):
+    _check_admin(token)
+    with get_db() as conn:
+        rows = conn.execute("""
+            SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name,
+                   u.avatar, u.color, u.created_at,
+                   COUNT(DISTINCT uf.id) as friend_count,
+                   COUNT(DISTINCT uw.film_id) as watchlist_count
+            FROM users u
+            LEFT JOIN user_friends uf ON (uf.requester_id=u.id OR uf.addressee_id=u.id) AND uf.status='accepted'
+            LEFT JOIN user_watchlist uw ON uw.user_id=u.id
+            GROUP BY u.id ORDER BY u.created_at DESC
+        """).fetchall()
+        return [dict(r) for r in rows]
+
+
+@app.get("/api/admin/stats")
+def admin_stats(token: str = "", user_id: Optional[int] = None):
+    _check_admin(token)
+    with get_db() as conn:
+        if user_id:
+            fc = conn.execute("SELECT COUNT(*) as c FROM user_friends WHERE (requester_id=? OR addressee_id=?) AND status='accepted'", (user_id, user_id)).fetchone()["c"]
+            wc = conn.execute("SELECT COUNT(*) as c FROM user_watchlist WHERE user_id=?", (user_id,)).fetchone()["c"]
+            dc = conn.execute("SELECT COUNT(*) as c FROM user_watched WHERE user_id=?", (user_id,)).fetchone()["c"]
+            rc = conn.execute("SELECT COUNT(*) as c FROM user_recommendations WHERE from_user_id=? OR to_user_id=?", (user_id, user_id)).fetchone()["c"]
+            return [
+                {"label": "Friends", "value": fc},
+                {"label": "Watchlisted", "value": wc},
+                {"label": "Watched", "value": dc},
+                {"label": "Recommendations", "value": rc},
+            ]
+        else:
+            total = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()["c"]
+            new7 = conn.execute("SELECT COUNT(*) as c FROM users WHERE created_at >= datetime('now','-7 days')").fetchone()["c"]
+            friends = conn.execute("SELECT COUNT(*) as c FROM user_friends WHERE status='accepted'").fetchone()["c"]
+            recs = conn.execute("SELECT COUNT(*) as c FROM user_recommendations").fetchone()["c"]
+            return [
+                {"label": "Total Users", "value": total},
+                {"label": "New This Week", "value": new7},
+                {"label": "Active Friendships", "value": friends},
+                {"label": "Recommendations Sent", "value": recs},
+            ]
+
+
+@app.get("/api/admin/chart")
+def admin_chart(token: str = "", user_id: Optional[int] = None):
+    _check_admin(token)
+    with get_db() as conn:
+        days = [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(13, -1, -1)]
+        # DAU - unique users who did anything each day
+        if user_id:
+            dau_q = """
+                SELECT day, COUNT(DISTINCT user_id) as c FROM (
+                    SELECT date(added_at) as day, user_id FROM user_watchlist WHERE user_id=? AND added_at >= datetime('now','-14 days')
+                    UNION ALL SELECT date(watched_at), user_id FROM user_watched WHERE user_id=? AND watched_at >= datetime('now','-14 days')
+                    UNION ALL SELECT date(created_at), from_user_id FROM user_recommendations WHERE from_user_id=? AND created_at >= datetime('now','-14 days')
+                ) GROUP BY day
+            """
+            dau_rows = conn.execute(dau_q, (user_id, user_id, user_id)).fetchall()
+        else:
+            dau_q = """
+                SELECT day, COUNT(DISTINCT user_id) as c FROM (
+                    SELECT date(added_at) as day, user_id FROM user_watchlist WHERE added_at >= datetime('now','-14 days')
+                    UNION ALL SELECT date(watched_at), user_id FROM user_watched WHERE watched_at >= datetime('now','-14 days')
+                    UNION ALL SELECT date(created_at), from_user_id FROM user_recommendations WHERE from_user_id IS NOT NULL AND created_at >= datetime('now','-14 days')
+                ) GROUP BY day
+            """
+            dau_rows = conn.execute(dau_q).fetchall()
+        dau_data = {r["day"]: r["c"] for r in dau_rows}
+
+        if user_id:
+            rec_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM user_recommendations WHERE (from_user_id=? OR to_user_id=?) AND created_at >= datetime('now','-14 days') GROUP BY day", (user_id, user_id)).fetchall()
+        else:
+            rec_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM user_recommendations WHERE created_at >= datetime('now','-14 days') GROUP BY day").fetchall()
+        rec_data = {r["day"]: r["c"] for r in rec_rows}
+
+        labels = [d[5:] for d in days]
+        return {
+            "labels": labels,
+            "dau": [dau_data.get(d, 0) for d in days],
+            "recommendations": [rec_data.get(d, 0) for d in days],
+        }
+
+
+@app.get("/api/admin/recommendations")
+def admin_recs(token: str = "", user_id: Optional[int] = None):
+    _check_admin(token)
+    with get_db() as conn:
+        if user_id:
+            rows = conn.execute("""
+                SELECT ur.created_at, f.title as film_title,
+                       COALESCE(uf.display_name, uf.username) as from_name,
+                       COALESCE(ut.display_name, ut.username) as to_name,
+                       ur.note, ur.rating
+                FROM user_recommendations ur
+                JOIN films f ON f.id=ur.film_id
+                LEFT JOIN users uf ON uf.id=ur.from_user_id
+                JOIN users ut ON ut.id=ur.to_user_id
+                WHERE ur.from_user_id=? OR ur.to_user_id=?
+                ORDER BY ur.created_at DESC LIMIT 30
+            """, (user_id, user_id)).fetchall()
+        else:
+            rows = conn.execute("""
+                SELECT ur.created_at, f.title as film_title,
+                       COALESCE(uf.display_name, uf.username) as from_name,
+                       COALESCE(ut.display_name, ut.username) as to_name,
+                       ur.note, ur.rating
+                FROM user_recommendations ur
+                JOIN films f ON f.id=ur.film_id
+                LEFT JOIN users uf ON uf.id=ur.from_user_id
+                JOIN users ut ON ut.id=ur.to_user_id
+                ORDER BY ur.created_at DESC LIMIT 30
+            """).fetchall()
+        return [dict(r) for r in rows]
+
+
+@app.get("/api/admin/activity")
+def admin_activity(token: str = "", user_id: Optional[int] = None):
+    _check_admin(token)
+    with get_db() as conn:
+        events = []
+        uid_filter = (user_id,) if user_id else ()
+        where_user_wl = "WHERE uw.user_id=?" if user_id else ""
+        where_user_wd = "WHERE uw.user_id=?" if user_id else ""
+        where_user_rc = "WHERE (ur.from_user_id=? OR ur.to_user_id=?)" if user_id else ""
+
+        wl = conn.execute(f"""
+            SELECT uw.added_at as ts, COALESCE(u.display_name,u.username) as user_name,
+                   u.id as user_id, f.title as film, 'Added to Watchlist' as action, NULL as to_user, 'In-App' as channel
+            FROM user_watchlist uw JOIN users u ON u.id=uw.user_id JOIN films f ON f.id=uw.film_id
+            {where_user_wl} ORDER BY uw.added_at DESC LIMIT 30
+        """, uid_filter).fetchall()
+        events.extend([dict(r) for r in wl])
+
+        wd = conn.execute(f"""
+            SELECT uw.watched_at as ts, COALESCE(u.display_name,u.username) as user_name,
+                   u.id as user_id, f.title as film, 'Marked Watched' as action, NULL as to_user, 'In-App' as channel
+            FROM user_watched uw JOIN users u ON u.id=uw.user_id JOIN films f ON f.id=uw.film_id
+            {where_user_wd} ORDER BY uw.watched_at DESC LIMIT 30
+        """, uid_filter).fetchall()
+        events.extend([dict(r) for r in wd])
+
+        rc_filter = (user_id, user_id) if user_id else ()
+        rc = conn.execute(f"""
+            SELECT ur.created_at as ts, COALESCE(uf.display_name,uf.username) as user_name,
+                   uf.id as user_id, f.title as film, 'Recommended' as action,
+                   COALESCE(ut.display_name,ut.username) as to_user, 'In-App' as channel
+            FROM user_recommendations ur
+            JOIN films f ON f.id=ur.film_id
+            LEFT JOIN users uf ON uf.id=ur.from_user_id
+            JOIN users ut ON ut.id=ur.to_user_id
+            {where_user_rc} ORDER BY ur.created_at DESC LIMIT 30
+        """, rc_filter).fetchall()
+        events.extend([dict(r) for r in rc])
+
+        events.sort(key=lambda x: x.get("ts") or "", reverse=True)
+        return events[:50]
+
+
+@app.get("/api/admin/friends")
+def admin_friends_list(token: str = "", user_id: Optional[int] = None):
+    _check_admin(token)
+    with get_db() as conn:
+        if user_id:
+            rows = conn.execute("""
+                SELECT u.id, COALESCE(u.display_name,u.username) as name, u.avatar, u.color, uf.created_at as since
+                FROM user_friends uf
+                JOIN users u ON (CASE WHEN uf.requester_id=? THEN u.id=uf.addressee_id ELSE u.id=uf.requester_id END)
+                WHERE (uf.requester_id=? OR uf.addressee_id=?) AND uf.status='accepted'
+            """, (user_id, user_id, user_id)).fetchall()
+        else:
+            rows = conn.execute("""
+                SELECT u.id, COALESCE(u.display_name,u.username) as name, u.avatar, u.color,
+                       COUNT(DISTINCT uf.id) as friend_count
+                FROM users u
+                LEFT JOIN user_friends uf ON (uf.requester_id=u.id OR uf.addressee_id=u.id) AND uf.status='accepted'
+                GROUP BY u.id ORDER BY friend_count DESC LIMIT 15
+            """).fetchall()
+        return [dict(r) for r in rows]
+
+
 # ─── Streamers config ──────────────────────────────────────────────────────────
 
 STREAMERS = {
