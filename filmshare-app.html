@@ -11963,12 +11963,13 @@
                 ),
 
                 /* TRENDING & BANGING (local films) */
-                trendingFilms.length > 0 && React.createElement(React.Fragment, null,
+                React.createElement(React.Fragment, null,
+                  (watchlistRecentFilms.length > 0 ? watchlistRecentFilms : trendingFilms).length > 0 &&
                   sectionLabel(React.createElement(React.Fragment, null, sectionIcon("watching"), "What Reel users are watching right now"), null),
                   React.createElement("div", {
                     style: { display: "flex", gap: 10, overflowX: "auto", padding: "0 16px 12px", scrollbarWidth: "none" },
                   },
-                    trendingFilms.slice(0, 10).map(film =>
+                    (watchlistRecentFilms.length > 0 ? watchlistRecentFilms : trendingFilms).slice(0, 10).map(film =>
                       React.createElement("button", {
                         key: film.id,
                         onClick: () => onFilmClick(film),
@@ -13439,9 +13440,7 @@ function App() {
                 });
               };
 
-              const trendingFilms = watchlistRecentFilms.length > 0
-                ? watchlistRecentFilms
-                : [...ALL_FILMS].sort((a, b) => b.trendingViews - a.trendingViews).slice(0, 10);
+              const trendingFilms = [...ALL_FILMS].sort((a, b) => b.trendingViews - a.trendingViews).slice(0, 10);
               const friendPicks = ALL_FILMS.slice(0, 5);
               const visiblePicks = showAllPicks
                 ? friendPicks
