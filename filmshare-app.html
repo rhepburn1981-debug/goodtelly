@@ -12906,7 +12906,8 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                     React.createElement("span", { style: { fontSize: 13, color: "var(--muted)" } }, "Invite friends to join you on Reel:"),
                     React.createElement("button", {
                       onClick: () => {
-                        const msg = "Hey! I\u2019m using Reel to track what I\u2019m watching and get recommendations from friends. Join me! \uD83C\uDF7F\n\nhttps://goodtelly-production.up.railway.app";
+                        const inviteUrl = "https://goodtelly.app?invite=" + encodeURIComponent((currentUser && currentUser.username) || "");
+                        const msg = "Tired of scrolling Netflix for 30 minutes and finding nothing? \uD83D\uDE05\n\nReel is an app where friends share the best TV & films.\n\nJoin me here \uD83D\uDC47\n" + inviteUrl;
                         window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
                       },
                       style: { display: "flex", alignItems: "center", gap: 7, background: "#25D366", border: "none", borderRadius: 20, padding: "8px 14px", cursor: "pointer", color: "#fff", fontWeight: 700, fontSize: 13 },
@@ -13468,6 +13469,15 @@ function App() {
                 window.__AUTH_TOKEN = token;
                 fetch(API_BASE + "/api/friends", { headers: { Authorization: "Bearer " + token } })
                   .then(r => r.ok ? r.json() : []).then(fs => setRealFriends(fs)).catch(() => {});
+                // Auto-friend inviter if user arrived via invite link
+                const inviteFrom = sessionStorage.getItem("invite_from");
+                if (inviteFrom) {
+                  sessionStorage.removeItem("invite_from");
+                  fetch(API_BASE + "/api/friends/" + encodeURIComponent(inviteFrom) + "/connect", {
+                    method: "POST",
+                    headers: { Authorization: "Bearer " + token },
+                  }).catch(() => {});
+                }
               };
               const onLogout = () => {
                 localStorage.removeItem("filmshare_token");
@@ -14800,6 +14810,12 @@ function App() {
               const root = ReactDOM.createRoot(document.getElementById('root'));
               root.render(React.createElement(App, null));
             }
+
+            // Store invite param so onLogin can auto-friend the inviter
+            (function() {
+              const inv = new URLSearchParams(window.location.search).get("invite");
+              if (inv) { sessionStorage.setItem("invite_from", inv); window.history.replaceState({}, "", "/"); }
+            })();
 
             bootstrap();
     </script>
