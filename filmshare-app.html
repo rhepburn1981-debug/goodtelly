@@ -13683,6 +13683,11 @@ function App() {
               // Handle arrival from the landing page after sign-up or share link
               useEffect(() => {
                 const params = new URLSearchParams(window.location.search);
+                // ?register=1 — arrived from share page CTA, open register screen if not logged in
+                if (params.get("register") === "1" && !authToken && !localStorage.getItem("filmshare_token")) {
+                  setAuthMode("register");
+                  setShowAuth(true);
+                }
                 // ?open=SLUG or ?open_title=TITLE — open a specific film (from share link redirect)
                 const openSlug = params.get("open");
                 const openTitle = params.get("open_title");
