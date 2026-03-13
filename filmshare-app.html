@@ -10483,14 +10483,14 @@
 
               const buildWAMsg = (shareUrl) => {
                 const actualNote = note.trim() || film.note || "Trust me on this one.";
-                return "🎬 " + CURRENT_USER + " recommends" + "\n\n" +
-                  film.title + "\n\n" +
-                  "💬 \u201C" + actualNote + "\u201D\n\n" +
-                  "\u25B6 Watch the trailer and see " + CURRENT_USER + "'s recommendation\n\n" +
-                  "👇\n" + shareUrl + "\n\n" +
-                  "—\n\n" +
-                  "Join " + CURRENT_USER + " on Reel.\n\n" +
-                  "Watch ONLY the good content.\nStop the scroll.";
+                return "Hey \u2014 you should watch this \uD83D\uDC40\n\n" +
+                  "\uD83C\uDFAC " + film.title + "\n" +
+                  "\uD83D\uDCAC \u201C" + actualNote + "\u201D\n\n" +
+                  "\u25B6 Watch the trailer\n" +
+                  shareUrl + "\n\n" +
+                  "Join me on Reel\n" +
+                  "See what your friends are watching & quickly build your watchlist.\n\n" +
+                  "Stop the scroll. Watch only the good stuff.";
               };
 
               const sendInApp = async (friend) => {
@@ -10838,7 +10838,7 @@
                         fontWeight: 700,
                       },
                     },
-                    rating,
+                    normalizeRating(rating).toFixed(1),
                     "/5",
                   ),
               );
@@ -11707,7 +11707,7 @@
                 poster: show.poster_large || show.poster || show.image,
                 description: show.overview || show.summary || "",
                 genre: Array.isArray(show.genres) ? show.genres.slice(0, 2).join(", ") : (show.genres || ""),
-                year: show.year || (show.first_air_date ? show.first_air_date.slice(0, 4) : ""),
+                year: show.year || (show.release_date ? show.release_date.slice(0, 4) : "") || (show.first_air_date ? show.first_air_date.slice(0, 4) : ""),
                 rating: show.rating,
                 streamers: [], stills: [], _isExternal: true,
               }, extra || {});
@@ -11969,7 +11969,7 @@
                           : React.createElement("div", { style: { width: 82, height: 118, borderRadius: 9, background: "var(--surface3)" } }),
                         React.createElement("div", { style: { fontSize: 11, fontWeight: 700, color: "var(--text)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, show.title),
                         React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.58)", marginTop: 1, fontWeight: 500 } },
-                          show.popularity && parseFloat(show.popularity) > 0 ? formatCount(parseFloat(show.popularity)) : (show.year || "")),
+                          show.year || ""),
                       );
                     }),
                   ),
@@ -11992,7 +11992,7 @@
                           ? React.createElement("img", { src: film.poster, alt: film.title, style: { width: 82, height: 118, objectFit: "cover", borderRadius: 7, display: "block", boxShadow: "0 10px 22px rgba(0,0,0,0.34)" } })
                           : React.createElement("div", { style: { width: 82, height: 118, borderRadius: 9, background: film.color || "var(--surface3)" } }),
                         React.createElement("div", { style: { fontSize: 11, fontWeight: 700, color: "var(--text)", marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, film.title),
-                        React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.58)", marginTop: 1, fontWeight: 500 } }, formatCount(film.trendingViews || 0)),
+                        React.createElement("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.58)", marginTop: 1, fontWeight: 500 } }, film.year || ""),
                       ),
                     ),
                   ),
