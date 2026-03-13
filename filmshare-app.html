@@ -13672,10 +13672,20 @@ function App() {
                 const tmdbFilm = id < 0 ? (tmdbFilmCacheRef.current[id] || tmdbSearchResults.find(f => f.id === id)) : null;
                 if (tmdbFilm) {
                   const existingFilm = ALL_FILMS.find(f => (f.title || '').toLowerCase() === (tmdbFilm.title || '').toLowerCase());
-                  if (existingFilm) {
-                    setAddedIds(prev => prev.includes(existingFilm.id) ? prev : [...prev, existingFilm.id]);
-                    setMyList(prev => prev.find(f => f.id === existingFilm.id) ? prev : [...prev, existingFilm]);
+                  if (existingFilm && addedIds.includes(existingFilm.id)) {
                     showToastMsg(`"${existingFilm.title}" is already on your watchlist`);
+                    return;
+                  }
+                  if (existingFilm) {
+                    setAddedIds(prev => [...prev, existingFilm.id]);
+                    setMyList(prev => prev.find(f => f.id === existingFilm.id) ? prev : [...prev, existingFilm]);
+                    showToastMsg(`"${existingFilm.title}" added to Watchlist`);
+                    if (authToken) {
+                      fetch(API_BASE + '/api/me/watchlist/' + existingFilm.id, {
+                        method: 'POST',
+                        headers: { Authorization: 'Bearer ' + authToken },
+                      }).catch(() => {});
+                    }
                     return;
                   }
                   setAddedIds(prev => [...prev, id]);
