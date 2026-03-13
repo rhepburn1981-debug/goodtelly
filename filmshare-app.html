@@ -12411,7 +12411,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                 if (genreFilter !== "All") list = list.filter(f => (f.genre || "").includes(genreFilter));
                 if (providerFilter !== "all") list = list.filter(f => f.streamers && f.streamers.includes(providerFilter));
                 list = filterByTime(list);
-                return list.sort((a, b) => (b.trendingViews || 0) - (a.trendingViews || 0));
+                return list.sort((a, b) => (b.activityScore || b.trendingViews || 0) - (a.activityScore || a.trendingViews || 0));
               }, [genreFilter, providerFilter, timePeriod]);
 
               const featuredFilm = filtered[0];
@@ -13655,7 +13655,7 @@ function App() {
                 });
               };
 
-              const trendingFilms = [...ALL_FILMS].sort((a, b) => b.trendingViews - a.trendingViews).slice(0, 10);
+              const trendingFilms = [...ALL_FILMS].sort((a, b) => (b.activityScore || b.trendingViews || 0) - (a.activityScore || a.trendingViews || 0)).slice(0, 10);
               const friendPicks = ALL_FILMS.slice(0, 5);
               const visiblePicks = showAllPicks
                 ? friendPicks

@@ -868,6 +868,16 @@ def list_films(genre: Optional[str] = None, streamer: Optional[str] = None, q: O
             query += " WHERE " + " AND ".join(wheres)
 
         rows = conn.execute(query, params).fetchall()
+        # Compute activity scores (watchlist + watched + recommendations) per film
+        scores = {}
+        for r in conn.execute("""
+            SELECT film_id, COUNT(*) as c FROM (
+                SELECT film_id FROM user_watchlist
+                UNION ALL SELECT film_id FROM user_watched
+                UNION ALL SELECT film_id FROM user_recommendations
+            ) GROUP BY film_id
+        """).fetchall():
+            scores[r["film_id"]] = r["c"]
         films = []
         for row in rows:
             fid = row["id"]
@@ -877,7 +887,10 @@ def list_films(genre: Optional[str] = None, streamer: Optional[str] = None, q: O
             stills = [r["still_url"] for r in conn.execute(
                 "SELECT still_url FROM film_stills WHERE film_id = ? ORDER BY rowid", (fid,)
             ).fetchall()]
-            films.append(row_to_film(row, streamers, stills))
+            f = row_to_film(row, streamers, stills)
+            f["activityScore"] = scores.get(fid, 0)
+            films.append(f)
+        films.sort(key=lambda f: f["activityScore"], reverse=True)
         return films
 
 
@@ -1474,15 +1487,28 @@ def get_providers():
 
 @app.get("/api/trending/watchlist-recent")
 def trending_watchlist_recent():
-    """Films ordered by most recently added to any user's watchlist."""
+    """Films ordered by most watches + recommendations in the last 7 days."""
     with get_db() as conn:
         rows = conn.execute("""
-            SELECT f.*, COUNT(uw.film_id) as watchlist_count, MAX(uw.created_at) as last_added
+            SELECT f.*,
+                COUNT(DISTINCT uw.id) as watchlist_count,
+                (
+                    SELECT COUNT(*) FROM user_watched uwat WHERE uwat.film_id = f.id
+                    AND uwat.created_at >= datetime('now', '-7 days')
+                ) +
+                (
+                    SELECT COUNT(*) FROM user_watchlist uwl WHERE uwl.film_id = f.id
+                    AND uwl.created_at >= datetime('now', '-7 days')
+                ) +
+                (
+                    SELECT COUNT(*) FROM user_recommendations ur WHERE ur.film_id = f.id
+                    AND ur.created_at >= datetime('now', '-7 days')
+                ) as recent_score
             FROM films f
-            JOIN user_watchlist uw ON uw.film_id = f.id
+            LEFT JOIN user_watchlist uw ON uw.film_id = f.id
             WHERE f.poster IS NOT NULL AND f.poster != ''
             GROUP BY f.id
-            ORDER BY last_added DESC
+            ORDER BY recent_score DESC, COUNT(DISTINCT uw.id) DESC
             LIMIT 15
         """).fetchall()
         result = []
