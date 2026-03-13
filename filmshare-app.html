@@ -14646,11 +14646,8 @@ function App() {
               const token = localStorage.getItem('filmshare_token');
               const authHeaders = token ? { Authorization: 'Bearer ' + token } : {};
 
-              // Load Google Client ID
-              try {
-                const cfg = await fetch(API_BASE + '/api/config').then(r => r.json());
-                window.__GOOGLE_CLIENT_ID = cfg.google_client_id || '';
-              } catch(e) { window.__GOOGLE_CLIENT_ID = ''; }
+              // Google Client ID (public — safe to embed in frontend)
+              window.__GOOGLE_CLIENT_ID = '709452989437-vooq081nkmhb03n12h8p0tee0e327ui1.apps.googleusercontent.com';
 
               try {
                 const [filmsRes, friendsRes, logosRes] = await Promise.all([
