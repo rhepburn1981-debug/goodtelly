@@ -154,10 +154,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <div style="max-height:270px;overflow-y:auto">
             <table class="data-table">
               <thead><tr>
-                <th>Username</th>
-                <th>Last Login</th>
-                <th>Friends</th>
-                <th>Watchlisted</th>
+                <th style="cursor:pointer" onclick="sortTable('users','display_name',ALL_USERS,renderUsersTable)">Username ↕</th>
+                <th style="cursor:pointer" onclick="sortTable('users','last_login_at',ALL_USERS,renderUsersTable)">Last Login ↕</th>
+                <th style="cursor:pointer" onclick="sortTable('users','friend_count',ALL_USERS,renderUsersTable)">Friends ↕</th>
+                <th style="cursor:pointer" onclick="sortTable('users','watchlist_count',ALL_USERS,renderUsersTable)">Watchlisted ↕</th>
               </tr></thead>
               <tbody id="tbl-users"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
             </table>
@@ -174,10 +174,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
               <thead><tr>
                 <th>Film</th>
                 <th>Recommended To</th>
+                <th>Date</th>
                 <th>Comments</th>
                 <th>Status</th>
               </tr></thead>
-              <tbody id="tbl-recs"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+              <tbody id="tbl-recs"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
             </table>
           </div>
 
@@ -380,7 +381,7 @@ function selectUser(user) {
   fb.style.display = user ? '' : 'none';
   if (user) document.getElementById('filter-label').textContent = user.display_name || user.username;
   // Update users table row highlight (only if already loaded)
-  if (ALL_USERS.length) renderUsersTable(ALL_USERS);
+  if (ALL_USERS.length) renderUsersTable(user ? [user] : ALL_USERS);
   // Reload all panels
   loadAll();
 }
@@ -394,11 +395,12 @@ function renderStats(stats) {
 function renderRecs(recs) {
   const tbody = document.getElementById('tbl-recs');
   document.getElementById('recs-count').textContent = recs.length + ' records';
-  if (!recs.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No recommendations yet</td></tr>'; return; }
+  if (!recs.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No recommendations yet</td></tr>'; return; }
   tbody.innerHTML = recs.map(r => {
     const status = r.rating ? '<span class="badge badge-watched">Rated ' + parseFloat(r.rating).toFixed(1) + '</span>' : '<span class="badge badge-towatch">Pending</span>';
     return '<tr><td><strong>' + esc(trunc(r.film_title)) + '</strong></td>' +
       '<td>' + esc(r.to_name || '—') + '</td>' +
+      '<td style="white-space:nowrap;color:#718096">' + fmtDate(r.created_at) + '</td>' +
       '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#718096">' + esc(r.note || '—') + '</td>' +
       '<td>' + status + '</td></tr>';
   }).join('');
@@ -488,6 +490,25 @@ function updateCharts(data) {
       c.update();
     } catch(e) {}
   });
+}
+
+// ── Sortable tables ────────────────────────────────────────────────────────────
+const sortState = {};
+
+function sortTable(tableId, col, dataArr, renderFn) {
+  const key = tableId + col;
+  if (sortState[key] === 'asc') {
+    sortState[key] = 'desc';
+  } else {
+    sortState[key] = 'asc';
+  }
+  const dir = sortState[key] === 'asc' ? 1 : -1;
+  const sorted = [...dataArr].sort((a, b) => {
+    const av = a[col] || '';
+    const bv = b[col] || '';
+    return av < bv ? -dir : av > bv ? dir : 0;
+  });
+  renderFn(sorted);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

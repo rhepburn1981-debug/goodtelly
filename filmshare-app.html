@@ -11919,7 +11919,7 @@
                           style: { position: "relative", display: "flex", gap: 8, padding: "0 10px 10px" },
                         },
                           React.createElement("button", {
-                            onClick: (e) => { e.stopPropagation(); if (hasTrailer) onPlayTrailer(film.trailerUrl); },
+                            onClick: (e) => { e.stopPropagation(); if (hasTrailer) { onPlayTrailer(film.trailerUrl); fetch(API_BASE + '/api/log/trailer', {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (window.__AUTH_TOKEN || '')}, body: JSON.stringify({title: film.title || ''})}).catch(() => {}); } },
                             style: {
                               flex: 1, padding: "7px 11px", borderRadius: 16,
                               background: hasTrailer ? "linear-gradient(180deg, rgba(28,28,34,0.84), rgba(14,14,19,0.84))" : "rgba(255,255,255,0.03)",
@@ -12827,6 +12827,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                             setActiveFriend(getName(f));
                             setGenreFilter("All");
                             setWatchFilter("unwatched");
+                            fetch(API_BASE + '/api/log/friend_view', {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (window.__AUTH_TOKEN || '')}, body: JSON.stringify({friend: getName(f) || ''})}).catch(() => {});
                           },
                           style: {
                             textAlign: "center",

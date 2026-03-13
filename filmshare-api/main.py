@@ -1745,7 +1745,14 @@ def admin_users_list(token: str = ""):
     with get_db() as conn:
         rows = conn.execute("""
             SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name,
-                   u.avatar, u.color, u.created_at, u.last_login_at,
+                   u.avatar, u.color, u.created_at,
+                   (SELECT MAX(ts) FROM (
+                       SELECT u2.last_login_at as ts FROM users u2 WHERE u2.id=u.id
+                       UNION ALL SELECT MAX(wl.added_at) FROM user_watchlist wl WHERE wl.user_id=u.id
+                       UNION ALL SELECT MAX(wd.watched_at) FROM user_watched wd WHERE wd.user_id=u.id
+                       UNION ALL SELECT MAX(rc.created_at) FROM user_recommendations rc WHERE rc.from_user_id=u.id
+                       UNION ALL SELECT MAX(sl.created_at) FROM search_logs sl WHERE sl.user_id=u.id
+                   ) WHERE ts IS NOT NULL) as last_login_at,
                    COUNT(DISTINCT uf.id) as friend_count,
                    COUNT(DISTINCT uw.film_id) as watchlist_count
             FROM users u
@@ -1928,8 +1935,50 @@ def admin_activity(token: str = "", user_id: Optional[int] = None):
         """, rc_filter).fetchall()
         events.extend([dict(r) for r in rc])
 
+        # Search events
+        sl_filter = (user_id,) if user_id else ()
+        where_sl = "WHERE sl.user_id=?" if user_id else ""
+        sl = conn.execute(f"""
+            SELECT sl.created_at as ts, COALESCE(u.display_name,u.username,'Unknown') as user_name,
+                   sl.user_id as user_id, sl.query as film, 'Searched' as action, NULL as to_user, 'In-App' as channel
+            FROM search_logs sl LEFT JOIN users u ON u.id=sl.user_id
+            {where_sl} ORDER BY sl.created_at DESC LIMIT 50
+        """, sl_filter).fetchall()
+        events.extend([dict(r) for r in sl])
+
+        # Tab view events
+        tv_filter = (user_id,) if user_id else ()
+        where_tv = "WHERE tv.user_id=?" if user_id else ""
+        tv = conn.execute(f"""
+            SELECT tv.created_at as ts, COALESCE(u.display_name,u.username,'Unknown') as user_name,
+                   tv.user_id as user_id, NULL as film, 'Opened ' || tv.tab_name || ' tab' as action, NULL as to_user, 'In-App' as channel
+            FROM tab_views tv LEFT JOIN users u ON u.id=tv.user_id
+            {where_tv} ORDER BY tv.created_at DESC LIMIT 50
+        """, tv_filter).fetchall()
+        events.extend([dict(r) for r in tv])
+
+        # Generic event logs (trailer views, friend list views)
+        try:
+            el_filter = (user_id,) if user_id else ()
+            where_el = "WHERE el.user_id=?" if user_id else ""
+            el = conn.execute(f"""
+                SELECT el.created_at as ts, COALESCE(u.display_name,u.username,'Unknown') as user_name,
+                       el.user_id as user_id, el.detail as film,
+                       CASE el.event_type
+                           WHEN 'trailer_view' THEN 'Watched Trailer'
+                           WHEN 'friend_view' THEN 'Viewed Friend List'
+                           ELSE el.event_type
+                       END as action,
+                       NULL as to_user, 'In-App' as channel
+                FROM event_logs el LEFT JOIN users u ON u.id=el.user_id
+                {where_el} ORDER BY el.created_at DESC LIMIT 50
+            """, el_filter).fetchall()
+            events.extend([dict(r) for r in el])
+        except Exception:
+            pass
+
         events.sort(key=lambda x: x.get("ts") or "", reverse=True)
-        return events[:50]
+        return events[:100]
 
 
 @app.get("/api/admin/friends")
@@ -1987,6 +2036,46 @@ def log_tab(body: dict, token: str = Depends(oauth2_scheme)):
             pass
     with get_db() as conn:
         conn.execute("INSERT INTO tab_views (user_id, tab_name) VALUES (?,?)", (user_id, tab))
+    return {"ok": True}
+
+
+@app.post("/api/log/trailer", status_code=201)
+def log_trailer(body: dict, token: str = Depends(oauth2_scheme)):
+    film_title = (body.get("title") or "").strip()
+    if not film_title:
+        return {"ok": True}
+    user_id = None
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            user_id = int(payload.get("sub", 0)) or None
+        except Exception:
+            pass
+    with get_db() as conn:
+        try:
+            conn.execute("CREATE TABLE IF NOT EXISTS event_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, event_type TEXT NOT NULL, detail TEXT, created_at TEXT DEFAULT (datetime('now')))")
+        except Exception:
+            pass
+        conn.execute("INSERT INTO event_logs (user_id, event_type, detail) VALUES (?,?,?)", (user_id, "trailer_view", film_title))
+    return {"ok": True}
+
+
+@app.post("/api/log/friend_view", status_code=201)
+def log_friend_view(body: dict, token: str = Depends(oauth2_scheme)):
+    friend_name = (body.get("friend") or "").strip()
+    user_id = None
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            user_id = int(payload.get("sub", 0)) or None
+        except Exception:
+            pass
+    with get_db() as conn:
+        try:
+            conn.execute("CREATE TABLE IF NOT EXISTS event_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, event_type TEXT NOT NULL, detail TEXT, created_at TEXT DEFAULT (datetime('now')))")
+        except Exception:
+            pass
+        conn.execute("INSERT INTO event_logs (user_id, event_type, detail) VALUES (?,?,?)", (user_id, "friend_view", friend_name))
     return {"ok": True}
 
 
