@@ -12674,6 +12674,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               realFriends,
               authToken,
               onFriendsChanged,
+              onPendingChange,
             }) {
               const friendsList = (realFriends && realFriends.length > 0) ? realFriends : FRIENDS_DATA;
               const getName = (f) => f ? (f.username || f.name || "") : "";
@@ -12691,12 +12692,13 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               const [addFriendStatus, setAddFriendStatus] = React.useState("");
               const [addFriendLoading, setAddFriendLoading] = React.useState(false);
               const [pendingRequests, setPendingRequests] = React.useState([]);
+              const [newFriendBanners, setNewFriendBanners] = React.useState([]);
 
               React.useEffect(() => {
                 if (!authToken) return;
                 fetch(API_BASE + "/api/friends/requests", { headers: { Authorization: "Bearer " + authToken } })
                   .then(r => r.ok ? r.json() : [])
-                  .then(data => setPendingRequests(data || []))
+                  .then(data => { setPendingRequests(data || []); if (onPendingChange) onPendingChange((data || []).length); })
                   .catch(() => {});
               }, [authToken]);
 
@@ -12704,7 +12706,14 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                 const headers = { Authorization: "Bearer " + authToken };
                 const r = await fetch(API_BASE + "/api/friends/" + encodeURIComponent(username) + "/accept", { method: "PUT", headers });
                 if (r.ok) {
-                  setPendingRequests(prev => prev.filter(req => req.username !== username));
+                  const accepted = pendingRequests.find(req => req.username === username);
+                  const displayName = accepted?.display_name || username;
+                  setPendingRequests(prev => {
+                    const next = prev.filter(req => req.username !== username);
+                    if (onPendingChange) onPendingChange(next.length);
+                    return next;
+                  });
+                  setNewFriendBanners(prev => [...prev, displayName]);
                   if (onFriendsChanged) onFriendsChanged();
                 }
               };
@@ -12797,6 +12806,22 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               return React.createElement(
                 "div",
                 { __self: this },
+                /* New friend banners */
+                newFriendBanners.map((name, i) =>
+                  React.createElement("div", {
+                    key: i,
+                    style: { margin: "10px 16px 0", padding: "12px 14px", background: "rgba(46,204,138,0.12)", border: "1px solid rgba(46,204,138,0.35)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 },
+                  },
+                    React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
+                      React.createElement("span", { style: { fontSize: 16 } }, "\uD83E\uDD1D"),
+                      React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: "#2ecc8a" } }, "You and " + name + " are now friends"),
+                    ),
+                    React.createElement("button", {
+                      onClick: () => setNewFriendBanners(prev => prev.filter((_, j) => j !== i)),
+                      style: { background: "none", border: "none", cursor: "pointer", color: "rgba(46,204,138,0.7)", fontSize: 16, fontWeight: 700, lineHeight: 1, padding: 0 },
+                    }, "\u00D7"),
+                  )
+                ),
                 React.createElement(
                   "div",
                   {
@@ -13405,6 +13430,7 @@ function App() {
               const [recommendFilm, setRecommendFilm] = useState(null);
               const [myListFilter, setMyListFilter] = useState("unwatched");
               const [friendsDefaultFriend, setFriendsDefaultFriend] = useState(null);
+              const [friendsPendingCount, setFriendsPendingCount] = useState(0);
               const [listPublic, setListPublic] = useState(true);
               const [privateIds, setPrivateIds] = useState(new Set());
               const [welcomeBanner, setWelcomeBanner] = useState(null);
@@ -14259,6 +14285,7 @@ function App() {
                           fetch(API_BASE + "/api/friends", { headers: { Authorization: "Bearer " + authToken } })
                             .then(r => r.ok ? r.json() : []).then(fs => setRealFriends(fs)).catch(() => {});
                         },
+                        onPendingChange: (count) => setFriendsPendingCount(count),
                       }),
 
                     /* PROFILE */
@@ -14308,21 +14335,21 @@ function App() {
                                 transition: "color 0.2s",
                               },
                             }, t.label)
-                          : React.createElement(Icon, {
-                              name: t.icon,
-                              size: 21,
-                              style: {
-                                color:
-                                  tab === t.id ? "var(--gold-bright)" : "var(--muted)",
-                                transition: "color 0.2s, filter 0.2s, transform 0.2s",
-                                transform:
-                                  tab === t.id ? "translateY(-1px)" : "translateY(0)",
-                                filter:
-                                  tab === t.id
-                                    ? "drop-shadow(0 2px 8px rgba(232,201,106,0.35))"
-                                    : "none",
-                              },
-                            }),
+                          : React.createElement("div", { style: { position: "relative", display: "inline-flex" } },
+                              React.createElement(Icon, {
+                                name: t.icon,
+                                size: 21,
+                                style: {
+                                  color: tab === t.id ? "var(--gold-bright)" : "var(--muted)",
+                                  transition: "color 0.2s, filter 0.2s, transform 0.2s",
+                                  transform: tab === t.id ? "translateY(-1px)" : "translateY(0)",
+                                  filter: tab === t.id ? "drop-shadow(0 2px 8px rgba(232,201,106,0.35))" : "none",
+                                },
+                              }),
+                              t.id === "friends" && friendsPendingCount > 0 && React.createElement("div", {
+                                style: { position: "absolute", top: -2, right: -3, width: 9, height: 9, borderRadius: "50%", background: "#ff4444", border: "1.5px solid #07080c" },
+                              }),
+                            ),
                         t.id !== "profile" && React.createElement(
                           "span",
                           {
