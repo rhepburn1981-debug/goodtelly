@@ -649,8 +649,12 @@ function updateCharts(data) {
   const totalEl = document.getElementById('total-users-count');
   if (totalEl && cumTotals.length) totalEl.textContent = cumTotals[cumTotals.length - 1].toLocaleString() + ' users';
   try {
-    const c = charts['chart-total-users'];
-    if (c) { c.data.labels = cumLabels; c.data.datasets[0].data = cumTotals; c.update(); }
+    let c = charts['chart-total-users'];
+    if (!c) {
+      const el = document.getElementById('chart-total-users');
+      if (el) c = charts['chart-total-users'] = new Chart(el, { ...chartDefaults, data: { labels: [], datasets: [makeDataset([])] } });
+    }
+    if (c && cumLabels.length) { c.data.labels = cumLabels; c.data.datasets[0].data = cumTotals; c.update(); }
   } catch(e) {}
 
   [
