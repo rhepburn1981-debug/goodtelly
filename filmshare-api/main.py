@@ -2035,15 +2035,25 @@ def admin_chart(token: str = "", user_id: Optional[int] = None, period: str = "d
                 tab_rows = []
         tab_data = {r["bucket"]: r["c"] for r in tab_rows}
 
-        # Cumulative users (all time, same grouping)
-        all_acct_rows = conn.execute(f"SELECT {grp('created_at')} as bucket, COUNT(*) as c FROM users GROUP BY bucket ORDER BY bucket").fetchall()
-        cumulative_buckets = [r["bucket"] for r in all_acct_rows]
-        cumulative_counts = [r["c"] for r in all_acct_rows]
-        running = 0
-        cumulative_totals = []
-        for c in cumulative_counts:
-            running += c
-            cumulative_totals.append(running)
+        # Cumulative users — total accounts on DB as of each day (continuous series)
+        from datetime import date as _date
+        daily_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM users GROUP BY day ORDER BY day").fetchall()
+        if daily_rows:
+            day_counts = {r["day"]: r["c"] for r in daily_rows}
+            start_d = _date.fromisoformat(daily_rows[0]["day"])
+            end_d = _date.fromisoformat(now.strftime("%Y-%m-%d"))
+            cumulative_labels = []
+            cumulative_totals = []
+            running = 0
+            cur = start_d
+            while cur <= end_d:
+                running += day_counts.get(cur.isoformat(), 0)
+                cumulative_labels.append(cur.strftime("%m-%d"))
+                cumulative_totals.append(running)
+                cur += timedelta(days=1)
+        else:
+            cumulative_labels = []
+            cumulative_totals = []
 
         return {
             "labels": labels,
