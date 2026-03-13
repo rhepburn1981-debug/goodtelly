@@ -158,8 +158,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                 <th style="cursor:pointer" onclick="sortTable('users','last_login_at',ALL_USERS,renderUsersTable)">Last Login ↕</th>
                 <th style="cursor:pointer" onclick="sortTable('users','friend_count',ALL_USERS,renderUsersTable)">Friends ↕</th>
                 <th style="cursor:pointer" onclick="sortTable('users','watchlist_count',ALL_USERS,renderUsersTable)">Watchlisted ↕</th>
+                <th></th>
               </tr></thead>
-              <tbody id="tbl-users"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+              <tbody id="tbl-users"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
             </table>
             </div>
           </div>
@@ -374,7 +375,7 @@ function filterSidebar(q) {
 function renderUsersTable(users) {
   const tbody = document.getElementById('tbl-users');
   document.getElementById('users-count').textContent = users.length + ' users';
-  if (!users.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No users</td></tr>'; return; }
+  if (!users.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No users</td></tr>'; return; }
   tbody.innerHTML = users.map(u => {
     const login = u.last_login_at ? fmtDate(u.last_login_at) : '—';
     const cls = SELECTED_USER && SELECTED_USER.id === u.id ? 'user-row selected' : 'user-row';
@@ -382,14 +383,35 @@ function renderUsersTable(users) {
       '<td><strong>' + esc(u.display_name || u.username) + '</strong><br><span style="font-size:11px;color:#a0aec0">@' + esc(u.username) + '</span></td>' +
       '<td>' + login + '</td>' +
       '<td>' + u.friend_count + '</td>' +
-      '<td>' + u.watchlist_count + '</td></tr>';
+      '<td>' + u.watchlist_count + '</td>' +
+      '<td><button class="del-btn" data-uid="' + u.id + '" data-name="' + esc(u.display_name || u.username) + '" style="padding:3px 10px;font-size:11px;font-weight:600;background:#fff0f0;color:#c53030;border:1px solid #feb2b2;border-radius:6px;cursor:pointer">Delete</button></td></tr>';
   }).join('');
   tbody.querySelectorAll('tr[data-uid]').forEach(row => {
-    row.addEventListener('click', function() {
+    row.addEventListener('click', function(e) {
+      if (e.target.classList.contains('del-btn')) return;
       const uid = parseInt(this.getAttribute('data-uid'));
       selectUser(ALL_USERS.find(u => u.id === uid) || null);
     });
   });
+  tbody.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      deleteUser(parseInt(this.getAttribute('data-uid')), this.getAttribute('data-name'));
+    });
+  });
+}
+
+function deleteUser(userId, name) {
+  if (!confirm('Delete user "' + name + '"?\n\nThis will remove their account, watchlist, ratings, friends, and activity. This cannot be undone.')) return;
+  fetch(API + '/api/admin/users/' + userId + '?token=' + encodeURIComponent(TOKEN), { method: 'DELETE' })
+    .then(r => r.ok ? r.json() : r.json().then(d => { throw new Error(d.detail || 'Delete failed'); }))
+    .then(() => {
+      ALL_USERS = ALL_USERS.filter(u => u.id !== userId);
+      if (SELECTED_USER && SELECTED_USER.id === userId) selectUser(null);
+      renderSidebar(ALL_USERS);
+      renderUsersTable(ALL_USERS);
+    })
+    .catch(err => alert('Error: ' + err.message));
 }
 
 // ── Select user ───────────────────────────────────────────────────────────────

@@ -2218,6 +2218,22 @@ STREAMERS = {
 def get_streamers():
     return STREAMERS
 
+@app.delete("/api/admin/users/{user_id}")
+def admin_delete_user(user_id: int, token: str = ""):
+    _check_admin(token)
+    with get_db() as conn:
+        user = conn.execute("SELECT username FROM users WHERE id=?", (user_id,)).fetchone()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        conn.execute("DELETE FROM user_watchlist WHERE user_id=?", (user_id,))
+        conn.execute("DELETE FROM user_watched WHERE user_id=?", (user_id,))
+        conn.execute("DELETE FROM user_ratings WHERE user_id=?", (user_id,))
+        conn.execute("DELETE FROM user_friends WHERE user_id=? OR friend_id=?", (user_id, user_id))
+        conn.execute("DELETE FROM user_recommendations WHERE from_user_id=? OR to_user_id=?", (user_id, user_id))
+        conn.execute("DELETE FROM activity_log WHERE user_id=?", (user_id,))
+        conn.execute("DELETE FROM users WHERE id=?", (user_id,))
+    return {"deleted": user_id}
+
 @app.post("/api/admin/assign-avatars")
 def assign_avatars(token: str = ""):
     _check_admin(token)
