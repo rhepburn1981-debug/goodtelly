@@ -12702,6 +12702,26 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                   .catch(() => {});
               }, [authToken]);
 
+              // Detect new friends added since last visit (e.g. via invite link auto-connect)
+              React.useEffect(() => {
+                if (!realFriends || !window.__AUTH_USER) return;
+                const seenKey = "seen_friends_" + window.__AUTH_USER.username;
+                const seenRaw = localStorage.getItem(seenKey);
+                const currentUsernames = realFriends.map(f => f.username).filter(Boolean);
+                if (seenRaw !== null) {
+                  const seen = new Set(JSON.parse(seenRaw));
+                  const newOnes = realFriends.filter(f => f.username && !seen.has(f.username));
+                  if (newOnes.length > 0) {
+                    setNewFriendBanners(prev => {
+                      const existing = new Set(prev);
+                      const toAdd = newOnes.map(f => f.display_name || f.username).filter(n => !existing.has(n));
+                      return toAdd.length > 0 ? [...prev, ...toAdd] : prev;
+                    });
+                  }
+                }
+                localStorage.setItem(seenKey, JSON.stringify(currentUsernames));
+              }, [realFriends]);
+
               const acceptFriend = async (username) => {
                 const headers = { Authorization: "Bearer " + authToken };
                 const r = await fetch(API_BASE + "/api/friends/" + encodeURIComponent(username) + "/accept", { method: "PUT", headers });
