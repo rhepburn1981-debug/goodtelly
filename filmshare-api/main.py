@@ -2228,11 +2228,16 @@ def get_streamers():
 @app.delete("/api/admin/users/{user_id}")
 def admin_delete_user(user_id: int, token: str = ""):
     _check_admin(token)
-    with get_db() as conn:
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    try:
         user = conn.execute("SELECT username FROM users WHERE id=?", (user_id,)).fetchone()
         if not user:
+            conn.close()
             raise HTTPException(status_code=404, detail="User not found")
-        for sql, params in [
+        # Disable FK enforcement so we can delete in any order
+        conn.execute("PRAGMA foreign_keys = OFF")
+        tables = [
             ("DELETE FROM user_watchlist WHERE user_id=?", (user_id,)),
             ("DELETE FROM user_watched WHERE user_id=?", (user_id,)),
             ("DELETE FROM user_ratings WHERE user_id=?", (user_id,)),
@@ -2241,11 +2246,15 @@ def admin_delete_user(user_id: int, token: str = ""):
             ("DELETE FROM search_logs WHERE user_id=?", (user_id,)),
             ("DELETE FROM tab_views WHERE user_id=?", (user_id,)),
             ("DELETE FROM users WHERE id=?", (user_id,)),
-        ]:
+        ]
+        for sql, params in tables:
             try:
                 conn.execute(sql, params)
             except Exception:
                 pass
+        conn.commit()
+    finally:
+        conn.close()
     return {"deleted": user_id}
 
 @app.post("/api/admin/assign-avatars")
