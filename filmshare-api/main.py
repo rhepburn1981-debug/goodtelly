@@ -39,7 +39,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "709452989437-vooq081nkmhb03n12h8p0tee0e327ui1.apps.googleusercontent.com")
 
 DB_PATH = os.environ.get("DB_PATH", "/data/filmshare.db")
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
