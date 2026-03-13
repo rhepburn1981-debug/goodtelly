@@ -2175,3 +2175,14 @@ STREAMERS = {
 @app.get("/api/streamers")
 def get_streamers():
     return STREAMERS
+
+@app.post("/api/admin/assign-avatars")
+def assign_avatars(token: str = ""):
+    _check_admin(token)
+    import random
+    avatars = ["🌑","⚡","🔥","🌊","💀","💎","🌿","🎭","🎸","👑","☁️","🌙"]
+    with get_db() as conn:
+        rows = conn.execute('SELECT id, username FROM users WHERE avatar IS NULL OR avatar = ""').fetchall()
+        for row in rows:
+            conn.execute("UPDATE users SET avatar=? WHERE id=?", (random.choice(avatars), row["id"]))
+    return {"updated": len(rows), "users": [r["username"] for r in rows]}
