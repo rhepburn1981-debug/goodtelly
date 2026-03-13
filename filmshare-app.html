@@ -14801,6 +14801,15 @@ function App() {
                     const wl = Array.isArray(wlRes) ? wlRes : [];
                     INITIAL_WATCHLIST = wl;
                     INITIAL_WATCHLIST_IDS = wl.map(f => f.id);
+                    // Auto-friend inviter for already-logged-in users arriving via invite link
+                    const inviteFrom = sessionStorage.getItem("invite_from");
+                    if (inviteFrom) {
+                      sessionStorage.removeItem("invite_from");
+                      fetch(API_BASE + "/api/friends/" + encodeURIComponent(inviteFrom) + "/connect", {
+                        method: "POST",
+                        headers: { Authorization: "Bearer " + token },
+                      }).catch(() => {});
+                    }
                   }
                 }
               } catch (e) {
