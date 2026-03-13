@@ -11804,7 +11804,7 @@
                   React.createElement("div", {
                     key: i,
                     style: { margin: "10px 16px 0", padding: "12px 14px", background: "rgba(46,204,138,0.12)", border: "1px solid rgba(46,204,138,0.35)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, cursor: "pointer" },
-                    onClick: () => onGoToFriends && onGoToFriends(),
+                    onClick: () => onFriendClick && onFriendClick(b.username),
                   },
                     React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
                       React.createElement("span", { style: { fontSize: 16 } }, "\uD83E\uDD1D"),
@@ -13456,6 +13456,7 @@ function App() {
               const [friendsDefaultFriend, setFriendsDefaultFriend] = useState(null);
               const [friendsPendingCount, setFriendsPendingCount] = useState(0);
               const [newFriendBanners, setNewFriendBanners] = useState([]);
+              const [friendsHasUnread, setFriendsHasUnread] = useState(false);
               const [listPublic, setListPublic] = useState(true);
               const [privateIds, setPrivateIds] = useState(new Set());
               const [welcomeBanner, setWelcomeBanner] = useState(null);
@@ -13524,7 +13525,7 @@ function App() {
                   .catch(() => {});
                 fetch(API_BASE + "/api/friends/requests", { headers })
                   .then(r => r.ok ? r.json() : [])
-                  .then(data => setFriendsPendingCount((data || []).length))
+                  .then(data => { const n = (data || []).length; setFriendsPendingCount(n); if (n > 0) setFriendsHasUnread(true); })
                   .catch(() => {});
               }, [authToken, tab]);
 
@@ -13536,11 +13537,15 @@ function App() {
                 const currentUsernames = realFriends.map(f => f.username).filter(Boolean);
                 if (seenRaw !== null) {
                   const seen = new Set(JSON.parse(seenRaw));
-                  realFriends.filter(f => f.username && !seen.has(f.username)).forEach(f => {
-                    setNewFriendBanners(prev =>
-                      prev.find(b => b.username === f.username) ? prev : [...prev, { displayName: f.display_name || f.username, username: f.username }]
-                    );
-                  });
+                  const newOnes = realFriends.filter(f => f.username && !seen.has(f.username));
+                  if (newOnes.length > 0) {
+                    setFriendsHasUnread(true);
+                    newOnes.forEach(f => {
+                      setNewFriendBanners(prev =>
+                        prev.find(b => b.username === f.username) ? prev : [...prev, { displayName: f.display_name || f.username, username: f.username }]
+                      );
+                    });
+                  }
                 }
                 localStorage.setItem(seenKey, JSON.stringify(currentUsernames));
               }, [realFriends]);
@@ -14368,6 +14373,7 @@ function App() {
                               return;
                             }
                             setTab(t.id);
+                            if (t.id === "friends") setFriendsHasUnread(false);
                             setSearch("");
                             setSelectedFilm(null);
                             const _tok = window.__AUTH_TOKEN || localStorage.getItem("filmshare_token");
@@ -14397,7 +14403,7 @@ function App() {
                                   filter: tab === t.id ? "drop-shadow(0 2px 8px rgba(232,201,106,0.35))" : "none",
                                 },
                               }),
-                              t.id === "friends" && (friendsPendingCount > 0 || newFriendBanners.length > 0) && React.createElement("div", {
+                              t.id === "friends" && friendsHasUnread && React.createElement("div", {
                                 style: { position: "absolute", top: -2, right: -3, width: 9, height: 9, borderRadius: "50%", background: "#ff4444", border: "1.5px solid #07080c" },
                               }),
                             ),
