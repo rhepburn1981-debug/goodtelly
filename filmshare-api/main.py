@@ -2061,7 +2061,7 @@ def admin_chart(token: str = "", user_id: Optional[int] = None, period: str = "d
             "searches": [srch_data.get(b, 0) for b in buckets],
             "new_accounts": [acct_data.get(b, 0) for b in buckets],
             "tab_views": [tab_data.get(b, 0) for b in buckets],
-            "cumulative_labels": cumulative_buckets,
+            "cumulative_labels": cumulative_labels,
             "cumulative_totals": cumulative_totals,
         }
 
