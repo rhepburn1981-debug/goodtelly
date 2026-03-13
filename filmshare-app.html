@@ -11727,9 +11727,7 @@
                 streamers: [], stills: [], _isExternal: true,
               }, extra || {});
 
-              const recommendedFilms = (friendsRecommendedFilms && friendsRecommendedFilms.length > 0)
-                ? friendsRecommendedFilms.filter(f => !watchedIds.includes(f.id)).slice(0, 6)
-                : ALL_FILMS.filter(f => f.sharedBy && !watchedIds.includes(f.id)).slice(0, 6);
+              const recommendedFilms = (friendsRecommendedFilms || []).filter(f => !watchedIds.includes(f.id)).slice(0, 6);
               const glassPanel = "linear-gradient(180deg, rgba(24,24,31,0.94), rgba(10,10,15,0.94))";
               const panelBorder = "1px solid rgba(255,255,255,0.09)";
               const panelShadow = "0 12px 28px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.04)";
