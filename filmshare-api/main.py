@@ -1608,11 +1608,15 @@ def backfill_streamers():
 def record_recommendation(body: dict, current_user=Depends(require_user)):
     """Record that a film was recommended to the current user via a share link."""
     film_slug = body.get("film_slug", "")
+    film_id = body.get("film_id")
     from_username = body.get("from_username", "")
     note = body.get("note", "")
     rating = body.get("rating")
     with get_db() as conn:
-        film = conn.execute("SELECT id FROM films WHERE slug=?", (film_slug,)).fetchone()
+        if film_id:
+            film = conn.execute("SELECT id FROM films WHERE id=?", (film_id,)).fetchone()
+        else:
+            film = conn.execute("SELECT id FROM films WHERE slug=?", (film_slug,)).fetchone()
         if not film:
             raise HTTPException(status_code=404, detail="Film not found")
         from_user_id = None

@@ -13495,11 +13495,23 @@ function App() {
                 const recFrom = params.get("rec_from") || "";
                 const recNote = params.get("rec_note") || "";
                 const recRating = params.get("rec_rating") || "";
+                const recordRec = (filmId) => {
+                  if (!recFrom || filmId <= 0) return;
+                  const token = authToken || localStorage.getItem("filmshare_token");
+                  if (!token) return;
+                  const recFromUser = params.get("rec_from") || "";
+                  fetch(API_BASE + "/api/me/recommendations", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+                    body: JSON.stringify({ film_id: filmId, from_username: recFromUser, note: recNote, rating: recRating ? parseFloat(recRating) : null }),
+                  }).catch(() => {});
+                };
                 const applyRec = (film) => {
                   if (recFrom) film._fromFriend = recFrom;
                   if (recNote) film._recNote = recNote;
                   if (recRating) film._recRating = parseFloat(recRating);
                   setSelectedFilm(film);
+                  if (film.id > 0) recordRec(film.id);
                   // Enrich: fetch full DB record + TMDB trailer if missing
                   const enrich = (f) => {
                     const ep = "/api/tmdb/enrich?title=" + encodeURIComponent(f.title) + (f.year ? "&year=" + f.year : "");
