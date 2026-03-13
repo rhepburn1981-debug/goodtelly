@@ -11882,10 +11882,6 @@
                         React.createElement("div", { style: { fontSize: 13, color: "var(--gold-bright)", fontWeight: 500 } },
                           friendName + " thinks you\u2019ll like\u2026"),
                         recRating && React.createElement("div", { style: { fontSize: 12, color: "var(--gold-bright)", fontWeight: 700, marginLeft: "auto", whiteSpace: "nowrap" } }, "\u2B50 " + parseFloat(recRating).toFixed(1)),
-                        React.createElement("button", {
-                          onClick: (e) => { e.stopPropagation(); onDismissRec && onDismissRec(film.id); },
-                          style: { marginLeft: recRating ? 8 : "auto", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.35)", fontSize: 16, lineHeight: 1, padding: "0 2px" },
-                        }, "\u00D7"),
                       ),
                       /* Film card */
                       React.createElement("div", {
@@ -11896,6 +11892,10 @@
                           position: "relative",
                         },
                       },
+                        React.createElement("button", {
+                          onClick: (e) => { e.stopPropagation(); onDismissRec && onDismissRec(film.id); },
+                          style: { position: "absolute", top: 8, right: 8, zIndex: 10, width: 24, height: 24, borderRadius: "50%", background: "#fff", border: "2px solid #111", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 900, color: "#111", lineHeight: 1, padding: 0 },
+                        }, "\u00D7"),
                         /* Backdrop image if available */
                         film.backdrop && React.createElement("div", {
                           style: {
@@ -13499,7 +13499,10 @@ function App() {
                 const headers = { Authorization: "Bearer " + authToken };
                 fetch(API_BASE + "/api/me/recommendations", { headers })
                   .then(r => r.ok ? r.json() : [])
-                  .then(films => setFriendsRecommendedFilms(films))
+                  .then(films => {
+                    const dismissed = JSON.parse(localStorage.getItem("dismissed_recs") || "[]");
+                    setFriendsRecommendedFilms(films.filter(f => !dismissed.includes(f.id)));
+                  })
                   .catch(() => {});
                 fetch(API_BASE + "/api/me/friends-ratings", { headers })
                   .then(r => r.ok ? r.json() : {})
@@ -14237,7 +14240,11 @@ function App() {
                         onGoToList: () => setTab("list"),
                         onGoToFriends: () => setTab("friends"),
                         onPlayTrailer: (url) => setTrailerOverlayUrl(url),
-                        onDismissRec: (filmId) => setFriendsRecommendedFilms(prev => prev.filter(f => f.id !== filmId)),
+                        onDismissRec: (filmId) => {
+                          const dismissed = JSON.parse(localStorage.getItem("dismissed_recs") || "[]");
+                          if (!dismissed.includes(filmId)) localStorage.setItem("dismissed_recs", JSON.stringify([...dismissed, filmId]));
+                          setFriendsRecommendedFilms(prev => prev.filter(f => f.id !== filmId));
+                        },
                       }),
 
                     /* LIST */
