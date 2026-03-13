@@ -13500,6 +13500,31 @@ function App() {
                   if (recNote) film._recNote = recNote;
                   if (recRating) film._recRating = parseFloat(recRating);
                   setSelectedFilm(film);
+                  // Enrich: fetch full DB record + TMDB trailer if missing
+                  const enrich = (f) => {
+                    const ep = "/api/tmdb/enrich?title=" + encodeURIComponent(f.title) + (f.year ? "&year=" + f.year : "");
+                    fetch(API_BASE + ep)
+                      .then(r => r.ok ? r.json() : null)
+                      .then(enriched => {
+                        if (enriched && enriched.trailer_url) {
+                          setSelectedFilm(prev => prev && prev.id === f.id ? Object.assign({}, prev, { trailerUrl: enriched.trailer_url }) : prev);
+                        }
+                      })
+                      .catch(() => {});
+                  };
+                  if (film.id > 0) {
+                    fetch(API_BASE + "/api/films/" + film.id)
+                      .then(r => r.ok ? r.json() : null)
+                      .then(full => {
+                        if (full) {
+                          setSelectedFilm(prev => prev && prev.id === film.id ? Object.assign({}, prev, full) : prev);
+                          if (!full.trailerUrl) enrich(full);
+                        }
+                      })
+                      .catch(() => {});
+                  } else if (film.title) {
+                    enrich(film);
+                  }
                 };
                 if (openSlug) {
                   const token = authToken || localStorage.getItem("filmshare_token");
