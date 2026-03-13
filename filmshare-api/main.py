@@ -1754,17 +1754,35 @@ def admin_users_list(token: str = ""):
                 conn.execute(col_sql)
             except Exception:
                 pass
-        rows = conn.execute("""
-            SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name,
-                   u.avatar, u.color, u.created_at, u.last_login_at,
-                   COUNT(DISTINCT uf.id) as friend_count,
-                   COUNT(DISTINCT uw.film_id) as watchlist_count
-            FROM users u
-            LEFT JOIN user_friends uf ON (uf.requester_id=u.id OR uf.addressee_id=u.id) AND uf.status='accepted'
-            LEFT JOIN user_watchlist uw ON uw.user_id=u.id
-            GROUP BY u.id ORDER BY u.created_at DESC
-        """).fetchall()
+        try:
+            rows = conn.execute("""
+                SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name,
+                       u.avatar, u.color, u.created_at, u.last_login_at,
+                       COUNT(DISTINCT uf.id) as friend_count,
+                       COUNT(DISTINCT uw.film_id) as watchlist_count
+                FROM users u
+                LEFT JOIN user_friends uf ON (uf.requester_id=u.id OR uf.addressee_id=u.id) AND uf.status='accepted'
+                LEFT JOIN user_watchlist uw ON uw.user_id=u.id
+                GROUP BY u.id ORDER BY u.created_at DESC
+            """).fetchall()
+        except Exception as e:
+            # Fallback: simple query without JOINs (diagnostic — JOIN table may be missing)
+            rows = conn.execute(
+                "SELECT id, username, COALESCE(display_name, username) as display_name, "
+                "avatar, color, created_at, last_login_at, 0 as friend_count, 0 as watchlist_count "
+                "FROM users ORDER BY created_at DESC"
+            ).fetchall()
         return [dict(r) for r in rows]
+
+
+@app.get("/api/admin/debug")
+def admin_debug(token: str = ""):
+    _check_admin(token)
+    with get_db() as conn:
+        tables = [r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").fetchall()]
+        user_count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(users)").fetchall()]
+        return {"tables": tables, "user_count": user_count, "user_columns": cols}
 
 
 @app.get("/api/admin/stats")
