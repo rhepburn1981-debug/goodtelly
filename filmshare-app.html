@@ -11692,6 +11692,7 @@
               onGoToList,
               onGoToFriends,
               onPlayTrailer,
+              onDismissRec,
             }) {
               const [tvSchedule, setTvSchedule] = React.useState([]);
               const [discoverShows, setDiscoverShows] = React.useState([]);
@@ -11881,6 +11882,10 @@
                         React.createElement("div", { style: { fontSize: 13, color: "var(--gold-bright)", fontWeight: 500 } },
                           friendName + " thinks you\u2019ll like\u2026"),
                         recRating && React.createElement("div", { style: { fontSize: 12, color: "var(--gold-bright)", fontWeight: 700, marginLeft: "auto", whiteSpace: "nowrap" } }, "\u2B50 " + parseFloat(recRating).toFixed(1)),
+                        React.createElement("button", {
+                          onClick: (e) => { e.stopPropagation(); onDismissRec && onDismissRec(film.id); },
+                          style: { marginLeft: recRating ? 8 : "auto", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.35)", fontSize: 16, lineHeight: 1, padding: "0 2px" },
+                        }, "\u00D7"),
                       ),
                       /* Film card */
                       React.createElement("div", {
@@ -14232,6 +14237,7 @@ function App() {
                         onGoToList: () => setTab("list"),
                         onGoToFriends: () => setTab("friends"),
                         onPlayTrailer: (url) => setTrailerOverlayUrl(url),
+                        onDismissRec: (filmId) => setFriendsRecommendedFilms(prev => prev.filter(f => f.id !== filmId)),
                       }),
 
                     /* LIST */
