@@ -12385,10 +12385,10 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
             }
 
             // ─── Discover Tab ─────────────────────────────────────────────────────────────
-            function DiscoverTab({ onFilmClick, addedIds, onAdd, onMarkWatched, onRecommend }) {
+            function DiscoverTab({ onFilmClick, addedIds, onAdd, onMarkWatched, onRecommend, onPlayTrailer }) {
               const [genreFilter, setGenreFilter] = useState("All");
               const [providerFilter, setProviderFilter] = useState("all");
-              const [timePeriod, setTimePeriod] = useState("all");
+              const [timePeriod, setTimePeriod] = useState("week");
 
               const GENRE_ICONS = { All: "+", Drama: "♡", Thriller: "↑", Horror: "◆", Comedy: "☺", "Sci-Fi": "✦", Action: "⚡", Romance: "♥" };
 
@@ -12418,10 +12418,10 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               const rankedList = filtered.slice(1, 20);
 
               const timePills = [
-                { id: "all", label: "All Time" },
-                { id: "year", label: "This Year" },
-                { id: "month", label: "This Month" },
                 { id: "week", label: "This Week" },
+                { id: "month", label: "This Month" },
+                { id: "year", label: "This Year" },
+                { id: "all", label: "All Time" },
               ];
 
               const formatViews = (n) => n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n || 0);
@@ -12506,7 +12506,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                 /* Featured #1 card */
                 featuredFilm && React.createElement("div", {
                   style: { margin: "0 16px 20px", borderRadius: 16, overflow: "hidden", position: "relative", height: 220, cursor: "pointer" },
-                  onClick: () => onFilmClick(featuredFilm),
+                  onClick: () => { const tUrl = featuredFilm.trailer_url || featuredFilm.trailerUrl; if (tUrl && onPlayTrailer) { onPlayTrailer(tUrl); } else { onFilmClick(featuredFilm); } },
                 },
                   featuredFilm.backdrop || featuredFilm.poster
                     ? React.createElement("img", {
@@ -14282,6 +14282,7 @@ function App() {
                         onAdd: addToList,
                         onMarkWatched: markWatched,
                         onRecommend: (f) => setRecommendFilm(f),
+                        onPlayTrailer: (url) => setTrailerOverlayUrl(url),
                       }),
 
                     /* FRIENDS */
