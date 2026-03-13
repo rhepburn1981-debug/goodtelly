@@ -11610,10 +11610,10 @@
                   film.poster
                     ? React.createElement("img", {
                         src: film.poster, alt: film.title,
-                        style: { width: 54, height: 76, objectFit: "cover", borderRadius: 8, display: "block" },
+                        style: { width: 64, height: 90, objectFit: "cover", borderRadius: 8, display: "block" },
                       })
                     : React.createElement("div", {
-                        style: { width: 54, height: 76, borderRadius: 8, background: film.color || "var(--surface3)" },
+                        style: { width: 64, height: 90, borderRadius: 8, background: film.color || "var(--surface3)" },
                       }),
                 ),
                 /* Info */
@@ -12622,10 +12622,10 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                     film.poster
                       ? React.createElement("img", {
                           src: film.poster, alt: film.title,
-                          style: { width: 46, height: 64, objectFit: "cover", borderRadius: 8, flexShrink: 0 },
+                          style: { width: 54, height: 76, objectFit: "cover", borderRadius: 8, flexShrink: 0 },
                         })
                       : React.createElement("div", {
-                          style: { width: 46, height: 64, borderRadius: 8, background: film.color || "var(--surface3)", flexShrink: 0 },
+                          style: { width: 54, height: 76, borderRadius: 8, background: film.color || "var(--surface3)", flexShrink: 0 },
                         }),
                     /* Info */
                     React.createElement("div", { style: { flex: 1, minWidth: 0 } },
