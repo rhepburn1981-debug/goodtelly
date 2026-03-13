@@ -13499,7 +13499,7 @@ function App() {
                   if (!recFrom || filmId <= 0) return;
                   const token = authToken || localStorage.getItem("filmshare_token");
                   if (!token) return;
-                  const recFromUser = params.get("rec_from") || "";
+                  const recFromUser = params.get("rec_from_user") || params.get("rec_from") || "";
                   fetch(API_BASE + "/api/me/recommendations", {
                     method: "POST",
                     headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
@@ -13556,7 +13556,26 @@ function App() {
                       .then(r => r.ok ? r.json() : [])
                       .then(results => {
                         const hit = results[0];
-                        if (hit) applyRec(Object.assign({ _fromTmdb: true, tmdb_id: hit.tmdb_id }, hit));
+                        if (!hit) return;
+                        // Create the film in the DB first, then open + record rec
+                        const filmBody = { title: hit.title, year: hit.year ? parseInt(hit.year) : null, autoEnrich: true };
+                        if (hit.tmdb_id) filmBody.tmdbId = hit.tmdb_id;
+                        const token2 = authToken || localStorage.getItem("filmshare_token");
+                        fetch(API_BASE + "/api/films", {
+                          method: "POST",
+                          headers: Object.assign({ "Content-Type": "application/json" }, token2 ? { Authorization: "Bearer " + token2 } : {}),
+                          body: JSON.stringify(filmBody),
+                        })
+                          .then(r => r.ok ? r.json() : null)
+                          .then(saved => {
+                            if (saved) {
+                              ALL_FILMS.push(saved);
+                              applyRec(saved);
+                            } else {
+                              applyRec(Object.assign({ _fromTmdb: true, tmdb_id: hit.tmdb_id }, hit));
+                            }
+                          })
+                          .catch(() => { applyRec(Object.assign({ _fromTmdb: true, tmdb_id: hit.tmdb_id }, hit)); });
                       })
                       .catch(() => {});
                   }
