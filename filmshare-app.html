@@ -11693,6 +11693,8 @@
               onGoToFriends,
               onPlayTrailer,
               onDismissRec,
+              newFriendBanners,
+              onDismissFriendBanner,
             }) {
               const [tvSchedule, setTvSchedule] = React.useState([]);
               const [discoverShows, setDiscoverShows] = React.useState([]);
@@ -11796,6 +11798,24 @@
                 );
 
               return React.createElement("div", { style: { height: "100%", overflowY: "auto" } },
+
+                /* New friend banners */
+                (newFriendBanners || []).map((b, i) =>
+                  React.createElement("div", {
+                    key: i,
+                    style: { margin: "10px 16px 0", padding: "12px 14px", background: "rgba(46,204,138,0.12)", border: "1px solid rgba(46,204,138,0.35)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, cursor: "pointer" },
+                    onClick: () => onGoToFriends && onGoToFriends(),
+                  },
+                    React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
+                      React.createElement("span", { style: { fontSize: 16 } }, "\uD83E\uDD1D"),
+                      React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: "#2ecc8a" } }, "You and " + b.displayName + " are now friends \u2192"),
+                    ),
+                    React.createElement("button", {
+                      onClick: (e) => { e.stopPropagation(); if (onDismissFriendBanner) onDismissFriendBanner(i); },
+                      style: { background: "none", border: "none", cursor: "pointer", color: "rgba(46,204,138,0.7)", fontSize: 16, fontWeight: 700, lineHeight: 1, padding: 0 },
+                    }, "\u00D7"),
+                  )
+                ),
 
                 /* MY LIST RIBBON */
                 onGoToList && React.createElement("div", {
@@ -12675,6 +12695,9 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               authToken,
               onFriendsChanged,
               onPendingChange,
+              newFriendBanners,
+              onDismissFriendBanner,
+              onNewFriend,
             }) {
               const friendsList = (realFriends && realFriends.length > 0) ? realFriends : FRIENDS_DATA;
               const getName = (f) => f ? (f.username || f.name || "") : "";
@@ -12692,7 +12715,6 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               const [addFriendStatus, setAddFriendStatus] = React.useState("");
               const [addFriendLoading, setAddFriendLoading] = React.useState(false);
               const [pendingRequests, setPendingRequests] = React.useState([]);
-              const [newFriendBanners, setNewFriendBanners] = React.useState([]);
 
               React.useEffect(() => {
                 if (!authToken) return;
@@ -12711,13 +12733,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                 if (seenRaw !== null) {
                   const seen = new Set(JSON.parse(seenRaw));
                   const newOnes = realFriends.filter(f => f.username && !seen.has(f.username));
-                  if (newOnes.length > 0) {
-                    setNewFriendBanners(prev => {
-                      const existing = new Set(prev);
-                      const toAdd = newOnes.map(f => f.display_name || f.username).filter(n => !existing.has(n));
-                      return toAdd.length > 0 ? [...prev, ...toAdd] : prev;
-                    });
-                  }
+                  newOnes.forEach(f => { if (onNewFriend) onNewFriend(f.display_name || f.username, f.username); });
                 }
                 localStorage.setItem(seenKey, JSON.stringify(currentUsernames));
               }, [realFriends]);
@@ -12733,7 +12749,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                     if (onPendingChange) onPendingChange(next.length);
                     return next;
                   });
-                  setNewFriendBanners(prev => [...prev, displayName]);
+                  if (onNewFriend) onNewFriend(displayName, username);
                   if (onFriendsChanged) onFriendsChanged();
                 }
               };
@@ -12827,17 +12843,18 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                 "div",
                 { __self: this },
                 /* New friend banners */
-                newFriendBanners.map((name, i) =>
+                (newFriendBanners || []).map((b, i) =>
                   React.createElement("div", {
                     key: i,
-                    style: { margin: "10px 16px 0", padding: "12px 14px", background: "rgba(46,204,138,0.12)", border: "1px solid rgba(46,204,138,0.35)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 },
+                    style: { margin: "10px 16px 0", padding: "12px 14px", background: "rgba(46,204,138,0.12)", border: "1px solid rgba(46,204,138,0.35)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, cursor: "pointer" },
+                    onClick: () => setActiveFriend(b.username),
                   },
                     React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
                       React.createElement("span", { style: { fontSize: 16 } }, "\uD83E\uDD1D"),
-                      React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: "#2ecc8a" } }, "You and " + name + " are now friends"),
+                      React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: "#2ecc8a" } }, "You and " + b.displayName + " are now friends"),
                     ),
                     React.createElement("button", {
-                      onClick: () => setNewFriendBanners(prev => prev.filter((_, j) => j !== i)),
+                      onClick: (e) => { e.stopPropagation(); if (onDismissFriendBanner) onDismissFriendBanner(i); },
                       style: { background: "none", border: "none", cursor: "pointer", color: "rgba(46,204,138,0.7)", fontSize: 16, fontWeight: 700, lineHeight: 1, padding: 0 },
                     }, "\u00D7"),
                   )
@@ -13451,6 +13468,7 @@ function App() {
               const [myListFilter, setMyListFilter] = useState("unwatched");
               const [friendsDefaultFriend, setFriendsDefaultFriend] = useState(null);
               const [friendsPendingCount, setFriendsPendingCount] = useState(0);
+              const [newFriendBanners, setNewFriendBanners] = useState([]);
               const [listPublic, setListPublic] = useState(true);
               const [privateIds, setPrivateIds] = useState(new Set());
               const [welcomeBanner, setWelcomeBanner] = useState(null);
@@ -13516,6 +13534,10 @@ function App() {
                 fetch(API_BASE + "/api/friends", { headers })
                   .then(r => r.ok ? r.json() : null)
                   .then(fs => { if (fs) setRealFriends(fs); })
+                  .catch(() => {});
+                fetch(API_BASE + "/api/friends/requests", { headers })
+                  .then(r => r.ok ? r.json() : [])
+                  .then(data => setFriendsPendingCount((data || []).length))
                   .catch(() => {});
               }, [authToken, tab]);
 
@@ -14248,6 +14270,8 @@ function App() {
                           if (!dismissed.includes(filmId)) localStorage.setItem("dismissed_recs", JSON.stringify([...dismissed, filmId]));
                           setFriendsRecommendedFilms(prev => prev.filter(f => f.id !== filmId));
                         },
+                        newFriendBanners: newFriendBanners,
+                        onDismissFriendBanner: (i) => setNewFriendBanners(prev => prev.filter((_, j) => j !== i)),
                       }),
 
                     /* LIST */
@@ -14306,6 +14330,9 @@ function App() {
                             .then(r => r.ok ? r.json() : []).then(fs => setRealFriends(fs)).catch(() => {});
                         },
                         onPendingChange: (count) => setFriendsPendingCount(count),
+                        newFriendBanners: newFriendBanners,
+                        onDismissFriendBanner: (i) => setNewFriendBanners(prev => prev.filter((_, j) => j !== i)),
+                        onNewFriend: (displayName, username) => setNewFriendBanners(prev => prev.find(b => b.username === username) ? prev : [...prev, { displayName, username }]),
                       }),
 
                     /* PROFILE */
