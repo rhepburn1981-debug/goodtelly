@@ -13774,7 +13774,9 @@ function App() {
                 } else {
                   const film =
                     ALL_FILMS.find((f) => f.id === id) ||
-                    myList.find((f) => f.id === id);
+                    myList.find((f) => f.id === id) ||
+                    tmdbFilmCacheRef.current[id] ||
+                    (selectedFilm && selectedFilm.id === id ? selectedFilm : null);
                   showToastMsg(`"${film?.title}" logged as watched`);
                 }
               };
