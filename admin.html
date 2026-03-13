@@ -279,7 +279,8 @@ function boot() {
   setTimeout(function() { if (sb) sb.value = ''; }, 200);
   setTimeout(function() { if (sb) sb.value = ''; }, 600);
   initCharts();
-  loadUsers().then(() => loadAll());
+  loadUsers();  // Table 1 + sidebar (independent)
+  loadAll();    // Tables 2-4 + charts (independent)
 }
 
 // ── Load helpers ──────────────────────────────────────────────────────────────
@@ -298,13 +299,18 @@ function loadAll() {
 }
 
 // ── Users sidebar + table ─────────────────────────────────────────────────────
-function loadUsers() {
+function loadUsers(retry) {
   return fetch(API + '/api/admin/users?token=' + encodeURIComponent(TOKEN))
     .then(r => {
       if (r.ok) return r.json();
       return r.text().then(txt => { throw new Error(r.status + ': ' + txt); });
     })
     .then(users => {
+      if (!users.length && !retry) {
+        // Retry once after 4s in case Railway was cold-starting
+        setTimeout(function() { loadUsers(true); }, 4000);
+        return;
+      }
       ALL_USERS = users;
       renderSidebar(users);
       renderUsersTable(users);
