@@ -12906,7 +12906,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                     React.createElement("div", { style: { fontSize: 12, color: "var(--text)", fontWeight: 600, marginBottom: 8 } }, "Invite friends to join you on Reel"),
                     React.createElement("button", {
                       onClick: () => {
-                        const inviteUrl = "https://goodtelly-production.up.railway.app?invite=" + encodeURIComponent((currentUser && currentUser.username) || "");
+                        const inviteUrl = "https://goodtelly-production.up.railway.app?invite=" + encodeURIComponent((window.__AUTH_USER && window.__AUTH_USER.username) || "");
                         const msg = "Tired of scrolling Netflix for 30 minutes and finding nothing? \uD83D\uDE05\n\nReel is an app where friends share the best TV & films.\n\nJoin me here \uD83D\uDC47\n" + inviteUrl;
                         window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
                       },
