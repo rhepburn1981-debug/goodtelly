@@ -172,11 +172,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             </div>
             <table class="data-table">
               <thead><tr>
-                <th>Film</th>
-                <th>Recommended To</th>
-                <th>Date</th>
+                <th style="cursor:pointer" onclick="sortTable('recs','film_title',ALL_RECS,renderRecs)">Film ↕</th>
+                <th style="cursor:pointer" onclick="sortTable('recs','to_name',ALL_RECS,renderRecs)">Recommended To ↕</th>
+                <th style="cursor:pointer" onclick="sortTable('recs','created_at',ALL_RECS,renderRecs)">Date ↕</th>
                 <th>Comments</th>
-                <th>Status</th>
+                <th style="cursor:pointer" onclick="sortTable('recs','rating',ALL_RECS,renderRecs)">Status ↕</th>
               </tr></thead>
               <tbody id="tbl-recs"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
             </table>
@@ -190,10 +190,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             </div>
             <table class="data-table">
               <thead><tr>
-                <th>Time</th>
-                <th>Username</th>
-                <th>Activity</th>
-                <th>Program</th>
+                <th style="cursor:pointer" onclick="sortTable('activity','ts',ALL_ACTIVITY,renderActivity)">Time ↕</th>
+                <th style="cursor:pointer" onclick="sortTable('activity','user_name',ALL_ACTIVITY,renderActivity)">Username ↕</th>
+                <th style="cursor:pointer" onclick="sortTable('activity','action',ALL_ACTIVITY,renderActivity)">Activity ↕</th>
+                <th style="cursor:pointer" onclick="sortTable('activity','film',ALL_ACTIVITY,renderActivity)">Program ↕</th>
                 <th>Recommended To</th>
                 <th>Channel</th>
               </tr></thead>
@@ -209,9 +209,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             </div>
             <table class="data-table">
               <thead><tr>
-                <th>Username</th>
-                <th>Friend</th>
-                <th>Connected</th>
+                <th style="cursor:pointer" onclick="sortTable('friends','name',ALL_FRIENDS,renderFriends)">Username ↕</th>
+                <th style="cursor:pointer" onclick="sortTable('friends','friend_name',ALL_FRIENDS,renderFriends)">Friend ↕</th>
+                <th style="cursor:pointer" onclick="sortTable('friends','friend_count',ALL_FRIENDS,renderFriends)">Connected ↕</th>
               </tr></thead>
               <tbody id="tbl-friends"><tr class="empty-row"><td colspan="3">Loading…</td></tr></tbody>
             </table>
@@ -271,6 +271,9 @@ const API = '';
 let TOKEN = '';
 let SELECTED_USER = null;
 let ALL_USERS = [];
+let ALL_RECS = [];
+let ALL_ACTIVITY = [];
+let ALL_FRIENDS = [];
 let charts = {};
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -417,7 +420,9 @@ function renderStats(stats) {
 }
 
 // ── Recommendations ───────────────────────────────────────────────────────────
-function renderRecs(recs) {
+function renderRecs(recs, skipCache) {
+  if (!skipCache) ALL_RECS = recs;
+  recs = skipCache ? recs : ALL_RECS;
   const tbody = document.getElementById('tbl-recs');
   document.getElementById('recs-count').textContent = recs.length + ' records';
   if (!recs.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No recommendations yet</td></tr>'; return; }
@@ -432,7 +437,9 @@ function renderRecs(recs) {
 }
 
 // ── Activity ──────────────────────────────────────────────────────────────────
-function renderActivity(events) {
+function renderActivity(events, skipCache) {
+  if (!skipCache) ALL_ACTIVITY = events;
+  events = skipCache ? events : ALL_ACTIVITY;
   const tbody = document.getElementById('tbl-activity');
   document.getElementById('activity-count').textContent = events.length + ' events';
   if (!events.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No activity yet</td></tr>'; return; }
@@ -456,7 +463,9 @@ function renderActivity(events) {
 }
 
 // ── Friends ───────────────────────────────────────────────────────────────────
-function renderFriends(friends) {
+function renderFriends(friends, skipCache) {
+  if (!skipCache) ALL_FRIENDS = friends;
+  friends = skipCache ? friends : ALL_FRIENDS;
   const tbody = document.getElementById('tbl-friends');
   document.getElementById('friends-count').textContent = friends.length + ' records';
   if (!friends.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No friends data</td></tr>'; return; }
@@ -572,7 +581,7 @@ function sortTable(tableId, col, dataArr, renderFn) {
     const bv = b[col] || '';
     return av < bv ? -dir : av > bv ? dir : 0;
   });
-  renderFn(sorted);
+  renderFn(sorted, true);  // true = skipCache, don't overwrite source data
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
