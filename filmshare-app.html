@@ -13100,6 +13100,25 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                   const mr = await fetch(API_BASE + "/api/auth/me", { headers: { Authorization: "Bearer " + access_token } });
                   const user = await mr.json();
                   window.__AUTH_USER = user;
+                  // If arrived from a share link, auto-connect friend + save recommendation
+                  if (mode === "register") {
+                    const _p = new URLSearchParams(window.location.search);
+                    const _fromUser = _p.get("rec_from_user");
+                    const _slug = _p.get("open");
+                    const _note = _p.get("rec_note") || "";
+                    const _rating = _p.get("rec_rating");
+                    const _h = { Authorization: "Bearer " + access_token };
+                    if (_fromUser) {
+                      fetch(API_BASE + "/api/friends/" + encodeURIComponent(_fromUser) + "/connect", { method: "POST", headers: _h }).catch(() => {});
+                    }
+                    if (_slug) {
+                      fetch(API_BASE + "/api/me/recommendations", {
+                        method: "POST",
+                        headers: Object.assign({ "Content-Type": "application/json" }, _h),
+                        body: JSON.stringify({ film_slug: _slug, from_username: _fromUser || "", note: _note, rating: _rating ? parseFloat(_rating) : null }),
+                      }).catch(() => {});
+                    }
+                  }
                   onLogin(user, access_token);
                   onClose();
                 } catch(e) { setError("Network error"); }
