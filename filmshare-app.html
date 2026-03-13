@@ -13793,10 +13793,8 @@ function App() {
                     ALL_FILMS.find((f) => f.id === id) ||
                     myList.find((f) => f.id === id) ||
                     tmdbFilmCacheRef.current[id];
-                  if (film && film.id > 0) {
+                  if (film) {
                     setTimeout(() => setRecommendFilm(film), 50);
-                  } else {
-                    showToastMsg("Add it to your watchlist first to recommend");
                   }
                 } else {
                   const film =
