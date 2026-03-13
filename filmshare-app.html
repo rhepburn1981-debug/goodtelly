@@ -10503,6 +10503,7 @@
                     const body = { title: film.title, year: film.year ? parseInt(film.year) : null, autoEnrich: true };
                     if (film._fromTmdb && film.tmdb_id) body.tmdbId = film.tmdb_id;
                     if (film._fromTmdbTv && film.tmdb_tv_id) body.tmdbTvId = film.tmdb_tv_id;
+                    if (film._fromTvmaze && film.tvmaze_id) body.tvmazeId = film.tvmaze_id;
                     const cr = await fetch("/api/films", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + authToken }, body: JSON.stringify(body) });
                     if (!cr.ok) { setSending(s => ({ ...s, [friend.username]: null })); showToast("Failed to send"); return; }
                     const saved = await cr.json();
