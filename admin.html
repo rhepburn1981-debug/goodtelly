@@ -284,14 +284,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         </div><!-- /col-tables -->
 
         <div class="col-charts">
-          <div class="chart-card" style="margin-bottom:4px">
-            <div class="chart-title">Total Users (Cumulative)</div>
-            <div class="chart-wrap"><canvas id="chart-total-users"></canvas></div>
-          </div>
           <div style="display:flex;gap:6px;margin-bottom:12px" id="period-filter">
             <button onclick="setPeriod('day')" id="period-day" style="flex:1;padding:5px 0;font-size:11px;font-weight:700;border-radius:6px;border:1px solid #e2e8f0;background:#38b2ac;color:#fff;cursor:pointer">Days</button>
             <button onclick="setPeriod('week')" id="period-week" style="flex:1;padding:5px 0;font-size:11px;font-weight:700;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#4a5568;cursor:pointer">Weeks</button>
             <button onclick="setPeriod('month')" id="period-month" style="flex:1;padding:5px 0;font-size:11px;font-weight:700;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#4a5568;cursor:pointer">Months</button>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Total Users (Cumulative)</div>
+            <div class="chart-wrap"><canvas id="chart-total-users"></canvas></div>
           </div>
           <div class="chart-card">
             <div class="chart-title">Users Active by Day</div>
@@ -629,25 +629,14 @@ function makeDataset(data) {
 }
 
 function initCharts() {
-  const ids = ['chart-dau','chart-searches','chart-accounts','chart-tabs'];
+  const ids = ['chart-dau','chart-searches','chart-accounts','chart-tabs','chart-total-users'];
   ids.forEach(id => {
-    charts[id] = new Chart(document.getElementById(id), {
+    const el = document.getElementById(id);
+    if (!el) return;
+    charts[id] = new Chart(el, {
       ...chartDefaults,
       data: { labels: [], datasets: [makeDataset([])] }
     });
-  });
-  // Cumulative users chart — filled green
-  charts['chart-total-users'] = new Chart(document.getElementById('chart-total-users'), {
-    type: 'line',
-    options: {
-      responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { color: '#f0f2f5' }, ticks: { font: { size: 10 }, color: '#a0aec0', maxRotation: 0 } },
-        y: { grid: { color: '#f0f2f5' }, ticks: { font: { size: 10 }, color: '#a0aec0', precision: 0, stepSize: 1 }, beginAtZero: true, min: 0 }
-      }
-    },
-    data: { labels: [], datasets: [{ data: [], borderColor: '#38b2ac', backgroundColor: '#38b2ac22', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#38b2ac', borderWidth: 2 }] }
   });
 }
 
