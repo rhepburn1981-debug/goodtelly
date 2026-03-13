@@ -99,6 +99,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#cbd5e0;border-radius:3px}
+
+.stat-tile{text-align:center}
+.stat-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#8890a8;margin-bottom:4px}
+.stat-value{font-size:24px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:3px}
+.stat-sub{font-size:11px;font-weight:600}
+.stat-up{color:#48bb78}.stat-down{color:#fc8181}.stat-neutral{color:#8890a8}
 </style>
 </head>
 <body>
@@ -142,13 +148,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button id="clear-filter" onclick="selectUser(null)">✕ Show all</button>
       </div>
 
-      <!-- Cumulative users chart -->
-      <div class="chart-card" style="margin-bottom:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div class="chart-title" style="margin:0">Total Users (Cumulative)</div>
-          <span id="total-users-count" style="font-size:22px;font-weight:800;color:#38b2ac"></span>
+      <!-- Stat tiles -->
+      <div id="stat-tiles" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px;background:#1e2030;border-radius:10px;padding:16px 20px">
+        <div class="stat-tile">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="stat-total-users">—</div>
+          <div class="stat-sub" id="stat-new-week"></div>
         </div>
-        <div class="chart-wrap" style="height:140px"><canvas id="chart-total-users"></canvas></div>
+        <div class="stat-tile">
+          <div class="stat-label">Active Today</div>
+          <div class="stat-value" id="stat-active-today">—</div>
+          <div class="stat-sub" id="stat-active-pct"></div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">New Users</div>
+          <div class="stat-value" id="stat-new-users">—</div>
+          <div class="stat-sub" id="stat-new-pct"></div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Recs Sent</div>
+          <div class="stat-value" id="stat-recs-sent">—</div>
+          <div class="stat-sub" style="color:#8890a8">all time</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Recs Rated</div>
+          <div class="stat-value" id="stat-recs-rated">—</div>
+          <div class="stat-sub" style="color:#8890a8">responses</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Rec Conversion</div>
+          <div class="stat-value" id="stat-conv-pct">—</div>
+          <div class="stat-sub" style="color:#8890a8">rated / sent</div>
+        </div>
       </div>
 
       <div class="main-grid">
@@ -254,6 +285,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
         <div class="col-charts">
           <div class="chart-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div class="chart-title" style="margin:0">Total Users (Cumulative)</div>
+              <span id="total-users-count" style="font-size:16px;font-weight:800;color:#38b2ac"></span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-total-users"></canvas></div>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:12px" id="period-filter">
+            <button onclick="setPeriod('day')" id="period-day" style="flex:1;padding:5px 0;font-size:11px;font-weight:700;border-radius:6px;border:1px solid #e2e8f0;background:#38b2ac;color:#fff;cursor:pointer">Days</button>
+            <button onclick="setPeriod('week')" id="period-week" style="flex:1;padding:5px 0;font-size:11px;font-weight:700;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#4a5568;cursor:pointer">Weeks</button>
+            <button onclick="setPeriod('month')" id="period-month" style="flex:1;padding:5px 0;font-size:11px;font-weight:700;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#4a5568;cursor:pointer">Months</button>
+          </div>
+          <div class="chart-card">
             <div class="chart-title">Users Active by Day</div>
             <div class="chart-wrap"><canvas id="chart-dau"></canvas></div>
           </div>
@@ -285,6 +328,7 @@ let ALL_RECS = [];
 let ALL_ACTIVITY = [];
 let ALL_FRIENDS = [];
 let charts = {};
+let CHART_PERIOD = 'day';
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 (function init() {
@@ -331,7 +375,7 @@ function q(path) {
 
 function loadAll() {
   q('/api/admin/stats').then(renderStats);
-  q('/api/admin/chart').then(updateCharts);
+  q('/api/admin/chart?period=' + CHART_PERIOD).then(updateCharts);
   q('/api/admin/recommendations').then(renderRecs);
   q('/api/admin/activity').then(renderActivity);
   q('/api/admin/friends').then(renderFriends);
@@ -379,6 +423,15 @@ function filterSidebar(q) {
   document.querySelectorAll('#user-list .s-item').forEach(el => {
     el.style.display = el.textContent.toLowerCase().includes(ql) ? '' : 'none';
   });
+}
+
+function setPeriod(p) {
+  CHART_PERIOD = p;
+  ['day','week','month'].forEach(k => {
+    const btn = document.getElementById('period-' + k);
+    if (btn) { btn.style.background = k === p ? '#38b2ac' : '#fff'; btn.style.color = k === p ? '#fff' : '#4a5568'; }
+  });
+  q('/api/admin/chart?period=' + p).then(updateCharts);
 }
 
 function renderUsersTable(users) {
@@ -447,7 +500,22 @@ function selectUser(user) {
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function renderStats(stats) {
-  // Stats are shown inline in the filter bar label — could add a stat strip here if needed
+  if (!stats || Array.isArray(stats)) return;
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const cls = (id, c) => { const el = document.getElementById(id); if (el) el.className = 'stat-sub ' + c; };
+  set('stat-total-users', (stats.total_users || 0).toLocaleString());
+  set('stat-new-week', '~ ' + (stats.new_this_week || 0) + ' this week');
+  set('stat-active-today', (stats.active_today || 0).toLocaleString());
+  const ap = stats.active_pct_change || 0;
+  set('stat-active-pct', '~ ' + (ap >= 0 ? '+' : '') + ap + '%');
+  cls('stat-active-pct', ap >= 0 ? 'stat-up' : 'stat-down');
+  set('stat-new-users', (stats.new_this_week || 0).toLocaleString());
+  const np = stats.new_pct_change || 0;
+  set('stat-new-pct', '~ ' + (np >= 0 ? '+' : '') + np + '%');
+  cls('stat-new-pct', np >= 0 ? 'stat-up' : 'stat-down');
+  set('stat-recs-sent', (stats.recs_sent || 0).toLocaleString());
+  set('stat-recs-rated', (stats.recs_rated || 0).toLocaleString());
+  set('stat-conv-pct', (stats.rec_conversion_pct || 0) + '%');
 }
 
 // ── Recommendations ───────────────────────────────────────────────────────────
@@ -589,15 +657,14 @@ function initCharts() {
 function updateCharts(data) {
   if (typeof Chart === 'undefined') return;
   const labels = data.labels || [];
-  // Cumulative users
-  const newAcc = data.new_accounts || [];
-  let running = data.users_before_window || 0;
-  const cumulative = newAcc.map(v => { running += (v || 0); return running; });
+  // Cumulative users (all-time data from API)
+  const cumLabels = data.cumulative_labels || [];
+  const cumTotals = data.cumulative_totals || [];
   const totalEl = document.getElementById('total-users-count');
-  if (totalEl && cumulative.length) totalEl.textContent = cumulative[cumulative.length - 1].toLocaleString() + ' users';
+  if (totalEl && cumTotals.length) totalEl.textContent = cumTotals[cumTotals.length - 1].toLocaleString() + ' users';
   try {
     const c = charts['chart-total-users'];
-    if (c) { c.data.labels = data.labels || []; c.data.datasets[0].data = cumulative; c.update(); }
+    if (c) { c.data.labels = cumLabels; c.data.datasets[0].data = cumTotals; c.update(); }
   } catch(e) {}
 
   [

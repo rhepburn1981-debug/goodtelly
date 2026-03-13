@@ -1913,83 +1913,146 @@ def admin_stats(token: str = "", user_id: Optional[int] = None):
         else:
             total = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()["c"]
             new7 = conn.execute("SELECT COUNT(*) as c FROM users WHERE created_at >= datetime('now','-7 days')").fetchone()["c"]
-            friends = conn.execute("SELECT COUNT(*) as c FROM user_friends WHERE status='accepted'").fetchone()["c"]
-            recs = conn.execute("SELECT COUNT(*) as c FROM user_recommendations").fetchone()["c"]
-            return [
-                {"label": "Total Users", "value": total},
-                {"label": "New This Week", "value": new7},
-                {"label": "Active Friendships", "value": friends},
-                {"label": "Recommendations Sent", "value": recs},
-            ]
+            new14 = conn.execute("SELECT COUNT(*) as c FROM users WHERE created_at >= datetime('now','-14 days') AND created_at < datetime('now','-7 days')").fetchone()["c"]
+            try:
+                active_today = conn.execute("""SELECT COUNT(DISTINCT user_id) as c FROM (
+                    SELECT user_id FROM user_watchlist WHERE date(added_at)=date('now')
+                    UNION SELECT user_id FROM user_watched WHERE date(watched_at)=date('now')
+                    UNION SELECT from_user_id as user_id FROM user_recommendations WHERE date(created_at)=date('now') AND from_user_id IS NOT NULL
+                )""").fetchone()["c"]
+                active_yesterday = conn.execute("""SELECT COUNT(DISTINCT user_id) as c FROM (
+                    SELECT user_id FROM user_watchlist WHERE date(added_at)=date('now','-1 day')
+                    UNION SELECT user_id FROM user_watched WHERE date(watched_at)=date('now','-1 day')
+                    UNION SELECT from_user_id as user_id FROM user_recommendations WHERE date(created_at)=date('now','-1 day') AND from_user_id IS NOT NULL
+                )""").fetchone()["c"]
+            except:
+                active_today = 0
+                active_yesterday = 0
+            recs_total = conn.execute("SELECT COUNT(*) as c FROM user_recommendations").fetchone()["c"]
+            recs_rated = conn.execute("SELECT COUNT(*) as c FROM user_recommendations WHERE rating IS NOT NULL").fetchone()["c"]
+            new_from_invites = conn.execute("SELECT COUNT(*) as c FROM users WHERE created_at >= datetime('now','-30 days')").fetchone()["c"]
+            active_pct = round((active_today / max(active_yesterday,1) - 1) * 100) if active_yesterday else 0
+            new_pct = round((new7 / max(new14,1) - 1) * 100) if new14 else 0
+            conv_pct = round(recs_rated / max(recs_total,1) * 100)
+            return {
+                "total_users": total,
+                "new_this_week": new7,
+                "new_pct_change": new_pct,
+                "active_today": active_today,
+                "active_pct_change": active_pct,
+                "recs_sent": recs_total,
+                "recs_rated": recs_rated,
+                "rec_conversion_pct": conv_pct,
+                "new_last_30d": new_from_invites,
+            }
 
 
 @app.get("/api/admin/chart")
-def admin_chart(token: str = "", user_id: Optional[int] = None):
+def admin_chart(token: str = "", user_id: Optional[int] = None, period: str = "day"):
     _check_admin(token)
     with get_db() as conn:
-        days = [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(13, -1, -1)]
-        # DAU - unique users who did anything each day
+        now = datetime.now()
+
+        if period == "week":
+            n = 12
+            window_days = n * 7
+            grp = lambda col: f"strftime('%Y-%W', {col})"
+            buckets = [(now - timedelta(weeks=i)).strftime("%Y-%W") for i in range(n-1, -1, -1)]
+            labels = ["W" + b.split("-")[1].lstrip("0") or "0" for b in buckets]
+            win = f"datetime('now', '-{window_days} days')"
+        elif period == "month":
+            n = 12
+            grp = lambda col: f"strftime('%Y-%m', {col})"
+            buckets = []
+            for i in range(n-1, -1, -1):
+                m = now.month - i
+                y = now.year
+                while m <= 0:
+                    m += 12
+                    y -= 1
+                buckets.append(f"{y:04d}-{m:02d}")
+            month_names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+            labels = [month_names[int(b[5:])-1] for b in buckets]
+            win = f"'{buckets[0]}-01'"
+        else:  # day
+            n = 14
+            grp = lambda col: f"date({col})"
+            buckets = [(now - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n-1, -1, -1)]
+            labels = [d[5:] for d in buckets]
+            win = f"datetime('now', '-{n} days')"
+
+        def win_clause(col):
+            if period == "month":
+                return f"strftime('%Y-%m', {col}) >= '{buckets[0]}'"
+            return f"{col} >= {win}"
+
+        # DAU/WAU/MAU
         if user_id:
-            dau_q = """
-                SELECT day, COUNT(DISTINCT user_id) as c FROM (
-                    SELECT date(added_at) as day, user_id FROM user_watchlist WHERE user_id=? AND added_at >= datetime('now','-14 days')
-                    UNION ALL SELECT date(watched_at), user_id FROM user_watched WHERE user_id=? AND watched_at >= datetime('now','-14 days')
-                    UNION ALL SELECT date(created_at), from_user_id FROM user_recommendations WHERE from_user_id=? AND created_at >= datetime('now','-14 days')
-                ) GROUP BY day
-            """
-            dau_rows = conn.execute(dau_q, (user_id, user_id, user_id)).fetchall()
+            dau_rows = conn.execute(f"""
+                SELECT {grp('day')} as bucket, COUNT(DISTINCT user_id) as c FROM (
+                    SELECT added_at as day, user_id FROM user_watchlist WHERE user_id=? AND {win_clause('added_at')}
+                    UNION ALL SELECT watched_at, user_id FROM user_watched WHERE user_id=? AND {win_clause('watched_at')}
+                    UNION ALL SELECT created_at, from_user_id FROM user_recommendations WHERE from_user_id=? AND {win_clause('created_at')}
+                ) GROUP BY bucket
+            """, (user_id, user_id, user_id)).fetchall()
         else:
-            dau_q = """
-                SELECT day, COUNT(DISTINCT user_id) as c FROM (
-                    SELECT date(added_at) as day, user_id FROM user_watchlist WHERE added_at >= datetime('now','-14 days')
-                    UNION ALL SELECT date(watched_at), user_id FROM user_watched WHERE watched_at >= datetime('now','-14 days')
-                    UNION ALL SELECT date(created_at), from_user_id FROM user_recommendations WHERE from_user_id IS NOT NULL AND created_at >= datetime('now','-14 days')
-                ) GROUP BY day
-            """
-            dau_rows = conn.execute(dau_q).fetchall()
-        dau_data = {r["day"]: r["c"] for r in dau_rows}
+            dau_rows = conn.execute(f"""
+                SELECT {grp('day')} as bucket, COUNT(DISTINCT user_id) as c FROM (
+                    SELECT added_at as day, user_id FROM user_watchlist WHERE {win_clause('added_at')}
+                    UNION ALL SELECT watched_at, user_id FROM user_watched WHERE {win_clause('watched_at')}
+                    UNION ALL SELECT created_at, from_user_id FROM user_recommendations WHERE from_user_id IS NOT NULL AND {win_clause('created_at')}
+                ) GROUP BY bucket
+            """).fetchall()
+        dau_data = {r["bucket"]: r["c"] for r in dau_rows}
 
+        # Searches
         if user_id:
-            rec_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM user_recommendations WHERE (from_user_id=? OR to_user_id=?) AND created_at >= datetime('now','-14 days') GROUP BY day", (user_id, user_id)).fetchall()
+            srch_rows = conn.execute(f"SELECT {grp('created_at')} as bucket, COUNT(*) as c FROM search_logs WHERE user_id=? AND {win_clause('created_at')} GROUP BY bucket", (user_id,)).fetchall()
         else:
-            rec_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM user_recommendations WHERE created_at >= datetime('now','-14 days') GROUP BY day").fetchall()
-        rec_data = {r["day"]: r["c"] for r in rec_rows}
+            try:
+                srch_rows = conn.execute(f"SELECT {grp('created_at')} as bucket, COUNT(*) as c FROM search_logs WHERE {win_clause('created_at')} GROUP BY bucket").fetchall()
+            except:
+                srch_rows = []
+        srch_data = {r["bucket"]: r["c"] for r in srch_rows}
 
-        # Searches by day
+        # New accounts
         if user_id:
-            srch_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM search_logs WHERE user_id=? AND created_at >= datetime('now','-14 days') GROUP BY day", (user_id,)).fetchall()
+            acct_rows = conn.execute(f"SELECT {grp('created_at')} as bucket, 1 as c FROM users WHERE id=? AND {win_clause('created_at')}", (user_id,)).fetchall()
         else:
-            srch_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM search_logs WHERE created_at >= datetime('now','-14 days') GROUP BY day").fetchall()
-        srch_data = {r["day"]: r["c"] for r in srch_rows}
+            acct_rows = conn.execute(f"SELECT {grp('created_at')} as bucket, COUNT(*) as c FROM users WHERE {win_clause('created_at')} GROUP BY bucket").fetchall()
+        acct_data = {r["bucket"]: r["c"] for r in acct_rows}
 
-        # New accounts by day (always platform-wide; per-user: 1 on join date)
+        # Tab views
         if user_id:
-            acct_rows = conn.execute("SELECT date(created_at) as day, 1 as c FROM users WHERE id=? AND created_at >= datetime('now','-14 days')", (user_id,)).fetchall()
+            try:
+                tab_rows = conn.execute(f"SELECT {grp('created_at')} as bucket, COUNT(*) as c FROM tab_views WHERE user_id=? AND {win_clause('created_at')} GROUP BY bucket", (user_id,)).fetchall()
+            except:
+                tab_rows = []
         else:
-            acct_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM users WHERE created_at >= datetime('now','-14 days') GROUP BY day").fetchall()
-        acct_data = {r["day"]: r["c"] for r in acct_rows}
+            try:
+                tab_rows = conn.execute(f"SELECT {grp('created_at')} as bucket, COUNT(*) as c FROM tab_views WHERE {win_clause('created_at')} GROUP BY bucket").fetchall()
+            except:
+                tab_rows = []
+        tab_data = {r["bucket"]: r["c"] for r in tab_rows}
 
-        # Tabs usage by day
-        if user_id:
-            tab_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM tab_views WHERE user_id=? AND created_at >= datetime('now','-14 days') GROUP BY day", (user_id,)).fetchall()
-        else:
-            tab_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM tab_views WHERE created_at >= datetime('now','-14 days') GROUP BY day").fetchall()
-        tab_data = {r["day"]: r["c"] for r in tab_rows}
+        # Cumulative users (all time, same grouping)
+        all_acct_rows = conn.execute(f"SELECT {grp('created_at')} as bucket, COUNT(*) as c FROM users GROUP BY bucket ORDER BY bucket").fetchall()
+        cumulative_buckets = [r["bucket"] for r in all_acct_rows]
+        cumulative_counts = [r["c"] for r in all_acct_rows]
+        running = 0
+        cumulative_totals = []
+        for c in cumulative_counts:
+            running += c
+            cumulative_totals.append(running)
 
-        # Users created before the chart window (for cumulative baseline)
-        oldest_day = days[0]
-        users_before = conn.execute(
-            "SELECT COUNT(*) as c FROM users WHERE date(created_at) < ?", (oldest_day,)
-        ).fetchone()["c"]
-
-        labels = [d[5:] for d in days]
         return {
             "labels": labels,
-            "dau": [dau_data.get(d, 0) for d in days],
-            "searches": [srch_data.get(d, 0) for d in days],
-            "new_accounts": [acct_data.get(d, 0) for d in days],
-            "tab_views": [tab_data.get(d, 0) for d in days],
-            "users_before_window": users_before,
+            "dau": [dau_data.get(b, 0) for b in buckets],
+            "searches": [srch_data.get(b, 0) for b in buckets],
+            "new_accounts": [acct_data.get(b, 0) for b in buckets],
+            "tab_views": [tab_data.get(b, 0) for b in buckets],
+            "cumulative_labels": cumulative_buckets,
+            "cumulative_totals": cumulative_totals,
         }
 
 
