@@ -12394,25 +12394,17 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
 
               const genres = ["All", ...new Set(ALL_FILMS.flatMap(f => (f.genre || "").split(",").map(g => g.trim()).filter(Boolean)))].slice(0, 8);
 
-              const now = new Date();
-              const filterByTime = (list) => {
-                if (timePeriod === "all") return list;
-                return list.filter(f => {
-                  const yr = f.year || 0;
-                  if (timePeriod === "year") return yr >= now.getFullYear() - 1;
-                  if (timePeriod === "month") return yr >= now.getFullYear() - 1;
-                  if (timePeriod === "week") return yr >= now.getFullYear() - 1;
-                  return true;
-                });
-              };
+              const scoreKey = timePeriod === "week" ? "activityScore7d"
+                : timePeriod === "month" ? "activityScore30d"
+                : timePeriod === "year"  ? "activityScore365d"
+                : "activityScore";
 
               const filtered = useMemo(() => {
                 let list = [...ALL_FILMS];
                 if (genreFilter !== "All") list = list.filter(f => (f.genre || "").includes(genreFilter));
                 if (providerFilter !== "all") list = list.filter(f => f.streamers && f.streamers.includes(providerFilter));
-                list = filterByTime(list);
-                return list.sort((a, b) => (b.activityScore || b.trendingViews || 0) - (a.activityScore || a.trendingViews || 0));
-              }, [genreFilter, providerFilter, timePeriod]);
+                return list.sort((a, b) => (b[scoreKey] || b.trendingViews || 0) - (a[scoreKey] || a.trendingViews || 0));
+              }, [genreFilter, providerFilter, timePeriod, scoreKey]);
 
               const featuredFilm = filtered[0];
               const rankedList = filtered.slice(1, 20);

@@ -868,16 +868,23 @@ def list_films(genre: Optional[str] = None, streamer: Optional[str] = None, q: O
             query += " WHERE " + " AND ".join(wheres)
 
         rows = conn.execute(query, params).fetchall()
-        # Compute activity scores (watchlist + watched + recommendations) per film
-        scores = {}
-        for r in conn.execute("""
-            SELECT film_id, COUNT(*) as c FROM (
-                SELECT film_id FROM user_watchlist
-                UNION ALL SELECT film_id FROM user_watched
-                UNION ALL SELECT film_id FROM user_recommendations
-            ) GROUP BY film_id
-        """).fetchall():
-            scores[r["film_id"]] = r["c"]
+        # Compute activity scores per film for different time windows
+        def build_scores(days=None):
+            date_clause = f"AND created_at >= datetime('now', '-{days} days')" if days else ""
+            out = {}
+            for r in conn.execute(f"""
+                SELECT film_id, COUNT(*) as c FROM (
+                    SELECT film_id, created_at FROM user_watchlist {date_clause}
+                    UNION ALL SELECT film_id, created_at FROM user_watched {date_clause}
+                    UNION ALL SELECT film_id, created_at FROM user_recommendations {date_clause}
+                ) GROUP BY film_id
+            """).fetchall():
+                out[r["film_id"]] = r["c"]
+            return out
+        scores_all = build_scores()
+        scores_7d  = build_scores(7)
+        scores_30d = build_scores(30)
+        scores_365d = build_scores(365)
         films = []
         for row in rows:
             fid = row["id"]
@@ -888,7 +895,10 @@ def list_films(genre: Optional[str] = None, streamer: Optional[str] = None, q: O
                 "SELECT still_url FROM film_stills WHERE film_id = ? ORDER BY rowid", (fid,)
             ).fetchall()]
             f = row_to_film(row, streamers, stills)
-            f["activityScore"] = scores.get(fid, 0)
+            f["activityScore"]    = scores_all.get(fid, 0)
+            f["activityScore7d"]  = scores_7d.get(fid, 0)
+            f["activityScore30d"] = scores_30d.get(fid, 0)
+            f["activityScore365d"] = scores_365d.get(fid, 0)
             films.append(f)
         films.sort(key=lambda f: f["activityScore"], reverse=True)
         return films
