@@ -10497,10 +10497,21 @@
                 if (rating && onSaveRating) onSaveRating(film.id, rating);
                 setSending(s => ({ ...s, [friend.username]: "loading" }));
                 try {
+                  let filmId = film.id;
+                  // If film isn't in DB yet (negative id), create it first
+                  if (filmId < 0) {
+                    const body = { title: film.title, year: film.year ? parseInt(film.year) : null, autoEnrich: true };
+                    if (film._fromTmdb && film.tmdb_id) body.tmdbId = film.tmdb_id;
+                    if (film._fromTmdbTv && film.tmdb_tv_id) body.tmdbTvId = film.tmdb_tv_id;
+                    const cr = await fetch("/api/films", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + authToken }, body: JSON.stringify(body) });
+                    if (!cr.ok) { setSending(s => ({ ...s, [friend.username]: null })); showToast("Failed to send"); return; }
+                    const saved = await cr.json();
+                    filmId = saved.id;
+                  }
                   const res = await fetch("/api/me/send-recommendation", {
                     method: "POST",
                     headers: { "Content-Type": "application/json", Authorization: "Bearer " + authToken },
-                    body: JSON.stringify({ to_username: friend.username, film_id: film.id, note: note.trim() || null, rating: film.rating ? parseFloat(film.rating) : null }),
+                    body: JSON.stringify({ to_username: friend.username, film_id: filmId, note: note.trim() || null, rating: film.rating ? parseFloat(film.rating) : null }),
                   });
                   if (res.ok) {
                     setSending(s => ({ ...s, [friend.username]: "done" }));
