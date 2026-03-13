@@ -1765,8 +1765,10 @@ def admin_users_list(token: str = ""):
                 LEFT JOIN user_watchlist uw ON uw.user_id=u.id
                 GROUP BY u.id ORDER BY u.created_at DESC
             """).fetchall()
-        except Exception as e:
-            # Fallback: simple query without JOINs (diagnostic — JOIN table may be missing)
+        except Exception:
+            rows = []
+        # If complex query returned nothing (empty join result or schema issue), use simple fallback
+        if not rows:
             rows = conn.execute(
                 "SELECT id, username, COALESCE(display_name, username) as display_name, "
                 "avatar, color, created_at, last_login_at, 0 as friend_count, 0 as watchlist_count "
