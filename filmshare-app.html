@@ -12849,7 +12849,6 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                   /* Right: WhatsApp CTA */
                   React.createElement("div", { style: { flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textAlign: "center" } },
                     React.createElement("div", { style: { fontSize: 11, fontWeight: 700, color: "var(--text)", lineHeight: 1.3 } }, "Invite Friends to Join Reel"),
-                    React.createElement("div", { style: { fontSize: 9, color: "var(--muted)", lineHeight: 1.4, marginBottom: 2 } }, "Send them a link \u2014 friends appear here when they join"),
                     React.createElement("button", {
                       onClick: () => {
                         const inviteUrl = "https://goodtelly-production.up.railway.app?invite=" + encodeURIComponent((window.__AUTH_USER && window.__AUTH_USER.username) || "");
@@ -12864,6 +12863,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                       ),
                       React.createElement("span", { style: { fontSize: 9, fontWeight: 700, textAlign: "center", lineHeight: 1.3 } }, "Invite via WhatsApp"),
                     ),
+                    React.createElement("div", { style: { fontSize: 9, color: "var(--muted)", lineHeight: 1.4, textAlign: "center" } }, "Send them a link \u2014 friends", React.createElement("br"), "appear here when they join"),
                   ),
                 ),
                 pendingRequests.length > 0 && React.createElement("div", {
@@ -13784,7 +13784,7 @@ function App() {
                 setRatingPromptStars(0);
                 setRatingPromptForRecommend(false);
                 setRatingPrompt(id);
-                if (authToken) {
+                if (authToken && id > 0) {
                   fetch(API_BASE + '/api/me/watched/' + id, {
                     method: 'POST',
                     headers: { Authorization: 'Bearer ' + authToken },
@@ -14470,7 +14470,7 @@ function App() {
 
                   ratingPrompt &&
                     (() => {
-                      const film = ALL_FILMS.find((f) => f.id === ratingPrompt);
+                      const film = ALL_FILMS.find((f) => f.id === ratingPrompt) || myList.find((f) => f.id === ratingPrompt) || tmdbFilmCacheRef.current[ratingPrompt] || (selectedFilm && selectedFilm.id === ratingPrompt ? selectedFilm : null);
                       return React.createElement(
                         "div",
                         {
@@ -14590,18 +14590,12 @@ function App() {
                                       {
                                         onClick: () => {
                                           const filmToRec =
-                                            ALL_FILMS.find(
-                                              (m) => m.id === ratingPrompt,
-                                            ) ||
-                                            myList.find((m) => m.id === ratingPrompt);
-                                          submitRating(
-                                            ratingPrompt,
-                                            ratingPromptStars,
-                                          );
-                                          setTimeout(
-                                            () => setRecommendFilm(filmToRec),
-                                            50,
-                                          );
+                                            ALL_FILMS.find((m) => m.id === ratingPrompt) ||
+                                            myList.find((m) => m.id === ratingPrompt) ||
+                                            tmdbFilmCacheRef.current[ratingPrompt] ||
+                                            (selectedFilm && selectedFilm.id === ratingPrompt ? selectedFilm : null);
+                                          submitRating(ratingPrompt, ratingPromptStars);
+                                          setTimeout(() => setRecommendFilm(filmToRec), 50);
                                         },
                                         style: {
                                           flex: 1,
