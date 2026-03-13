@@ -12724,19 +12724,6 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                   .catch(() => {});
               }, [authToken]);
 
-              // Detect new friends added since last visit (e.g. via invite link auto-connect)
-              React.useEffect(() => {
-                if (!realFriends || !window.__AUTH_USER) return;
-                const seenKey = "seen_friends_" + window.__AUTH_USER.username;
-                const seenRaw = localStorage.getItem(seenKey);
-                const currentUsernames = realFriends.map(f => f.username).filter(Boolean);
-                if (seenRaw !== null) {
-                  const seen = new Set(JSON.parse(seenRaw));
-                  const newOnes = realFriends.filter(f => f.username && !seen.has(f.username));
-                  newOnes.forEach(f => { if (onNewFriend) onNewFriend(f.display_name || f.username, f.username); });
-                }
-                localStorage.setItem(seenKey, JSON.stringify(currentUsernames));
-              }, [realFriends]);
 
               const acceptFriend = async (username) => {
                 const headers = { Authorization: "Bearer " + authToken };
@@ -13540,6 +13527,23 @@ function App() {
                   .then(data => setFriendsPendingCount((data || []).length))
                   .catch(() => {});
               }, [authToken, tab]);
+
+              // Detect new friends at App level so banner shows on any tab
+              React.useEffect(() => {
+                if (!realFriends || !realFriends.length || !window.__AUTH_USER) return;
+                const seenKey = "seen_friends_" + window.__AUTH_USER.username;
+                const seenRaw = localStorage.getItem(seenKey);
+                const currentUsernames = realFriends.map(f => f.username).filter(Boolean);
+                if (seenRaw !== null) {
+                  const seen = new Set(JSON.parse(seenRaw));
+                  realFriends.filter(f => f.username && !seen.has(f.username)).forEach(f => {
+                    setNewFriendBanners(prev =>
+                      prev.find(b => b.username === f.username) ? prev : [...prev, { displayName: f.display_name || f.username, username: f.username }]
+                    );
+                  });
+                }
+                localStorage.setItem(seenKey, JSON.stringify(currentUsernames));
+              }, [realFriends]);
 
               // Handle arrival from the landing page after sign-up or share link
               useEffect(() => {
@@ -14393,7 +14397,7 @@ function App() {
                                   filter: tab === t.id ? "drop-shadow(0 2px 8px rgba(232,201,106,0.35))" : "none",
                                 },
                               }),
-                              t.id === "friends" && friendsPendingCount > 0 && React.createElement("div", {
+                              t.id === "friends" && (friendsPendingCount > 0 || newFriendBanners.length > 0) && React.createElement("div", {
                                 style: { position: "absolute", top: -2, right: -3, width: 9, height: 9, borderRadius: "50%", background: "#ff4444", border: "1.5px solid #07080c" },
                               }),
                             ),
