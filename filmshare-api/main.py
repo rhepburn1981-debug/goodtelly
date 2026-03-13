@@ -1763,6 +1763,30 @@ def admin_users_list(token: str = ""):
         return [dict(r) for r in rows]
 
 
+@app.get("/api/admin/cleanup-users")
+def admin_cleanup_users(token: str = "", confirm: str = ""):
+    _check_admin(token)
+    if confirm != "yes-delete":
+        return {"error": "Pass confirm=yes-delete to proceed"}
+    keep_usernames = {"rik6805", "ingine8427", "suz1362", "dave8145"}
+    with get_db() as conn:
+        all_users = conn.execute("SELECT id, username FROM users").fetchall()
+        keep_ids = [u["id"] for u in all_users if u["username"].lower() in keep_usernames]
+        delete_ids = [u["id"] for u in all_users if u["username"].lower() not in keep_usernames]
+        if not delete_ids:
+            return {"message": "Nothing to delete", "kept": keep_ids}
+        placeholders = ",".join("?" * len(delete_ids))
+        conn.execute(f"DELETE FROM user_watchlist WHERE user_id IN ({placeholders})", delete_ids)
+        conn.execute(f"DELETE FROM user_watched WHERE user_id IN ({placeholders})", delete_ids)
+        conn.execute(f"DELETE FROM user_ratings WHERE user_id IN ({placeholders})", delete_ids)
+        conn.execute(f"DELETE FROM user_recommendations WHERE from_user_id IN ({placeholders}) OR to_user_id IN ({placeholders})", delete_ids + delete_ids)
+        conn.execute(f"DELETE FROM user_friends WHERE requester_id IN ({placeholders}) OR addressee_id IN ({placeholders})", delete_ids + delete_ids)
+        conn.execute(f"DELETE FROM search_logs WHERE user_id IN ({placeholders})", delete_ids)
+        conn.execute(f"DELETE FROM tab_views WHERE user_id IN ({placeholders})", delete_ids)
+        conn.execute(f"DELETE FROM users WHERE id IN ({placeholders})", delete_ids)
+        return {"deleted_count": len(delete_ids), "kept_ids": keep_ids, "kept_usernames": list(keep_usernames)}
+
+
 @app.get("/api/admin/watchlist")
 def admin_watchlist(token: str = "", user_id: Optional[int] = None):
     _check_admin(token)
