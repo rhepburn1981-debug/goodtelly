@@ -13305,125 +13305,201 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
             // ─── Main App ──────────────────────────────────────────────────────────────────
             
             function LandingPage({ onJoin, onLogin }) {
-              const sampleFilms = React.useMemo(() => {
-                const withBackdrop = ALL_FILMS.filter(f => f.stills && f.stills[0] && f.poster);
-                const pool = withBackdrop.length >= 2 ? withBackdrop : ALL_FILMS.filter(f => f.poster);
-                return pool.slice(0, 2);
+              const posterFilms = React.useMemo(() => {
+                const pool = ALL_FILMS.filter(f => f.poster);
+                return pool.slice(0, 8);
               }, []);
 
-              const demoFriends = [
-                { name: "Kate", emoji: "🦊", color: "#e07b3a" },
-                { name: "Jack", emoji: "🐸", color: "#4caf7c" },
-              ];
-              const demoNotes = [
-                "You've got to watch this — trust me on this one.",
-                "Absolutely brilliant. Changed how I see everything.",
-              ];
+              const recFilm = React.useMemo(() => {
+                return ALL_FILMS.find(f => f.poster && f.title) || null;
+              }, []);
 
-              const wifiSvg = React.createElement("svg", { width: 22, height: 17, viewBox: "0 0 22 17", fill: "none", style: { marginRight: 8, marginTop: 2, flexShrink: 0 } },
+              const trendingPosters = React.useMemo(() => {
+                return ALL_FILMS.filter(f => f.poster).slice(0, 6);
+              }, []);
+
+              const wifiSvg = React.createElement("svg", { width: 26, height: 20, viewBox: "0 0 22 17", fill: "none", style: { marginRight: 10, flexShrink: 0 } },
                 React.createElement("path", { d: "M11 13.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z", fill: "#4a9eff" }),
                 React.createElement("path", { d: "M7.2 10.2a5.3 5.3 0 0 1 7.6 0", stroke: "#4a9eff", strokeWidth: 1.8, strokeLinecap: "round", fill: "none" }),
                 React.createElement("path", { d: "M4 7a9.1 9.1 0 0 1 14 0", stroke: "#4a9eff", strokeWidth: 1.8, strokeLinecap: "round", fill: "none" }),
                 React.createElement("path", { d: "M0.8 3.8A13.7 13.7 0 0 1 21.2 3.8", stroke: "#4a9eff", strokeWidth: 1.8, strokeLinecap: "round", fill: "none" })
               );
 
+              const waLogoSvg = React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", style: { flexShrink: 0 } },
+                React.createElement("circle", { cx: 12, cy: 12, r: 11, fill: "rgba(255,255,255,0.12)", stroke: "rgba(255,255,255,0.3)", strokeWidth: 1 }),
+                React.createElement("path", { d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z", fill: "#25D366" })
+              );
+
+              const googleSvg = React.createElement("svg", { width: 20, height: 20, viewBox: "0 0 24 24", style: { flexShrink: 0 } },
+                React.createElement("path", { d: "M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z", fill: "#4285F4" }),
+                React.createElement("path", { d: "M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z", fill: "#34A853" }),
+                React.createElement("path", { d: "M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z", fill: "#FBBC05" }),
+                React.createElement("path", { d: "M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z", fill: "#EA4335" })
+              );
+
               return React.createElement("div", {
-                style: { width: "100vw", minHeight: "100dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", background: "var(--ink)", fontFamily: "var(--ff-body)", color: "var(--text)" },
+                style: { width: "100vw", minHeight: "100dvh", overflowY: "auto", WebkitOverflowScrolling: "touch", background: "#0d0812", fontFamily: "var(--ff-body)", color: "var(--text)", paddingBottom: 150 },
               },
-                /* Header */
-                React.createElement("div", { style: { padding: "28px 20px 0", display: "flex", alignItems: "center" } },
-                  wifiSvg,
-                  React.createElement("span", { style: { fontFamily: "var(--ff-display)", fontWeight: 900, fontSize: 42, color: "var(--text)", letterSpacing: -1, lineHeight: 1 } }, "Reel"),
-                ),
-                React.createElement("div", { style: { padding: "4px 20px 0 20px" } },
-                  React.createElement("div", { style: { fontSize: 13, color: "var(--muted)", letterSpacing: 0.2 } }, "TV recommended by friends")
-                ),
 
-                /* Hero CTA */
-                React.createElement("div", { style: { padding: "28px 20px 24px", textAlign: "center" } },
-                  React.createElement("h1", { style: { fontSize: 30, fontWeight: 700, lineHeight: 1.2, margin: "0 0 12px", fontFamily: "var(--ff-display)", color: "var(--text)" } },
-                    "Stop scrolling.", React.createElement("br"),
-                    React.createElement("span", { style: { color: "var(--gold-bright)" } }, "Watch what friends love.")
-                  ),
-                  React.createElement("p", { style: { fontSize: 14, color: "var(--muted)", lineHeight: 1.55, margin: "0 0 24px" } },
-                    "Get personalised TV and film picks from the people whose taste you actually trust."
-                  ),
-                  React.createElement("button", {
-                    onClick: onJoin,
-                    style: { background: "linear-gradient(135deg, var(--gold), var(--gold-bright))", color: "var(--ink)", fontWeight: 900, fontSize: 16, border: "none", borderRadius: 28, padding: "14px 0", cursor: "pointer", width: "100%", marginBottom: 10, letterSpacing: 0.3 },
-                  }, "Join Reel — it\u2019s free"),
-                  React.createElement("div", { style: { fontSize: 11, color: "var(--muted)", marginBottom: 8 } }, "Takes less than 30 seconds"),
-                  React.createElement("div", { style: { fontSize: 13, color: "var(--muted)" } },
-                    "Already on Reel? ",
-                    React.createElement("span", { onClick: onLogin, style: { color: "var(--gold-bright)", cursor: "pointer", fontWeight: 700 } }, "Sign in \u2192")
-                  ),
-                ),
+                /* ── Hero section with purple textured bg ── */
+                React.createElement("div", {
+                  style: { background: "linear-gradient(180deg, #2a1228 0%, #1a0c22 55%, #0d0812 100%)", paddingBottom: 28 },
+                },
 
-                /* Demo recommendation cards */
-                React.createElement("div", { style: { padding: "0 14px", display: "flex", flexDirection: "column", gap: 14, marginBottom: 28 } },
-                  sampleFilms.map((film, i) => {
-                    const friend = demoFriends[i] || demoFriends[0];
-                    const note = demoNotes[i] || demoNotes[0];
-                    const backdrop = film.stills && film.stills[0];
-                    return React.createElement("div", {
-                      key: i, onClick: onJoin,
-                      style: { background: "var(--surface)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 18, overflow: "hidden", cursor: "pointer" },
-                    },
-                      backdrop && React.createElement("div", {
-                        style: { height: 110, backgroundImage: "url(" + backdrop + ")", backgroundSize: "cover", backgroundPosition: "center", position: "relative" },
-                      },
-                        React.createElement("div", { style: { position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 20%, rgba(10,10,15,0.92))" } }),
-                        React.createElement("div", { style: { position: "absolute", bottom: 10, left: 14, display: "flex", alignItems: "center", gap: 8 } },
-                          React.createElement("div", { style: { width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 } }, friend.emoji),
-                          React.createElement("span", { style: { fontSize: 12, color: "rgba(255,255,255,0.7)", fontStyle: "italic" } },
-                            React.createElement("strong", { style: { color: "var(--gold-bright)", fontStyle: "normal" } }, friend.name), " thinks you\u2019ll like\u2026"
-                          ),
-                        ),
-                      ),
-                      React.createElement("div", { style: { padding: "10px 14px 14px", display: "flex", gap: 12, alignItems: "flex-start" } },
-                        film.poster && React.createElement("img", { src: film.poster, alt: film.title, style: { width: 52, height: 74, objectFit: "cover", borderRadius: 8, flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.5)" } }),
-                        React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                          React.createElement("div", { style: { fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 4 } }, film.title),
-                          React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", marginBottom: 8 } }, [film.year, film.genre ? film.genre.split(",")[0] : ""].filter(Boolean).join(" \u00b7 ")),
-                          React.createElement("div", { style: { borderLeft: "2px solid var(--gold-bright)", paddingLeft: 8, marginBottom: 10 } },
-                            React.createElement("div", { style: { fontSize: 12, fontStyle: "italic", color: "var(--text2)" } }, "\u201c" + note + "\u201d")
-                          ),
-                          React.createElement("div", { style: { display: "flex", gap: 8 } },
-                            React.createElement("button", { onClick: onJoin, style: { flex: 1, background: "rgba(74,158,255,0.12)", border: "1px solid rgba(74,158,255,0.3)", borderRadius: 20, padding: "7px 8px", color: "#4a9eff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "\u25b6 Watch Trailer"),
-                            React.createElement("button", { onClick: onJoin, style: { flex: 1, background: "rgba(232,201,106,0.12)", border: "1px solid rgba(232,201,106,0.3)", borderRadius: 20, padding: "7px 8px", color: "var(--gold-bright)", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "+ Watchlist"),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-
-                /* Features */
-                React.createElement("div", { style: { padding: "0 20px 16px" } },
-                  React.createElement("div", { style: { fontSize: 13, fontWeight: 800, color: "var(--text)", marginBottom: 14, textTransform: "uppercase", letterSpacing: 1.5 } }, "Why Reel"),
-                  [
-                    ["🎯", "Only the good stuff", "Curated picks from people you trust — zero algorithm noise"],
-                    ["📋", "Your watchlist, organised", "Save films, track what you\u2019ve watched, never forget a pick"],
-                    ["👥", "See what friends watch", "Browse your friends\u2019 full lists and discover hidden gems"],
-                    ["📲", "Share via WhatsApp", "Send a recommendation with a trailer link in seconds"],
-                  ].map(([icon, title, sub], i) => React.createElement("div", { key: i, style: { display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 16 } },
-                    React.createElement("div", { style: { width: 40, height: 40, borderRadius: 12, background: "var(--surface2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 } }, icon),
-                    React.createElement("div", null,
-                      React.createElement("div", { style: { fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 2 } }, title),
-                      React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", lineHeight: 1.4 } }, sub),
+                  /* Header row */
+                  React.createElement("div", { style: { padding: "24px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between" } },
+                    React.createElement("div", { style: { display: "flex", alignItems: "center" } },
+                      wifiSvg,
+                      React.createElement("span", { style: { fontFamily: "var(--ff-display)", fontWeight: 900, fontSize: 36, color: "#fff", letterSpacing: -0.5, lineHeight: 1 } }, "Reel"),
                     ),
-                  )),
+                    React.createElement("span", { onClick: onLogin, style: { fontSize: 15, color: "rgba(255,255,255,0.7)", cursor: "pointer", fontWeight: 500 } }, "Sign in"),
+                  ),
+
+                  /* Film poster strip */
+                  React.createElement("div", {
+                    style: { overflowX: "auto", overflowY: "hidden", display: "flex", gap: 8, padding: "20px 16px 8px", scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" },
+                  },
+                    posterFilms.map((film, i) => {
+                      const rotations = [-6, -2, 2, 6, 3, -4, 1, -3];
+                      const rot = rotations[i] || 0;
+                      return React.createElement("img", {
+                        key: film.id,
+                        src: film.poster,
+                        alt: film.title,
+                        style: {
+                          width: 110,
+                          height: 158,
+                          objectFit: "cover",
+                          borderRadius: 10,
+                          flexShrink: 0,
+                          transform: "rotate(" + rot + "deg)",
+                          boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
+                          border: "1.5px solid rgba(255,255,255,0.08)",
+                        },
+                        onClick: onJoin,
+                      });
+                    }),
+                  ),
+
+                  /* Headline */
+                  React.createElement("div", { style: { padding: "20px 20px 0" } },
+                    React.createElement("div", { style: { fontSize: 28, fontWeight: 800, color: "var(--gold-bright)", lineHeight: 1.2, marginBottom: 4 } }, "Stop scrolling."),
+                    React.createElement("div", { style: { fontSize: 28, fontWeight: 800, color: "#fff", lineHeight: 1.2, marginBottom: 4 } },
+                      "Find the ", React.createElement("span", { style: { fontStyle: "italic" } }, "best TV")
+                    ),
+                    React.createElement("div", { style: { fontSize: 18, color: "rgba(255,255,255,0.8)", lineHeight: 1.4, marginBottom: 20 } },
+                      "recommended by friends. ", React.createElement("span", { style: { color: "var(--gold-bright)", fontWeight: 800 } }, "It's FREE.")
+                    ),
+
+                    /* CTA buttons */
+                    React.createElement("div", { style: { display: "flex", gap: 10 } },
+                      React.createElement("button", {
+                        onClick: onJoin,
+                        style: { background: "linear-gradient(135deg, #c9943a, var(--gold-bright))", color: "#1a0c00", fontWeight: 900, fontSize: 15, border: "none", borderRadius: 28, padding: "13px 22px", cursor: "pointer", letterSpacing: 0.2, whiteSpace: "nowrap" },
+                      }, "Join Reel"),
+                      React.createElement("button", {
+                        onClick: onJoin,
+                        style: { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)", fontWeight: 700, fontSize: 15, border: "1px solid rgba(255,255,255,0.25)", borderRadius: 28, padding: "13px 18px", cursor: "pointer", whiteSpace: "nowrap" },
+                      }, "See what's trending"),
+                    ),
+                  ),
                 ),
 
-                /* Bottom CTA */
-                React.createElement("div", { style: { padding: "16px 20px 56px", textAlign: "center" } },
+                /* ── Social proof ── */
+                React.createElement("div", { style: { padding: "24px 20px 0" } },
+                  React.createElement("div", { style: { height: 1, background: "rgba(255,255,255,0.08)", marginBottom: 20 } }),
+                  React.createElement("div", { style: { textAlign: "center", marginBottom: 16 } },
+                    React.createElement("div", { style: { fontSize: 18, marginBottom: 4 } }, "\u2605\u2605\u2605\u2605\u00bd"),
+                    React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", fontWeight: 600, letterSpacing: 0.5 } }, "Loved by TV fans"),
+                  ),
+                  React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 } },
+                    React.createElement("div", { style: { textAlign: "center", fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.5 } },
+                      "\u201cFinally a place where ", React.createElement("strong", null, "friends"), " share the ", React.createElement("strong", null, "good stuff"), ".\u201d",
+                      React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", marginTop: 2 } }, "\u2014 Richard"),
+                    ),
+                    React.createElement("div", { style: { textAlign: "center", fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.5 } },
+                      "\u201cNo more scrolling Netflix for ", React.createElement("strong", null, "30 minutes"), ".\u201d",
+                      React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", marginTop: 2 } }, "\u2014 Kate"),
+                    ),
+                  ),
+                  React.createElement("div", { style: { textAlign: "center", fontSize: 13, color: "var(--muted)", lineHeight: 1.6, marginBottom: 24, padding: "0 8px" } },
+                    "See exactly what people are watching across all the platforms",
+                    React.createElement("br"),
+                    "Watch trailers in seconds, add to your watchlist",
+                  ),
+
+                  /* WhatsApp invite */
+                  React.createElement("div", { style: { textAlign: "center" } },
+                    React.createElement("button", {
+                      onClick: () => {
+                        const msg = "Hey! Come join me on Reel — it's a free app where friends share TV recommendations. Sign up here: https://goodtelly-production.up.railway.app";
+                        window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+                      },
+                      style: { display: "inline-flex", alignItems: "center", gap: 10, background: "transparent", border: "1.5px solid rgba(255,255,255,0.3)", borderRadius: 28, padding: "12px 24px", cursor: "pointer", color: "#fff", fontSize: 15, fontWeight: 700 },
+                    },
+                      waLogoSvg,
+                      "Invite via WhatsApp",
+                    ),
+                    React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", marginTop: 8 } }, "Send them a link \u2014 they'll appear in your friends list"),
+                  ),
+                ),
+
+                /* ── Trending on Reel ── */
+                React.createElement("div", { style: { padding: "28px 0 0" } },
+                  React.createElement("div", { style: { padding: "0 20px", fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 14 } }, "Trending on Reel"),
+
+                  /* Friend rec card */
+                  recFilm && React.createElement("div", { style: { margin: "0 16px 14px", background: "var(--surface)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "14px", display: "flex", gap: 12, alignItems: "flex-start", cursor: "pointer" }, onClick: onJoin },
+                    React.createElement("div", { style: { width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg, #c08040, #e8a050)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 } }, "\uD83E\uDDD1"),
+                    React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                      React.createElement("div", { style: { fontSize: 13, color: "var(--muted)", marginBottom: 2 } }, "Kate recommends"),
+                      React.createElement("div", { style: { fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 2 } },
+                        recFilm.title, React.createElement("span", { style: { fontWeight: 400, fontSize: 13, color: "var(--muted)" } }, recFilm.year ? " (" + recFilm.year + ")" : "")
+                      ),
+                      React.createElement("div", { style: { fontSize: 13, color: "var(--muted)", fontStyle: "italic", marginBottom: 10 } }, "\u201cYou\u2019ll love it\u201d"),
+                      React.createElement("div", { style: { display: "flex", gap: 8 } },
+                        React.createElement("button", { onClick: onJoin, style: { display: "flex", alignItems: "center", gap: 5, background: "#1e6b2e", border: "none", borderRadius: 20, padding: "7px 14px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" } },
+                          React.createElement("span", { style: { fontSize: 10 } }, "\u25b6"), "Watch Trailer"
+                        ),
+                        React.createElement("button", { onClick: onJoin, style: { background: "transparent", border: "1.5px solid rgba(255,255,255,0.2)", borderRadius: 20, padding: "7px 14px", color: "var(--text)", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "+ Watchlist"),
+                      ),
+                    ),
+                    recFilm.poster && React.createElement("img", { src: recFilm.poster, alt: recFilm.title, style: { width: 54, height: 76, objectFit: "cover", borderRadius: 8, flexShrink: 0 } }),
+                  ),
+
+                  /* Horizontal poster scroll */
+                  React.createElement("div", {
+                    style: { overflowX: "auto", overflowY: "hidden", display: "flex", gap: 8, padding: "0 16px 4px", scrollbarWidth: "none" },
+                  },
+                    trendingPosters.map((film, i) => React.createElement("div", { key: film.id, style: { flexShrink: 0, cursor: "pointer" }, onClick: onJoin },
+                      React.createElement("img", { src: film.poster, alt: film.title, style: { width: 90, height: 128, objectFit: "cover", borderRadius: 10, display: "block", border: "1px solid rgba(255,255,255,0.07)" } }),
+                    )),
+                  ),
+                ),
+
+                /* ── Footer ── */
+                React.createElement("div", { style: { padding: "32px 20px 20px", textAlign: "center" } },
+                  React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", marginBottom: 12, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px 16px" } },
+                    ["FAQ", "Terms of Use", "Privacy", "Help", "Contact Us"].map(t =>
+                      React.createElement("span", { key: t, style: { cursor: "pointer" } }, t)
+                    ),
+                  ),
+                ),
+
+                /* ── Sticky bottom bar ── */
+                React.createElement("div", {
+                  style: { position: "fixed", bottom: 0, left: 0, right: 0, background: "#0d0812", borderTop: "1px solid rgba(255,255,255,0.08)", padding: "12px 16px 28px", zIndex: 100 },
+                },
                   React.createElement("button", {
                     onClick: onJoin,
-                    style: { background: "linear-gradient(135deg, var(--gold), var(--gold-bright))", color: "var(--ink)", fontWeight: 900, fontSize: 16, border: "none", borderRadius: 28, padding: "14px 0", cursor: "pointer", width: "100%", marginBottom: 12, letterSpacing: 0.3 },
-                  }, "Get started \u2014 join free"),
-                  React.createElement("div", { style: { fontSize: 13, color: "var(--muted)" } },
-                    "Already on Reel? ",
-                    React.createElement("span", { onClick: onLogin, style: { color: "var(--gold-bright)", cursor: "pointer", fontWeight: 700 } }, "Sign in \u2192")
+                    style: { width: "100%", background: "linear-gradient(135deg, #c9943a, var(--gold-bright))", color: "#1a0c00", fontWeight: 900, fontSize: 17, border: "none", borderRadius: 28, padding: "15px 0", cursor: "pointer", marginBottom: 10, letterSpacing: 0.2 },
+                  }, "Join Reel"),
+                  React.createElement("button", {
+                    onClick: onLogin,
+                    style: { width: "100%", background: "rgba(255,255,255,0.92)", color: "#111", fontWeight: 700, fontSize: 15, border: "none", borderRadius: 28, padding: "13px 0", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 },
+                  },
+                    googleSvg,
+                    "Continue with Google \u2013 it's FREE",
                   ),
                 ),
               );
