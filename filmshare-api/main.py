@@ -39,6 +39,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 
 DB_PATH = os.environ.get("DB_PATH", "/data/filmshare.db")
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
@@ -457,6 +458,67 @@ def login(form: OAuth2PasswordRequestForm = Depends()):
         user_dict = {k: user[k] for k in user.keys() if k != "password_hash"}
     token = create_access_token({"sub": str(user["id"])})
     return {"access_token": token, "token_type": "bearer", "user": user_dict}
+
+
+@app.post("/api/auth/google")
+def google_auth(body: dict):
+    import urllib.request, json as _json
+    credential = body.get("credential", "")
+    if not credential:
+        raise HTTPException(status_code=400, detail="Missing credential")
+    # Verify token with Google
+    try:
+        url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + credential
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            info = _json.loads(resp.read())
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+    # Validate audience if client ID is configured
+    if GOOGLE_CLIENT_ID and info.get("aud") != GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=401, detail="Token audience mismatch")
+    email = info.get("email", "")
+    given_name = info.get("given_name") or info.get("name") or ""
+    if not email:
+        raise HTTPException(status_code=400, detail="No email from Google")
+    with get_db() as conn:
+        user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+        if not user:
+            # Create new account from Google profile
+            import random as _random
+            base = (given_name or email.split("@")[0]).lower()
+            base = _re.sub(r'[^a-z0-9]', '', base)[:12] or "user"
+            username = base + str(_random.randint(1000, 9999))
+            # Ensure unique username
+            while conn.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone():
+                username = base + str(_random.randint(1000, 9999))
+            display_name = given_name or base.capitalize()
+            conn.execute(
+                "INSERT INTO users (username, email, password_hash, display_name) VALUES (?,?,?,?)",
+                (username, email, "", display_name)
+            )
+            user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+        else:
+            conn.execute("UPDATE users SET last_login_at=datetime('now') WHERE id=?", (user["id"],))
+        token = jwt.encode(
+            {"sub": str(user["id"]), "exp": datetime.utcnow() + timedelta(days=7)},
+            SECRET_KEY, algorithm=ALGORITHM
+        )
+        return {
+            "access_token": token,
+            "token_type": "bearer",
+            "user": {
+                "id": user["id"],
+                "username": user["username"],
+                "display_name": user["display_name"],
+                "avatar": user["avatar"],
+                "color": user["color"],
+            }
+        }
+
+
+@app.get("/api/config")
+def get_config():
+    return {"google_client_id": GOOGLE_CLIENT_ID}
 
 
 @app.get("/api/auth/me")

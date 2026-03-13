@@ -223,6 +223,7 @@
         opacity: 0.22;
       }
     </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
     <div class="grain-overlay"></div>
@@ -13083,6 +13084,39 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                 setLoading(false);
               };
 
+              const handleGoogleSignIn = React.useCallback(() => {
+                if (!window.__GOOGLE_CLIENT_ID || typeof google === 'undefined') {
+                  setError('Google Sign-In not configured');
+                  return;
+                }
+                google.accounts.id.initialize({
+                  client_id: window.__GOOGLE_CLIENT_ID,
+                  callback: async (response) => {
+                    try {
+                      setLoading(true);
+                      setError('');
+                      const res = await fetch(API_BASE + '/api/auth/google', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({credential: response.credential})
+                      });
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data.detail || 'Google sign-in failed');
+                      localStorage.setItem('filmshare_token', data.access_token);
+                      window.__AUTH_TOKEN = data.access_token;
+                      window.__AUTH_USER = data.user;
+                      onLogin(data.user, data.access_token);
+                      onClose();
+                    } catch(e) {
+                      setError(e.message);
+                    } finally {
+                      setLoading(false);
+                    }
+                  }
+                });
+                google.accounts.id.prompt();
+              }, []);
+
               const inputStyle = { width: "100%", padding: "10px 14px", background: "var(--surface3)", border: "1px solid var(--border2)", borderRadius: 10, color: "var(--text)", fontSize: 14, fontFamily: "var(--ff-body)", outline: "none" };
               const labelStyle = { fontSize: 11, color: "var(--text2)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6, display: "block" };
 
@@ -13151,6 +13185,29 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                     style: { width: "100%", padding: "12px 0", background: loading ? "var(--surface3)" : "linear-gradient(135deg, var(--gold), var(--gold-bright))",
                       border: "none", borderRadius: 12, color: loading ? "var(--muted)" : "var(--ink)", fontSize: 15, fontWeight: 700, cursor: loading ? "default" : "pointer" } },
                     loading ? "..." : (mode === "login" ? "Sign In" : "Create Account")
+                  ),
+                  window.__GOOGLE_CLIENT_ID && React.createElement("div", {style:{marginTop:12}},
+                    React.createElement("div", {style:{display:"flex",alignItems:"center",gap:8,margin:"10px 0"}},
+                      React.createElement("div", {style:{flex:1,height:1,background:"rgba(255,255,255,0.15)"}}),
+                      React.createElement("span", {style:{color:"var(--muted)",fontSize:12}}, "or"),
+                      React.createElement("div", {style:{flex:1,height:1,background:"rgba(255,255,255,0.15)"}})
+                    ),
+                    React.createElement("button", {
+                      type: "button",
+                      onClick: handleGoogleSignIn,
+                      style: {
+                        width:"100%", padding:"10px 16px", borderRadius:8,
+                        background:"#fff", color:"#374151", border:"none",
+                        fontWeight:600, fontSize:14, cursor:"pointer",
+                        display:"flex", alignItems:"center", justifyContent:"center", gap:8
+                      }
+                    },
+                      React.createElement("img", {
+                        src: "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg",
+                        style:{width:18,height:18}, alt:"Google"
+                      }),
+                      "Continue with Google"
+                    )
                   ),
                 )
               );
@@ -14588,6 +14645,12 @@ function App() {
             async function bootstrap() {
               const token = localStorage.getItem('filmshare_token');
               const authHeaders = token ? { Authorization: 'Bearer ' + token } : {};
+
+              // Load Google Client ID
+              try {
+                const cfg = await fetch(API_BASE + '/api/config').then(r => r.json());
+                window.__GOOGLE_CLIENT_ID = cfg.google_client_id || '';
+              } catch(e) { window.__GOOGLE_CLIENT_ID = ''; }
 
               try {
                 const [filmsRes, friendsRes, logosRes] = await Promise.all([
