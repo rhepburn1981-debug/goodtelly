@@ -13489,25 +13489,40 @@ function App() {
               // Handle arrival from the landing page after sign-up or share link
               useEffect(() => {
                 const params = new URLSearchParams(window.location.search);
-                // ?open=SLUG — open a specific film (from share link redirect)
+                // ?open=SLUG or ?open_title=TITLE — open a specific film (from share link redirect)
                 const openSlug = params.get("open");
+                const openTitle = params.get("open_title");
+                const recFrom = params.get("rec_from") || "";
+                const recNote = params.get("rec_note") || "";
+                const recRating = params.get("rec_rating") || "";
+                const applyRec = (film) => {
+                  if (recFrom) film._fromFriend = recFrom;
+                  if (recNote) film._recNote = recNote;
+                  if (recRating) film._recRating = parseFloat(recRating);
+                  setSelectedFilm(film);
+                };
                 if (openSlug) {
                   const token = authToken || localStorage.getItem("filmshare_token");
                   const headers = token ? { Authorization: "Bearer " + token } : {};
-                  const recFrom = params.get("rec_from") || "";
-                  const recNote = params.get("rec_note") || "";
-                  const recRating = params.get("rec_rating") || "";
                   fetch(API_BASE + "/api/films/slug/" + encodeURIComponent(openSlug), { headers })
                     .then(r => r.ok ? r.json() : null)
-                    .then(film => {
-                      if (film) {
-                        if (recFrom) film._fromFriend = recFrom;
-                        if (recNote) film._recNote = recNote;
-                        if (recRating) film._recRating = parseFloat(recRating);
-                        setSelectedFilm(film);
-                      }
-                    })
+                    .then(film => { if (film) applyRec(film); })
                     .catch(() => {});
+                  window.history.replaceState({}, "", "/");
+                } else if (openTitle) {
+                  const match = ALL_FILMS.find(f => f.title.toLowerCase() === openTitle.toLowerCase());
+                  if (match) {
+                    applyRec(match);
+                  } else {
+                    // Film not in local DB — search TMDB and open
+                    fetch(API_BASE + "/api/tmdb/search?q=" + encodeURIComponent(openTitle))
+                      .then(r => r.ok ? r.json() : [])
+                      .then(results => {
+                        const hit = results[0];
+                        if (hit) applyRec(Object.assign({ _fromTmdb: true, tmdb_id: hit.tmdb_id }, hit));
+                      })
+                      .catch(() => {});
+                  }
                   window.history.replaceState({}, "", "/");
                 }
                 if (params.get("newUser") === "1") {
