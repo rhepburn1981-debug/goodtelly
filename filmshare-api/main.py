@@ -870,13 +870,13 @@ def list_films(genre: Optional[str] = None, streamer: Optional[str] = None, q: O
         rows = conn.execute(query, params).fetchall()
         # Compute activity scores per film for different time windows
         def build_scores(days=None):
-            date_clause = f"AND created_at >= datetime('now', '-{days} days')" if days else ""
+            date_clause = f"WHERE created_at >= datetime('now', '-{days} days')" if days else ""
             out = {}
             for r in conn.execute(f"""
                 SELECT film_id, COUNT(*) as c FROM (
-                    SELECT film_id, created_at FROM user_watchlist {date_clause}
-                    UNION ALL SELECT film_id, created_at FROM user_watched {date_clause}
-                    UNION ALL SELECT film_id, created_at FROM user_recommendations {date_clause}
+                    SELECT film_id FROM user_watchlist {date_clause}
+                    UNION ALL SELECT film_id FROM user_watched {date_clause}
+                    UNION ALL SELECT film_id FROM user_recommendations {date_clause}
                 ) GROUP BY film_id
             """).fetchall():
                 out[r["film_id"]] = r["c"]
