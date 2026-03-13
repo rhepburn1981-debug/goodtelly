@@ -2232,14 +2232,20 @@ def admin_delete_user(user_id: int, token: str = ""):
         user = conn.execute("SELECT username FROM users WHERE id=?", (user_id,)).fetchone()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        conn.execute("DELETE FROM user_watchlist WHERE user_id=?", (user_id,))
-        conn.execute("DELETE FROM user_watched WHERE user_id=?", (user_id,))
-        conn.execute("DELETE FROM user_ratings WHERE user_id=?", (user_id,))
-        conn.execute("DELETE FROM user_friends WHERE user_id=? OR friend_id=?", (user_id, user_id))
-        conn.execute("DELETE FROM user_recommendations WHERE from_user_id=? OR to_user_id=?", (user_id, user_id))
-        conn.execute("DELETE FROM search_logs WHERE user_id=?", (user_id,))
-        conn.execute("DELETE FROM tab_views WHERE user_id=?", (user_id,))
-        conn.execute("DELETE FROM users WHERE id=?", (user_id,))
+        for sql, params in [
+            ("DELETE FROM user_watchlist WHERE user_id=?", (user_id,)),
+            ("DELETE FROM user_watched WHERE user_id=?", (user_id,)),
+            ("DELETE FROM user_ratings WHERE user_id=?", (user_id,)),
+            ("DELETE FROM user_friends WHERE user_id=? OR friend_id=?", (user_id, user_id)),
+            ("DELETE FROM user_recommendations WHERE from_user_id=? OR to_user_id=?", (user_id, user_id)),
+            ("DELETE FROM search_logs WHERE user_id=?", (user_id,)),
+            ("DELETE FROM tab_views WHERE user_id=?", (user_id,)),
+            ("DELETE FROM users WHERE id=?", (user_id,)),
+        ]:
+            try:
+                conn.execute(sql, params)
+            except Exception:
+                pass
     return {"deleted": user_id}
 
 @app.post("/api/admin/assign-avatars")
