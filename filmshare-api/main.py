@@ -1743,37 +1743,16 @@ def serve_admin():
 def admin_users_list(token: str = ""):
     _check_admin(token)
     with get_db() as conn:
-        # Ensure all optional columns exist (may be missing on older DBs)
-        for col_sql in [
-            "ALTER TABLE users ADD COLUMN display_name TEXT",
-            "ALTER TABLE users ADD COLUMN avatar TEXT",
-            "ALTER TABLE users ADD COLUMN color TEXT",
-            "ALTER TABLE users ADD COLUMN last_login_at TEXT",
-        ]:
-            try:
-                conn.execute(col_sql)
-            except Exception:
-                pass
-        try:
-            rows = conn.execute("""
-                SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name,
-                       u.avatar, u.color, u.created_at, u.last_login_at,
-                       COUNT(DISTINCT uf.id) as friend_count,
-                       COUNT(DISTINCT uw.film_id) as watchlist_count
-                FROM users u
-                LEFT JOIN user_friends uf ON (uf.requester_id=u.id OR uf.addressee_id=u.id) AND uf.status='accepted'
-                LEFT JOIN user_watchlist uw ON uw.user_id=u.id
-                GROUP BY u.id ORDER BY u.created_at DESC
-            """).fetchall()
-        except Exception:
-            rows = []
-        # If complex query returned nothing (empty join result or schema issue), use simple fallback
-        if not rows:
-            rows = conn.execute(
-                "SELECT id, username, COALESCE(display_name, username) as display_name, "
-                "avatar, color, created_at, last_login_at, 0 as friend_count, 0 as watchlist_count "
-                "FROM users ORDER BY created_at DESC"
-            ).fetchall()
+        rows = conn.execute("""
+            SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name,
+                   u.avatar, u.color, u.created_at, u.last_login_at,
+                   COUNT(DISTINCT uf.id) as friend_count,
+                   COUNT(DISTINCT uw.film_id) as watchlist_count
+            FROM users u
+            LEFT JOIN user_friends uf ON (uf.requester_id=u.id OR uf.addressee_id=u.id) AND uf.status='accepted'
+            LEFT JOIN user_watchlist uw ON uw.user_id=u.id
+            GROUP BY u.id ORDER BY u.created_at DESC
+        """).fetchall()
         return [dict(r) for r in rows]
 
 
