@@ -220,6 +220,9 @@ def _migrate():
             "ALTER TABLE films ADD COLUMN slug TEXT",
             "ALTER TABLE films ADD COLUMN tmdb_id INTEGER",
             "ALTER TABLE films ADD COLUMN tvmaze_id INTEGER",
+            "ALTER TABLE users ADD COLUMN display_name TEXT",
+            "ALTER TABLE users ADD COLUMN avatar TEXT",
+            "ALTER TABLE users ADD COLUMN color TEXT",
             "ALTER TABLE users ADD COLUMN last_login_at TEXT",
             """CREATE TABLE IF NOT EXISTS search_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1740,11 +1743,17 @@ def serve_admin():
 def admin_users_list(token: str = ""):
     _check_admin(token)
     with get_db() as conn:
-        # Ensure column exists (may be missing on older DBs before migration)
-        try:
-            conn.execute("ALTER TABLE users ADD COLUMN last_login_at TEXT")
-        except Exception:
-            pass
+        # Ensure all optional columns exist (may be missing on older DBs)
+        for col_sql in [
+            "ALTER TABLE users ADD COLUMN display_name TEXT",
+            "ALTER TABLE users ADD COLUMN avatar TEXT",
+            "ALTER TABLE users ADD COLUMN color TEXT",
+            "ALTER TABLE users ADD COLUMN last_login_at TEXT",
+        ]:
+            try:
+                conn.execute(col_sql)
+            except Exception:
+                pass
         rows = conn.execute("""
             SELECT u.id, u.username, COALESCE(u.display_name, u.username) as display_name,
                    u.avatar, u.color, u.created_at, u.last_login_at,
