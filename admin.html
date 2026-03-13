@@ -382,8 +382,8 @@ function selectUser(user) {
   const fb = document.getElementById('filter-bar');
   fb.style.display = user ? '' : 'none';
   if (user) document.getElementById('filter-label').textContent = user.display_name || user.username;
-  // Update users table highlight
-  renderUsersTable(ALL_USERS);
+  // Update users table row highlight (only if already loaded)
+  if (ALL_USERS.length) renderUsersTable(ALL_USERS);
   // Reload all panels
   loadAll();
 }
