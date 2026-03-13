@@ -13785,7 +13785,21 @@ function App() {
                 if (film.id > 0) {
                   fetch(API_BASE + "/api/films/" + film.id)
                     .then(r => r.ok ? r.json() : null)
-                    .then(full => { if (full) setSelectedFilm(f => f && f.id === film.id ? Object.assign({}, f, full) : f); })
+                    .then(full => {
+                      if (full) {
+                        setSelectedFilm(f => f && f.id === film.id ? Object.assign({}, f, full) : f);
+                        // If no trailer in DB, try TMDB enrichment
+                        if (!full.trailerUrl && full.title) {
+                          const ep = full.tmdb_id
+                            ? "/api/tmdb/enrich?title=" + encodeURIComponent(full.title) + (full.year ? "&year=" + full.year : "")
+                            : "/api/tmdb/enrich?title=" + encodeURIComponent(full.title) + (full.year ? "&year=" + full.year : "");
+                          fetch(API_BASE + ep)
+                            .then(r => r.ok ? r.json() : null)
+                            .then(enriched => applyEnriched(film.id, enriched))
+                            .catch(() => {});
+                        }
+                      }
+                    })
                     .catch(() => {});
                 } else if (film._fromTmdb && film.tmdb_id) {
                   const params = "title=" + encodeURIComponent(film.title) + (film.year ? "&year=" + film.year : "");
