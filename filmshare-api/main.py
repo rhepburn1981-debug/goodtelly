@@ -2237,7 +2237,8 @@ def admin_delete_user(user_id: int, token: str = ""):
         conn.execute("DELETE FROM user_ratings WHERE user_id=?", (user_id,))
         conn.execute("DELETE FROM user_friends WHERE user_id=? OR friend_id=?", (user_id, user_id))
         conn.execute("DELETE FROM user_recommendations WHERE from_user_id=? OR to_user_id=?", (user_id, user_id))
-        conn.execute("DELETE FROM activity_log WHERE user_id=?", (user_id,))
+        conn.execute("DELETE FROM search_logs WHERE user_id=?", (user_id,))
+        conn.execute("DELETE FROM tab_views WHERE user_id=?", (user_id,))
         conn.execute("DELETE FROM users WHERE id=?", (user_id,))
     return {"deleted": user_id}
 
