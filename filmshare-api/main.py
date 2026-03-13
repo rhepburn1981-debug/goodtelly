@@ -1763,6 +1763,24 @@ def admin_users_list(token: str = ""):
         return [dict(r) for r in rows]
 
 
+@app.get("/api/admin/watchlist")
+def admin_watchlist(token: str = "", user_id: Optional[int] = None):
+    _check_admin(token)
+    if not user_id:
+        raise HTTPException(status_code=400, detail="user_id required")
+    with get_db() as conn:
+        rows = conn.execute("""
+            SELECT f.title, uw.added_at,
+                   CASE WHEN wd.film_id IS NOT NULL THEN 1 ELSE 0 END as watched
+            FROM user_watchlist uw
+            JOIN films f ON f.id = uw.film_id
+            LEFT JOIN user_watched wd ON wd.film_id = uw.film_id AND wd.user_id = uw.user_id
+            WHERE uw.user_id = ?
+            ORDER BY uw.added_at DESC
+        """, (user_id,)).fetchall()
+        return [dict(r) for r in rows]
+
+
 @app.get("/api/admin/debug")
 def admin_debug(token: str = ""):
     _check_admin(token)

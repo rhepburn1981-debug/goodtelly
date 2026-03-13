@@ -217,6 +217,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             </table>
           </div>
 
+          <!-- Table 5: Watchlist -->
+          <div class="card" id="watchlist-card" style="display:none">
+            <div class="card-header">
+              <span class="card-title">Watchlist</span>
+              <span style="display:flex;gap:6px;align-items:center">
+                <button id="wl-filter-all"  onclick="setWlFilter('all')"     style="font-size:11px;padding:3px 8px;border-radius:10px;border:1px solid #e2e8f0;background:#4299e1;color:#fff;cursor:pointer">All</button>
+                <button id="wl-filter-watch" onclick="setWlFilter('watched')" style="font-size:11px;padding:3px 8px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;color:#4a5568;cursor:pointer">Watched</button>
+                <button id="wl-filter-unwatched" onclick="setWlFilter('unwatched')" style="font-size:11px;padding:3px 8px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;color:#4a5568;cursor:pointer">Not Watched</button>
+                <span class="card-sub" id="watchlist-count"></span>
+              </span>
+            </div>
+            <div style="max-height:270px;overflow-y:auto">
+            <table class="data-table">
+              <thead><tr>
+                <th>Film</th>
+                <th>Added</th>
+                <th>Status</th>
+              </tr></thead>
+              <tbody id="tbl-watchlist"><tr class="empty-row"><td colspan="3">Select a user to view their watchlist</td></tr></tbody>
+            </table>
+            </div>
+          </div>
+
         </div><!-- /col-tables -->
 
         <div class="col-charts">
@@ -382,6 +405,8 @@ function selectUser(user) {
   if (user) document.getElementById('filter-label').textContent = user.display_name || user.username;
   // Update users table row highlight (only if already loaded)
   if (ALL_USERS.length) renderUsersTable(user ? [user] : ALL_USERS);
+  // Load watchlist for selected user
+  loadWatchlist(user ? user.id : null);
   // Reload all panels
   loadAll();
 }
@@ -438,6 +463,45 @@ function renderFriends(friends) {
   tbody.innerHTML = friends.map(f => {
     const since = f.since ? fmtDate(f.since) : (f.friend_count !== undefined ? f.friend_count + ' connections' : '—');
     return '<tr><td>' + esc(f.name) + '</td><td>' + esc(f.name) + '</td><td style="color:#8890a8">' + since + '</td></tr>';
+  }).join('');
+}
+
+// ── Watchlist ─────────────────────────────────────────────────────────────────
+let ALL_WATCHLIST = [];
+let WL_FILTER = 'all';
+
+function setWlFilter(f) {
+  WL_FILTER = f;
+  ['all','watched','unwatched'].forEach(k => {
+    const btn = document.getElementById('wl-filter-' + k);
+    if (btn) btn.style.background = k === f ? '#4299e1' : '#fff';
+    if (btn) btn.style.color = k === f ? '#fff' : '#4a5568';
+  });
+  renderWatchlist(ALL_WATCHLIST);
+}
+
+function loadWatchlist(userId) {
+  if (!userId) { document.getElementById('watchlist-card').style.display = 'none'; return; }
+  document.getElementById('watchlist-card').style.display = '';
+  fetch(API + '/api/admin/watchlist?token=' + encodeURIComponent(TOKEN) + '&user_id=' + userId)
+    .then(r => r.ok ? r.json() : [])
+    .then(items => { ALL_WATCHLIST = items; renderWatchlist(items); });
+}
+
+function renderWatchlist(items) {
+  const filtered = WL_FILTER === 'watched' ? items.filter(i => i.watched)
+                 : WL_FILTER === 'unwatched' ? items.filter(i => !i.watched)
+                 : items;
+  const tbody = document.getElementById('tbl-watchlist');
+  document.getElementById('watchlist-count').textContent = filtered.length + ' items';
+  if (!filtered.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No items</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(i => {
+    const status = i.watched
+      ? '<span class="badge badge-watched">Watched</span>'
+      : '<span style="color:#8890a8;font-size:12px">Not watched</span>';
+    return '<tr><td><strong>' + esc(i.title) + '</strong></td>' +
+      '<td style="color:#8890a8;white-space:nowrap">' + (i.added_at ? fmtDate(i.added_at) : '—') + '</td>' +
+      '<td>' + status + '</td></tr>';
   }).join('');
 }
 
