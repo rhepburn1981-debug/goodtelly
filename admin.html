@@ -142,6 +142,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button id="clear-filter" onclick="selectUser(null)">✕ Show all</button>
       </div>
 
+      <!-- Cumulative users chart -->
+      <div class="chart-card" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="chart-title" style="margin:0">Total Users (Cumulative)</div>
+          <span id="total-users-count" style="font-size:22px;font-weight:800;color:#38b2ac"></span>
+        </div>
+        <div class="chart-wrap" style="height:140px"><canvas id="chart-total-users"></canvas></div>
+      </div>
+
       <div class="main-grid">
         <div class="col-tables">
 
@@ -562,11 +571,35 @@ function initCharts() {
       data: { labels: [], datasets: [makeDataset([])] }
     });
   });
+  // Cumulative users chart — filled green
+  charts['chart-total-users'] = new Chart(document.getElementById('chart-total-users'), {
+    type: 'line',
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#f0f2f5' }, ticks: { font: { size: 10 }, color: '#a0aec0', maxRotation: 0 } },
+        y: { grid: { color: '#f0f2f5' }, ticks: { font: { size: 10 }, color: '#a0aec0', precision: 0, stepSize: 1 }, beginAtZero: true, min: 0 }
+      }
+    },
+    data: { labels: [], datasets: [{ data: [], borderColor: '#38b2ac', backgroundColor: '#38b2ac22', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#38b2ac', borderWidth: 2 }] }
+  });
 }
 
 function updateCharts(data) {
   if (typeof Chart === 'undefined') return;
   const labels = data.labels || [];
+  // Cumulative users
+  const newAcc = data.new_accounts || [];
+  let running = data.users_before_window || 0;
+  const cumulative = newAcc.map(v => { running += (v || 0); return running; });
+  const totalEl = document.getElementById('total-users-count');
+  if (totalEl && cumulative.length) totalEl.textContent = cumulative[cumulative.length - 1].toLocaleString() + ' users';
+  try {
+    const c = charts['chart-total-users'];
+    if (c) { c.data.labels = data.labels || []; c.data.datasets[0].data = cumulative; c.update(); }
+  } catch(e) {}
+
   [
     ['chart-dau', data.dau || []],
     ['chart-searches', data.searches || []],

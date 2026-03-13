@@ -1976,6 +1976,12 @@ def admin_chart(token: str = "", user_id: Optional[int] = None):
             tab_rows = conn.execute("SELECT date(created_at) as day, COUNT(*) as c FROM tab_views WHERE created_at >= datetime('now','-14 days') GROUP BY day").fetchall()
         tab_data = {r["day"]: r["c"] for r in tab_rows}
 
+        # Users created before the chart window (for cumulative baseline)
+        oldest_day = days[0]
+        users_before = conn.execute(
+            "SELECT COUNT(*) as c FROM users WHERE date(created_at) < ?", (oldest_day,)
+        ).fetchone()["c"]
+
         labels = [d[5:] for d in days]
         return {
             "labels": labels,
@@ -1983,6 +1989,7 @@ def admin_chart(token: str = "", user_id: Optional[int] = None):
             "searches": [srch_data.get(d, 0) for d in days],
             "new_accounts": [acct_data.get(d, 0) for d in days],
             "tab_views": [tab_data.get(d, 0) for d in days],
+            "users_before_window": users_before,
         }
 
 
