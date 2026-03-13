@@ -13162,81 +13162,80 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
               /* ── Register: full-page design ── */
               if (mode === "register") {
                 return React.createElement("div", {
-                  style: { position: "fixed", inset: 0, background: "linear-gradient(180deg, #2a1228 0%, #1a0c22 50%, #0d0812 100%)", zIndex: 200, overflowY: "auto", WebkitOverflowScrolling: "touch", fontFamily: "var(--ff-body)", color: "var(--text)" },
+                  style: { position: "fixed", inset: 0, background: "linear-gradient(180deg, #2a1228 0%, #1a0c22 50%, #0d0812 100%)", zIndex: 200, fontFamily: "var(--ff-body)", color: "var(--text)", display: "flex", flexDirection: "column" },
                 },
-                  /* Header */
-                  React.createElement("div", { style: { padding: "24px 20px 0", display: "flex", alignItems: "center" } },
-                    wifiSvg,
-                    React.createElement("span", { style: { fontFamily: "var(--ff-display)", fontWeight: 900, fontSize: 32, color: "#fff", letterSpacing: -0.5, lineHeight: 1 } }, "Reel"),
+                  /* Scrollable content */
+                  React.createElement("div", { style: { flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingBottom: 20 } },
+                    /* Header */
+                    React.createElement("div", { style: { padding: "24px 20px 0", display: "flex", alignItems: "center" } },
+                      wifiSvg,
+                      React.createElement("span", { style: { fontFamily: "var(--ff-display)", fontWeight: 900, fontSize: 32, color: "#fff", letterSpacing: -0.5, lineHeight: 1 } }, "Reel"),
+                    ),
+
+                    React.createElement("div", { style: { padding: "28px 20px 0" } },
+                      /* Title */
+                      React.createElement("h1", { style: { fontFamily: "var(--ff-display)", fontSize: 34, fontWeight: 700, color: "var(--gold-bright)", textAlign: "center", margin: "0 0 14px" } }, "Create your account"),
+                      /* Gold divider */
+                      React.createElement("div", { style: { height: 1, background: "linear-gradient(90deg, transparent, var(--gold-bright), transparent)", marginBottom: 28 } }),
+
+                      /* Avatar picker */
+                      React.createElement("div", { style: { marginBottom: 28 } },
+                        React.createElement("div", { style: { fontSize: 16, fontWeight: 800, color: "var(--gold-bright)", marginBottom: 4 } }, "Choose your avatar"),
+                        React.createElement("div", { style: { fontSize: 13, color: "rgba(255,255,255,0.5)", marginBottom: 16 } }, "Pick the one that feels most like you"),
+                        React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 } },
+                          AVATAR_OPTIONS.slice(0, 10).map(opt => {
+                            const isSelected = selectedAvatar.emoji === opt.emoji;
+                            return React.createElement("button", {
+                              key: opt.emoji,
+                              onClick: () => setSelectedAvatar(opt),
+                              style: {
+                                width: "100%", aspectRatio: "1", borderRadius: "50%",
+                                background: isSelected ? "rgba(74,158,255,0.15)" : "rgba(255,255,255,0.06)",
+                                border: isSelected ? "2.5px solid #4a9eff" : "2px solid rgba(255,255,255,0.1)",
+                                cursor: "pointer", fontSize: 28,
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                boxShadow: isSelected ? "0 0 0 4px rgba(74,158,255,0.25), 0 0 20px rgba(74,158,255,0.3)" : "none",
+                                transition: "all 0.15s",
+                                padding: 0,
+                              },
+                            }, opt.emoji);
+                          })
+                        ),
+                      ),
+
+                      /* Fields */
+                      React.createElement("div", { style: { marginBottom: 18 } },
+                        React.createElement("label", { style: labelStyle }, "Your Name"),
+                        React.createElement("input", { type: "text", placeholder: "e.g. Alex", value: displayName, onChange: e => setDisplayName(e.target.value), style: inputStyle }),
+                      ),
+                      React.createElement("div", { style: { marginBottom: 18 } },
+                        React.createElement("label", { style: labelStyle }, "Email"),
+                        React.createElement("input", { type: "email", placeholder: "you@example.com", value: email, onChange: e => setEmail(e.target.value), style: inputStyle, autoCapitalize: "none" }),
+                      ),
+                      React.createElement("div", { style: { marginBottom: error ? 14 : 8 } },
+                        React.createElement("label", { style: labelStyle }, "Password"),
+                        React.createElement("input", { type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022", value: password, onChange: e => setPassword(e.target.value), onKeyDown: e => e.key === "Enter" && submit(), style: inputStyle }),
+                      ),
+
+                      error && React.createElement("div", { style: { background: "rgba(220,53,69,0.15)", border: "1px solid rgba(220,53,69,0.3)", borderRadius: 10, padding: "10px 14px", marginBottom: 8, fontSize: 13, color: "#ff6b7a" } }, error),
+                    ),
                   ),
 
-                  React.createElement("div", { style: { padding: "28px 20px 32px" } },
-                    /* Title */
-                    React.createElement("h1", { style: { fontFamily: "var(--ff-display)", fontSize: 34, fontWeight: 700, color: "var(--gold-bright)", textAlign: "center", margin: "0 0 14px" } }, "Create your account"),
-                    /* Gold divider */
-                    React.createElement("div", { style: { height: 1, background: "linear-gradient(90deg, transparent, var(--gold-bright), transparent)", marginBottom: 28 } }),
-
-                    /* Avatar picker */
-                    React.createElement("div", { style: { marginBottom: 28 } },
-                      React.createElement("div", { style: { fontSize: 16, fontWeight: 800, color: "var(--gold-bright)", marginBottom: 4 } }, "Choose your avatar"),
-                      React.createElement("div", { style: { fontSize: 13, color: "rgba(255,255,255,0.5)", marginBottom: 16 } }, "Pick the one that feels most like you"),
-                      React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 } },
-                        AVATAR_OPTIONS.slice(0, 10).map(opt => {
-                          const isSelected = selectedAvatar.emoji === opt.emoji;
-                          return React.createElement("button", {
-                            key: opt.emoji,
-                            onClick: () => setSelectedAvatar(opt),
-                            style: {
-                              width: "100%", aspectRatio: "1", borderRadius: "50%",
-                              background: isSelected ? "rgba(74,158,255,0.15)" : "rgba(255,255,255,0.06)",
-                              border: isSelected ? "2.5px solid #4a9eff" : "2px solid rgba(255,255,255,0.1)",
-                              cursor: "pointer", fontSize: 28,
-                              display: "flex", alignItems: "center", justifyContent: "center",
-                              boxShadow: isSelected ? "0 0 0 4px rgba(74,158,255,0.25), 0 0 20px rgba(74,158,255,0.3)" : "none",
-                              transition: "all 0.15s",
-                              padding: 0,
-                            },
-                          }, opt.emoji);
-                        })
-                      ),
-                    ),
-
-                    /* Fields */
-                    React.createElement("div", { style: { marginBottom: 18 } },
-                      React.createElement("label", { style: labelStyle }, "Your Name"),
-                      React.createElement("input", { type: "text", placeholder: "e.g. Alex", value: displayName, onChange: e => setDisplayName(e.target.value), style: inputStyle }),
-                    ),
-                    React.createElement("div", { style: { marginBottom: 18 } },
-                      React.createElement("label", { style: labelStyle }, "Email"),
-                      React.createElement("input", { type: "email", placeholder: "you@example.com", value: email, onChange: e => setEmail(e.target.value), style: inputStyle, autoCapitalize: "none" }),
-                    ),
-                    React.createElement("div", { style: { marginBottom: error ? 14 : 22 } },
-                      React.createElement("label", { style: labelStyle }, "Password"),
-                      React.createElement("input", { type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022", value: password, onChange: e => setPassword(e.target.value), onKeyDown: e => e.key === "Enter" && submit(), style: inputStyle }),
-                    ),
-
-                    error && React.createElement("div", { style: { background: "rgba(220,53,69,0.15)", border: "1px solid rgba(220,53,69,0.3)", borderRadius: 10, padding: "10px 14px", marginBottom: 14, fontSize: 13, color: "#ff6b7a" } }, error),
-
-                    /* Create Account button */
+                  /* Sticky bottom */
+                  React.createElement("div", { style: { background: "linear-gradient(180deg, transparent 0%, #0d0812 30%)", padding: "12px 20px 36px", borderTop: "1px solid rgba(255,255,255,0.06)" } },
                     React.createElement("button", {
                       onClick: submit, disabled: loading,
-                      style: { width: "100%", padding: "15px 0", background: loading ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #c9943a, var(--gold-bright))", border: "none", borderRadius: 28, color: loading ? "var(--muted)" : "#1a0c00", fontSize: 17, fontWeight: 900, cursor: loading ? "default" : "pointer", marginBottom: 16, letterSpacing: 0.2 },
+                      style: { width: "100%", padding: "15px 0", background: loading ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #c9943a, var(--gold-bright))", border: "none", borderRadius: 28, color: loading ? "var(--muted)" : "#1a0c00", fontSize: 17, fontWeight: 900, cursor: loading ? "default" : "pointer", marginBottom: 10, letterSpacing: 0.2 },
                     }, loading ? "..." : "Create Account"),
-
-                    /* Or divider */
-                    React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 14 } },
+                    React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 10 } },
                       React.createElement("div", { style: { flex: 1, height: 1, background: "rgba(255,255,255,0.12)" } }),
                       React.createElement("span", { style: { fontSize: 12, color: "var(--muted)" } }, "or"),
                       React.createElement("div", { style: { flex: 1, height: 1, background: "rgba(255,255,255,0.12)" } }),
                     ),
-
-                    /* Google button */
                     React.createElement("button", {
                       onClick: handleGoogleSignIn,
-                      style: { width: "100%", padding: "13px 0", background: "rgba(255,255,255,0.9)", border: "none", borderRadius: 28, color: "#111", fontSize: 15, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 24 },
+                      style: { width: "100%", padding: "13px 0", background: "rgba(255,255,255,0.9)", border: "none", borderRadius: 28, color: "#111", fontSize: 15, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 14 },
                     }, googleSvg, "Continue with Google"),
-
-                    /* Sign in link */
                     React.createElement("div", { style: { textAlign: "center", fontSize: 14, color: "rgba(255,255,255,0.6)" } },
                       "Have an account? ",
                       React.createElement("span", { onClick: () => { setMode("login"); setError(""); }, style: { color: "var(--gold-bright)", fontWeight: 700, cursor: "pointer" } }, "Sign In"),
