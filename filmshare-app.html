@@ -13678,6 +13678,22 @@ function App() {
                   .catch(() => {});
               }, [authToken, tab]);
 
+              // Poll for new friends every 30s so notifications appear without refresh
+              React.useEffect(() => {
+                if (!authToken) return;
+                const headers = { Authorization: "Bearer " + authToken };
+                const poll = () => {
+                  fetch(API_BASE + "/api/friends", { headers })
+                    .then(r => r.ok ? r.json() : null).then(fs => { if (fs) setRealFriends(fs); }).catch(() => {});
+                  fetch(API_BASE + "/api/friends/requests", { headers })
+                    .then(r => r.ok ? r.json() : [])
+                    .then(data => { const n = (data || []).length; setFriendsPendingCount(n); if (n > 0) setFriendsHasUnread(true); })
+                    .catch(() => {});
+                };
+                const id = setInterval(poll, 30000);
+                return () => clearInterval(id);
+              }, [authToken]);
+
               // Detect new friends at App level so banner shows on any tab
               React.useEffect(() => {
                 if (!realFriends || !realFriends.length || !window.__AUTH_USER) return;

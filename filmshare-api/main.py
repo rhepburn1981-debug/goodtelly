@@ -636,6 +636,27 @@ def auto_connect_friend(username: str, current_user=Depends(require_user)):
         return {"ok": True, "status": "accepted"}
 
 
+@app.post("/api/admin/connect-friends")
+def admin_connect_friends(body: dict, token: str = ""):
+    """Admin: force an accepted friendship between two users by username."""
+    _check_admin(token)
+    u1 = body.get("username1", "")
+    u2 = body.get("username2", "")
+    with get_db() as conn:
+        r1 = conn.execute("SELECT id FROM users WHERE username=?", (u1,)).fetchone()
+        r2 = conn.execute("SELECT id FROM users WHERE username=?", (u2,)).fetchone()
+        if not r1 or not r2:
+            raise HTTPException(status_code=404, detail="User not found")
+        existing = conn.execute(
+            "SELECT id, status FROM user_friends WHERE (requester_id=? AND addressee_id=?) OR (requester_id=? AND addressee_id=?)",
+            (r1["id"], r2["id"], r2["id"], r1["id"])
+        ).fetchone()
+        if existing:
+            conn.execute("UPDATE user_friends SET status='accepted' WHERE id=?", (existing["id"],))
+        else:
+            conn.execute("INSERT INTO user_friends (requester_id, addressee_id, status) VALUES (?,?,'accepted')", (r1["id"], r2["id"]))
+    return {"ok": True, "connected": [u1, u2]}
+
 
 @app.delete("/api/friends/{username}")
 def remove_friend(username: str, current_user=Depends(require_user)):
