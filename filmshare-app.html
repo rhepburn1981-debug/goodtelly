@@ -13079,11 +13079,19 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                 setLoading(true); setError("");
                 try {
                   if (mode === "register") {
-                    // Gather invite_from_user from prop, then sessionStorage fallback
+                    // Gather invite data from prop + sessionStorage, pass to backend for server-side friend+rec creation
                     let _regFromUser = (shareInvite && shareInvite.fromUser) || "";
-                    try { _regFromUser = _regFromUser || sessionStorage.getItem('reel_invite_from') || ""; } catch(e) {}
+                    let _regTitle = "", _regYear = "", _regNote = (shareInvite && shareInvite.note) || "", _regRating = (shareInvite && shareInvite.rating) || "";
+                    try {
+                      _regFromUser = _regFromUser || sessionStorage.getItem('reel_invite_from') || "";
+                      _regTitle = sessionStorage.getItem('reel_invite_title') || "";
+                      _regYear = sessionStorage.getItem('reel_invite_year') || "";
+                      _regNote = _regNote || sessionStorage.getItem('reel_invite_note') || "";
+                      _regRating = _regRating || sessionStorage.getItem('reel_invite_rating') || "";
+                    } catch(e) {}
                     const _regBody = { email: email.trim(), password, display_name: displayName.trim(), color: selectedAvatar.color, avatar: selectedAvatar.emoji };
-                    if (_regFromUser) _regBody.invite_from_user = _regFromUser;
+                    if (_regFromUser) { _regBody.invite_from_user = _regFromUser; }
+                    if (_regTitle) { _regBody.invite_film_title = _regTitle; if (_regYear) _regBody.invite_film_year = parseInt(_regYear); if (_regNote) _regBody.invite_note = _regNote; if (_regRating) _regBody.invite_rating = parseFloat(_regRating); }
                     const r = await fetch(API_BASE + "/api/auth/register", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
@@ -13164,8 +13172,10 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                         sessionStorage.removeItem('reel_invite_title'); sessionStorage.removeItem('reel_invite_year');
                         sessionStorage.removeItem('reel_invite_note'); sessionStorage.removeItem('reel_invite_rating');
                       } catch(e) {}
+                      // Pass all invite data to backend — it creates friendship + recommendation atomically
                       const _gBody = {credential: response.credential};
-                      if (_gFrom) _gBody.invite_from_user = _gFrom;
+                      if (_gFrom) { _gBody.invite_from_user = _gFrom; }
+                      if (_gTitle) { _gBody.invite_film_title = _gTitle; if (_gYear) _gBody.invite_film_year = parseInt(_gYear); if (_gNote) _gBody.invite_note = _gNote; if (_gRating) _gBody.invite_rating = parseFloat(_gRating); }
                       const res = await fetch(API_BASE + '/api/auth/google', {
                         method: 'POST', headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(_gBody)
@@ -13175,13 +13185,6 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                       localStorage.setItem('filmshare_token', data.access_token);
                       window.__AUTH_TOKEN = data.access_token;
                       window.__AUTH_USER = data.user;
-                      // Post recommendation if arrived via share link — await before onLogin so GET sees it
-                      if (_gFrom && (_gSlug || _gTitle)) {
-                        const _rh = { "Content-Type": "application/json", Authorization: "Bearer " + data.access_token };
-                        const _rb = { from_username: _gFrom, note: _gNote, rating: _gRating ? parseFloat(_gRating) : null };
-                        if (_gSlug) _rb.film_slug = _gSlug; else { _rb.film_title = _gTitle; if (_gYear) _rb.film_year = parseInt(_gYear); }
-                        await fetch(API_BASE + '/api/me/recommendations', { method: 'POST', headers: _rh, body: JSON.stringify(_rb) }).catch(() => {});
-                      }
                       onLogin(data.user, data.access_token);
                       onClose();
                     } catch(e) { setError(e.message); } finally { setLoading(false); }

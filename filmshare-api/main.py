@@ -412,6 +412,10 @@ class RegisterRequest(BaseModel):
     color: Optional[str] = None
     avatar: Optional[str] = None
     invite_from_user: Optional[str] = None  # username of friend who shared the invite
+    invite_film_title: Optional[str] = None
+    invite_film_year: Optional[int] = None
+    invite_note: Optional[str] = None
+    invite_rating: Optional[float] = None
 
 
 def _generate_username(display_name: str, conn) -> str:
@@ -442,7 +446,7 @@ def register(req: RegisterRequest):
         user_id = cur.lastrowid
         user = {"id": user_id, "username": username, "email": req.email,
                 "display_name": display, "color": req.color, "avatar": req.avatar}
-        # Auto-create accepted friendship if user arrived via a share link invite
+        # Auto-create accepted friendship + recommendation if user arrived via a share link invite
         if req.invite_from_user:
             inviter = conn.execute("SELECT id FROM users WHERE username = ?", (req.invite_from_user,)).fetchone()
             if inviter and inviter["id"] != user_id:
@@ -450,6 +454,17 @@ def register(req: RegisterRequest):
                     "INSERT INTO user_friends (requester_id, addressee_id, status) VALUES (?,?,'accepted')",
                     (user_id, inviter["id"])
                 )
+                if req.invite_film_title:
+                    film = None
+                    if req.invite_film_year:
+                        film = conn.execute("SELECT id FROM films WHERE LOWER(title)=LOWER(?) AND year=?", (req.invite_film_title, req.invite_film_year)).fetchone()
+                    if not film:
+                        film = conn.execute("SELECT id FROM films WHERE LOWER(title)=LOWER(?)", (req.invite_film_title,)).fetchone()
+                    if film:
+                        conn.execute(
+                            "INSERT OR IGNORE INTO user_recommendations (film_id, from_user_id, to_user_id, note, rating) VALUES (?,?,?,?,?)",
+                            (film["id"], inviter["id"], user_id, req.invite_note or None, req.invite_rating or None)
+                        )
     token = create_access_token({"sub": str(user_id)})
     return {"access_token": token, "token_type": "bearer", "user": user}
 
@@ -490,6 +505,10 @@ def google_auth(body: dict):
     if not email:
         raise HTTPException(status_code=400, detail="No email from Google")
     invite_from_user = body.get("invite_from_user", "")
+    invite_film_title = body.get("invite_film_title", "")
+    invite_film_year = body.get("invite_film_year")
+    invite_note = body.get("invite_note", "")
+    invite_rating = body.get("invite_rating")
     with get_db() as conn:
         user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         is_new_user = not user
@@ -510,7 +529,7 @@ def google_auth(body: dict):
             user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         else:
             conn.execute("UPDATE users SET last_login_at=datetime('now') WHERE id=?", (user["id"],))
-        # Auto-create friendship for new sign-ups via share link
+        # Auto-create friendship + recommendation for new sign-ups via share link
         if is_new_user and invite_from_user:
             inviter = conn.execute("SELECT id FROM users WHERE username=?", (invite_from_user,)).fetchone()
             if inviter and inviter["id"] != user["id"]:
@@ -518,6 +537,20 @@ def google_auth(body: dict):
                     "INSERT INTO user_friends (requester_id, addressee_id, status) VALUES (?,?,'accepted')",
                     (user["id"], inviter["id"])
                 )
+                if invite_film_title:
+                    film = None
+                    if invite_film_year:
+                        try:
+                            film = conn.execute("SELECT id FROM films WHERE LOWER(title)=LOWER(?) AND year=?", (invite_film_title, int(invite_film_year))).fetchone()
+                        except Exception:
+                            pass
+                    if not film:
+                        film = conn.execute("SELECT id FROM films WHERE LOWER(title)=LOWER(?)", (invite_film_title,)).fetchone()
+                    if film:
+                        conn.execute(
+                            "INSERT OR IGNORE INTO user_recommendations (film_id, from_user_id, to_user_id, note, rating) VALUES (?,?,?,?,?)",
+                            (film["id"], inviter["id"], user["id"], invite_note or None, invite_rating or None)
+                        )
         token = jwt.encode(
             {"sub": str(user["id"]), "exp": datetime.utcnow() + timedelta(days=7)},
             SECRET_KEY, algorithm=ALGORITHM
