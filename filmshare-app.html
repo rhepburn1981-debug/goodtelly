@@ -13110,24 +13110,28 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                     let _slug = (shareInvite && shareInvite.slug) || "";
                     let _note = (shareInvite && shareInvite.note) || "";
                     let _rating = (shareInvite && shareInvite.rating) || "";
+                    let _title = "", _year = "";
                     try {
                       _fromUser = _fromUser || sessionStorage.getItem('reel_invite_from') || "";
                       _slug = _slug || sessionStorage.getItem('reel_invite_slug') || "";
+                      _title = sessionStorage.getItem('reel_invite_title') || "";
+                      _year = sessionStorage.getItem('reel_invite_year') || "";
                       _note = _note || sessionStorage.getItem('reel_invite_note') || "";
                       _rating = _rating || sessionStorage.getItem('reel_invite_rating') || "";
-                      sessionStorage.removeItem('reel_invite_from');
-                      sessionStorage.removeItem('reel_invite_slug');
-                      sessionStorage.removeItem('reel_invite_note');
-                      sessionStorage.removeItem('reel_invite_rating');
+                      sessionStorage.removeItem('reel_invite_from'); sessionStorage.removeItem('reel_invite_slug');
+                      sessionStorage.removeItem('reel_invite_title'); sessionStorage.removeItem('reel_invite_year');
+                      sessionStorage.removeItem('reel_invite_note'); sessionStorage.removeItem('reel_invite_rating');
                     } catch(e) {}
                     if (_fromUser) {
                       fetch(API_BASE + "/api/friends/" + encodeURIComponent(_fromUser) + "/connect", { method: "POST", headers: _h }).catch(() => {});
                     }
-                    if (_slug) {
+                    if (_fromUser && (_slug || _title)) {
+                      const _rb = { from_username: _fromUser, note: _note, rating: _rating ? parseFloat(_rating) : null };
+                      if (_slug) _rb.film_slug = _slug; else { _rb.film_title = _title; if (_year) _rb.film_year = parseInt(_year); }
                       fetch(API_BASE + "/api/me/recommendations", {
                         method: "POST",
                         headers: Object.assign({ "Content-Type": "application/json" }, _h),
-                        body: JSON.stringify({ film_slug: _slug, from_username: _fromUser || "", note: _note, rating: _rating ? parseFloat(_rating) : null }),
+                        body: JSON.stringify(_rb),
                       }).catch(() => {});
                     }
                   }
@@ -13147,11 +13151,21 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                   callback: async (response) => {
                     try {
                       setLoading(true); setError('');
-                      // Read invite_from_user from sessionStorage (useCallback has [] deps so shareInvite prop not accessible here)
-                      let _gFrom = "";
-                      try { _gFrom = sessionStorage.getItem('reel_invite_from') || ""; } catch(e) {}
+                      // Read invite data from sessionStorage (useCallback [] deps means shareInvite prop not accessible)
+                      let _gFrom = "", _gSlug = "", _gTitle = "", _gYear = "", _gNote = "", _gRating = "";
+                      try {
+                        _gFrom = sessionStorage.getItem('reel_invite_from') || "";
+                        _gSlug = sessionStorage.getItem('reel_invite_slug') || "";
+                        _gTitle = sessionStorage.getItem('reel_invite_title') || "";
+                        _gYear = sessionStorage.getItem('reel_invite_year') || "";
+                        _gNote = sessionStorage.getItem('reel_invite_note') || "";
+                        _gRating = sessionStorage.getItem('reel_invite_rating') || "";
+                        sessionStorage.removeItem('reel_invite_from'); sessionStorage.removeItem('reel_invite_slug');
+                        sessionStorage.removeItem('reel_invite_title'); sessionStorage.removeItem('reel_invite_year');
+                        sessionStorage.removeItem('reel_invite_note'); sessionStorage.removeItem('reel_invite_rating');
+                      } catch(e) {}
                       const _gBody = {credential: response.credential};
-                      if (_gFrom) { _gBody.invite_from_user = _gFrom; try { sessionStorage.removeItem('reel_invite_from'); } catch(e) {} }
+                      if (_gFrom) _gBody.invite_from_user = _gFrom;
                       const res = await fetch(API_BASE + '/api/auth/google', {
                         method: 'POST', headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(_gBody)
@@ -13161,6 +13175,13 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                       localStorage.setItem('filmshare_token', data.access_token);
                       window.__AUTH_TOKEN = data.access_token;
                       window.__AUTH_USER = data.user;
+                      // Post recommendation if arrived via share link
+                      if (_gFrom && (_gSlug || _gTitle)) {
+                        const _rh = { "Content-Type": "application/json", Authorization: "Bearer " + data.access_token };
+                        const _rb = { from_username: _gFrom, note: _gNote, rating: _gRating ? parseFloat(_gRating) : null };
+                        if (_gSlug) _rb.film_slug = _gSlug; else { _rb.film_title = _gTitle; if (_gYear) _rb.film_year = parseInt(_gYear); }
+                        fetch(API_BASE + '/api/me/recommendations', { method: 'POST', headers: _rh, body: JSON.stringify(_rb) }).catch(() => {});
+                      }
                       onLogin(data.user, data.access_token);
                       onClose();
                     } catch(e) { setError(e.message); } finally { setLoading(false); }

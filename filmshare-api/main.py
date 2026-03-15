@@ -1687,14 +1687,22 @@ def record_recommendation(body: dict, current_user=Depends(require_user)):
     """Record that a film was recommended to the current user via a share link."""
     film_slug = body.get("film_slug", "")
     film_id = body.get("film_id")
+    film_title = body.get("film_title", "")
+    film_year = body.get("film_year")
     from_username = body.get("from_username", "")
     note = body.get("note", "")
     rating = body.get("rating")
     with get_db() as conn:
+        film = None
         if film_id:
             film = conn.execute("SELECT id FROM films WHERE id=?", (film_id,)).fetchone()
-        else:
+        elif film_slug:
             film = conn.execute("SELECT id FROM films WHERE slug=?", (film_slug,)).fetchone()
+        elif film_title:
+            if film_year:
+                film = conn.execute("SELECT id FROM films WHERE LOWER(title)=LOWER(?) AND year=?", (film_title, int(film_year))).fetchone()
+            if not film:
+                film = conn.execute("SELECT id FROM films WHERE LOWER(title)=LOWER(?)", (film_title,)).fetchone()
         if not film:
             raise HTTPException(status_code=404, detail="Film not found")
         from_user_id = None
