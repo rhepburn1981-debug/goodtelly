@@ -13128,7 +13128,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                     if (_fromUser && (_slug || _title)) {
                       const _rb = { from_username: _fromUser, note: _note, rating: _rating ? parseFloat(_rating) : null };
                       if (_slug) _rb.film_slug = _slug; else { _rb.film_title = _title; if (_year) _rb.film_year = parseInt(_year); }
-                      fetch(API_BASE + "/api/me/recommendations", {
+                      await fetch(API_BASE + "/api/me/recommendations", {
                         method: "POST",
                         headers: Object.assign({ "Content-Type": "application/json" }, _h),
                         body: JSON.stringify(_rb),
@@ -13175,12 +13175,12 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                       localStorage.setItem('filmshare_token', data.access_token);
                       window.__AUTH_TOKEN = data.access_token;
                       window.__AUTH_USER = data.user;
-                      // Post recommendation if arrived via share link
+                      // Post recommendation if arrived via share link — await before onLogin so GET sees it
                       if (_gFrom && (_gSlug || _gTitle)) {
                         const _rh = { "Content-Type": "application/json", Authorization: "Bearer " + data.access_token };
                         const _rb = { from_username: _gFrom, note: _gNote, rating: _gRating ? parseFloat(_gRating) : null };
                         if (_gSlug) _rb.film_slug = _gSlug; else { _rb.film_title = _gTitle; if (_gYear) _rb.film_year = parseInt(_gYear); }
-                        fetch(API_BASE + '/api/me/recommendations', { method: 'POST', headers: _rh, body: JSON.stringify(_rb) }).catch(() => {});
+                        await fetch(API_BASE + '/api/me/recommendations', { method: 'POST', headers: _rh, body: JSON.stringify(_rb) }).catch(() => {});
                       }
                       onLogin(data.user, data.access_token);
                       onClose();
