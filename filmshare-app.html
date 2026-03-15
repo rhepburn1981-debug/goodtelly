@@ -13098,16 +13098,31 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                   const user = await mr.json();
                   window.__AUTH_USER = user;
                   // If arrived from a share link, auto-connect friend + save recommendation
-                  if (mode === "register" && shareInvite) {
+                  if (mode === "register") {
                     const _h = { Authorization: "Bearer " + access_token };
-                    if (shareInvite.fromUser) {
-                      fetch(API_BASE + "/api/friends/" + encodeURIComponent(shareInvite.fromUser) + "/connect", { method: "POST", headers: _h }).catch(() => {});
+                    // Use shareInvite prop OR fall back to sessionStorage directly (belt-and-suspenders)
+                    let _fromUser = (shareInvite && shareInvite.fromUser) || "";
+                    let _slug = (shareInvite && shareInvite.slug) || "";
+                    let _note = (shareInvite && shareInvite.note) || "";
+                    let _rating = (shareInvite && shareInvite.rating) || "";
+                    try {
+                      _fromUser = _fromUser || sessionStorage.getItem('reel_invite_from') || "";
+                      _slug = _slug || sessionStorage.getItem('reel_invite_slug') || "";
+                      _note = _note || sessionStorage.getItem('reel_invite_note') || "";
+                      _rating = _rating || sessionStorage.getItem('reel_invite_rating') || "";
+                      sessionStorage.removeItem('reel_invite_from');
+                      sessionStorage.removeItem('reel_invite_slug');
+                      sessionStorage.removeItem('reel_invite_note');
+                      sessionStorage.removeItem('reel_invite_rating');
+                    } catch(e) {}
+                    if (_fromUser) {
+                      fetch(API_BASE + "/api/friends/" + encodeURIComponent(_fromUser) + "/connect", { method: "POST", headers: _h }).catch(() => {});
                     }
-                    if (shareInvite.slug) {
+                    if (_slug) {
                       fetch(API_BASE + "/api/me/recommendations", {
                         method: "POST",
                         headers: Object.assign({ "Content-Type": "application/json" }, _h),
-                        body: JSON.stringify({ film_slug: shareInvite.slug, from_username: shareInvite.fromUser || "", note: shareInvite.note, rating: shareInvite.rating ? parseFloat(shareInvite.rating) : null }),
+                        body: JSON.stringify({ film_slug: _slug, from_username: _fromUser || "", note: _note, rating: _rating ? parseFloat(_rating) : null }),
                       }).catch(() => {});
                     }
                   }
@@ -13717,16 +13732,13 @@ function App() {
                   setShowAuth(true);
                   // Save invite data NOW before replaceState clears the URL
                   // Fall back to sessionStorage (set by reel-share-landing.html) if URL params missing
+                  // Read sessionStorage backup but do NOT clear it here — let submit() use it directly
                   let _ssFrom = "", _ssSlug = "", _ssNote = "", _ssRating = "";
                   try {
                     _ssFrom = sessionStorage.getItem('reel_invite_from') || "";
                     _ssSlug = sessionStorage.getItem('reel_invite_slug') || "";
                     _ssNote = sessionStorage.getItem('reel_invite_note') || "";
                     _ssRating = sessionStorage.getItem('reel_invite_rating') || "";
-                    sessionStorage.removeItem('reel_invite_from');
-                    sessionStorage.removeItem('reel_invite_slug');
-                    sessionStorage.removeItem('reel_invite_note');
-                    sessionStorage.removeItem('reel_invite_rating');
                   } catch(e) {}
                   const _inv = {
                     fromUser: params.get("rec_from_user") || _ssFrom || "",
