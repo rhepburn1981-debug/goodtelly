@@ -13716,11 +13716,23 @@ function App() {
                   setAuthMode("register");
                   setShowAuth(true);
                   // Save invite data NOW before replaceState clears the URL
+                  // Fall back to sessionStorage (set by reel-share-landing.html) if URL params missing
+                  let _ssFrom = "", _ssSlug = "", _ssNote = "", _ssRating = "";
+                  try {
+                    _ssFrom = sessionStorage.getItem('reel_invite_from') || "";
+                    _ssSlug = sessionStorage.getItem('reel_invite_slug') || "";
+                    _ssNote = sessionStorage.getItem('reel_invite_note') || "";
+                    _ssRating = sessionStorage.getItem('reel_invite_rating') || "";
+                    sessionStorage.removeItem('reel_invite_from');
+                    sessionStorage.removeItem('reel_invite_slug');
+                    sessionStorage.removeItem('reel_invite_note');
+                    sessionStorage.removeItem('reel_invite_rating');
+                  } catch(e) {}
                   const _inv = {
-                    fromUser: params.get("rec_from_user") || "",
-                    slug: params.get("open") || "",
-                    note: params.get("rec_note") || "",
-                    rating: params.get("rec_rating") || "",
+                    fromUser: params.get("rec_from_user") || _ssFrom || "",
+                    slug: params.get("open") || _ssSlug || "",
+                    note: params.get("rec_note") || _ssNote || "",
+                    rating: params.get("rec_rating") || _ssRating || "",
                   };
                   if (_inv.fromUser || _inv.slug) setShareInvite(_inv);
                 }
