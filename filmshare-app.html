@@ -13079,16 +13079,11 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                 setLoading(true); setError("");
                 try {
                   if (mode === "register") {
-                    // Gather invite data from prop + sessionStorage, pass to backend for server-side friend+rec creation
-                    let _regFromUser = (shareInvite && shareInvite.fromUser) || "";
-                    let _regTitle = "", _regYear = "", _regNote = (shareInvite && shareInvite.note) || "", _regRating = (shareInvite && shareInvite.rating) || "";
-                    try {
-                      _regFromUser = _regFromUser || sessionStorage.getItem('reel_invite_from') || "";
-                      _regTitle = sessionStorage.getItem('reel_invite_title') || "";
-                      _regYear = sessionStorage.getItem('reel_invite_year') || "";
-                      _regNote = _regNote || sessionStorage.getItem('reel_invite_note') || "";
-                      _regRating = _regRating || sessionStorage.getItem('reel_invite_rating') || "";
-                    } catch(e) {}
+                    // Gather invite data from prop + localStorage, pass to backend for server-side friend+rec creation
+                    let _regInv = null;
+                    try { var _rs=localStorage.getItem('reel_invite'); if(_rs){_regInv=JSON.parse(_rs); if(_regInv.exp&&Date.now()>_regInv.exp)_regInv=null;} localStorage.removeItem('reel_invite'); } catch(e){}
+                    let _regFromUser = (shareInvite && shareInvite.fromUser) || (_regInv&&_regInv.from) || "";
+                    let _regTitle = (_regInv&&_regInv.title)||"", _regYear = (_regInv&&_regInv.year)||"", _regNote = (shareInvite && shareInvite.note) || (_regInv&&_regInv.note)||"", _regRating = (shareInvite && shareInvite.rating) || (_regInv&&_regInv.rating)||"";
                     const _regBody = { email: email.trim(), password, display_name: displayName.trim(), color: selectedAvatar.color, avatar: selectedAvatar.emoji };
                     if (_regFromUser) { _regBody.invite_from_user = _regFromUser; }
                     if (_regTitle) { _regBody.invite_film_title = _regTitle; if (_regYear) _regBody.invite_film_year = parseInt(_regYear); if (_regNote) _regBody.invite_note = _regNote; if (_regRating) _regBody.invite_rating = parseFloat(_regRating); }
@@ -13119,17 +13114,7 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                     let _note = (shareInvite && shareInvite.note) || "";
                     let _rating = (shareInvite && shareInvite.rating) || "";
                     let _title = "", _year = "";
-                    try {
-                      _fromUser = _fromUser || sessionStorage.getItem('reel_invite_from') || "";
-                      _slug = _slug || sessionStorage.getItem('reel_invite_slug') || "";
-                      _title = sessionStorage.getItem('reel_invite_title') || "";
-                      _year = sessionStorage.getItem('reel_invite_year') || "";
-                      _note = _note || sessionStorage.getItem('reel_invite_note') || "";
-                      _rating = _rating || sessionStorage.getItem('reel_invite_rating') || "";
-                      sessionStorage.removeItem('reel_invite_from'); sessionStorage.removeItem('reel_invite_slug');
-                      sessionStorage.removeItem('reel_invite_title'); sessionStorage.removeItem('reel_invite_year');
-                      sessionStorage.removeItem('reel_invite_note'); sessionStorage.removeItem('reel_invite_rating');
-                    } catch(e) {}
+                    try { var _li2=localStorage.getItem('reel_invite'); if(_li2){var _li2p=JSON.parse(_li2); if(!_li2p.exp||Date.now()<=_li2p.exp){_fromUser=_fromUser||_li2p.from||""; _slug=_slug||_li2p.slug||""; _title=_li2p.title||""; _year=_li2p.year||""; _note=_note||_li2p.note||""; _rating=_rating||_li2p.rating||"";}} localStorage.removeItem('reel_invite'); } catch(e) {}
                     if (_fromUser) {
                       fetch(API_BASE + "/api/friends/" + encodeURIComponent(_fromUser) + "/connect", { method: "POST", headers: _h }).catch(() => {});
                     }
@@ -13159,19 +13144,10 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                   callback: async (response) => {
                     try {
                       setLoading(true); setError('');
-                      // Read invite data from sessionStorage (useCallback [] deps means shareInvite prop not accessible)
-                      let _gFrom = "", _gSlug = "", _gTitle = "", _gYear = "", _gNote = "", _gRating = "";
-                      try {
-                        _gFrom = sessionStorage.getItem('reel_invite_from') || "";
-                        _gSlug = sessionStorage.getItem('reel_invite_slug') || "";
-                        _gTitle = sessionStorage.getItem('reel_invite_title') || "";
-                        _gYear = sessionStorage.getItem('reel_invite_year') || "";
-                        _gNote = sessionStorage.getItem('reel_invite_note') || "";
-                        _gRating = sessionStorage.getItem('reel_invite_rating') || "";
-                        sessionStorage.removeItem('reel_invite_from'); sessionStorage.removeItem('reel_invite_slug');
-                        sessionStorage.removeItem('reel_invite_title'); sessionStorage.removeItem('reel_invite_year');
-                        sessionStorage.removeItem('reel_invite_note'); sessionStorage.removeItem('reel_invite_rating');
-                      } catch(e) {}
+                      // Read invite data from localStorage (survives mobile browser reloads during Google auth)
+                      let _inv = null;
+                      try { var _s = localStorage.getItem('reel_invite'); if(_s){_inv=JSON.parse(_s); if(_inv.exp&&Date.now()>_inv.exp)_inv=null;} localStorage.removeItem('reel_invite'); } catch(e){}
+                      let _gFrom = (_inv&&_inv.from)||"", _gSlug = (_inv&&_inv.slug)||"", _gTitle = (_inv&&_inv.title)||"", _gYear = (_inv&&_inv.year)||"", _gNote = (_inv&&_inv.note)||"", _gRating = (_inv&&_inv.rating)||"";
                       // Pass all invite data to backend — it creates friendship + recommendation atomically
                       const _gBody = {credential: response.credential};
                       if (_gFrom) { _gBody.invite_from_user = _gFrom; }
@@ -13765,20 +13741,14 @@ function App() {
                   setAuthMode("register");
                   setShowAuth(true);
                   // Save invite data NOW before replaceState clears the URL
-                  // Fall back to sessionStorage (set by reel-share-landing.html) if URL params missing
-                  // Read sessionStorage backup but do NOT clear it here — let submit() use it directly
-                  let _ssFrom = "", _ssSlug = "", _ssNote = "", _ssRating = "";
-                  try {
-                    _ssFrom = sessionStorage.getItem('reel_invite_from') || "";
-                    _ssSlug = sessionStorage.getItem('reel_invite_slug') || "";
-                    _ssNote = sessionStorage.getItem('reel_invite_note') || "";
-                    _ssRating = sessionStorage.getItem('reel_invite_rating') || "";
-                  } catch(e) {}
+                  // Fall back to localStorage (set by reel-share-landing.html) if URL params missing
+                  let _lsInv = null;
+                  try { var _lss=localStorage.getItem('reel_invite'); if(_lss){_lsInv=JSON.parse(_lss); if(_lsInv.exp&&Date.now()>_lsInv.exp)_lsInv=null;} } catch(e) {}
                   const _inv = {
-                    fromUser: params.get("rec_from_user") || _ssFrom || "",
-                    slug: params.get("open") || _ssSlug || "",
-                    note: params.get("rec_note") || _ssNote || "",
-                    rating: params.get("rec_rating") || _ssRating || "",
+                    fromUser: params.get("rec_from_user") || (_lsInv&&_lsInv.from) || "",
+                    slug: params.get("open") || (_lsInv&&_lsInv.slug) || "",
+                    note: params.get("rec_note") || (_lsInv&&_lsInv.note) || "",
+                    rating: params.get("rec_rating") || (_lsInv&&_lsInv.rating) || "",
                   };
                   if (_inv.fromUser || _inv.slug) setShareInvite(_inv);
                 }
