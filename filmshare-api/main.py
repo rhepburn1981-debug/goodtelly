@@ -489,8 +489,10 @@ def google_auth(body: dict):
     given_name = info.get("given_name") or info.get("name") or ""
     if not email:
         raise HTTPException(status_code=400, detail="No email from Google")
+    invite_from_user = body.get("invite_from_user", "")
     with get_db() as conn:
         user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+        is_new_user = not user
         if not user:
             # Create new account from Google profile
             import random as _random
@@ -508,6 +510,14 @@ def google_auth(body: dict):
             user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         else:
             conn.execute("UPDATE users SET last_login_at=datetime('now') WHERE id=?", (user["id"],))
+        # Auto-create friendship for new sign-ups via share link
+        if is_new_user and invite_from_user:
+            inviter = conn.execute("SELECT id FROM users WHERE username=?", (invite_from_user,)).fetchone()
+            if inviter and inviter["id"] != user["id"]:
+                conn.execute(
+                    "INSERT INTO user_friends (requester_id, addressee_id, status) VALUES (?,?,'accepted')",
+                    (user["id"], inviter["id"])
+                )
         token = jwt.encode(
             {"sub": str(user["id"]), "exp": datetime.utcnow() + timedelta(days=7)},
             SECRET_KEY, algorithm=ALGORITHM

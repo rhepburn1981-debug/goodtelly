@@ -13147,9 +13147,14 @@ upcomingShows.length > 0 && React.createElement(React.Fragment, null,
                   callback: async (response) => {
                     try {
                       setLoading(true); setError('');
+                      // Read invite_from_user from sessionStorage (useCallback has [] deps so shareInvite prop not accessible here)
+                      let _gFrom = "";
+                      try { _gFrom = sessionStorage.getItem('reel_invite_from') || ""; } catch(e) {}
+                      const _gBody = {credential: response.credential};
+                      if (_gFrom) { _gBody.invite_from_user = _gFrom; try { sessionStorage.removeItem('reel_invite_from'); } catch(e) {} }
                       const res = await fetch(API_BASE + '/api/auth/google', {
                         method: 'POST', headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({credential: response.credential})
+                        body: JSON.stringify(_gBody)
                       });
                       const data = await res.json();
                       if (!res.ok) throw new Error(data.detail || 'Google sign-in failed');
