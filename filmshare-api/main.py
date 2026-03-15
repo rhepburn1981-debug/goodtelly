@@ -677,6 +677,28 @@ def admin_connect_friends(body: dict, token: str = ""):
     return {"ok": True, "connected": [u1, u2]}
 
 
+@app.post("/api/admin/create-recommendation")
+def admin_create_recommendation(body: dict, token: str = ""):
+    """Admin: create a recommendation record for a user."""
+    _check_admin(token)
+    to_username = body.get("to_username", "")
+    from_username = body.get("from_username", "")
+    film_title = body.get("film_title", "")
+    note = body.get("note", "")
+    rating = body.get("rating")
+    with get_db() as conn:
+        to_user = conn.execute("SELECT id FROM users WHERE username=?", (to_username,)).fetchone()
+        from_user = conn.execute("SELECT id FROM users WHERE username=?", (from_username,)).fetchone()
+        film = conn.execute("SELECT id FROM films WHERE LOWER(title)=LOWER(?)", (film_title,)).fetchone()
+        if not to_user or not from_user or not film:
+            raise HTTPException(status_code=404, detail="User or film not found")
+        conn.execute(
+            "INSERT OR IGNORE INTO user_recommendations (film_id, from_user_id, to_user_id, note, rating) VALUES (?,?,?,?,?)",
+            (film["id"], from_user["id"], to_user["id"], note or None, rating or None)
+        )
+    return {"ok": True, "to": to_username, "from": from_username, "film": film_title}
+
+
 @app.delete("/api/friends/{username}")
 def remove_friend(username: str, current_user=Depends(require_user)):
     with get_db() as conn:
