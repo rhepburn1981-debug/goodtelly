@@ -411,6 +411,7 @@ class RegisterRequest(BaseModel):
     username: Optional[str] = None
     color: Optional[str] = None
     avatar: Optional[str] = None
+    invite_from_user: Optional[str] = None  # username of friend who shared the invite
 
 
 def _generate_username(display_name: str, conn) -> str:
@@ -441,6 +442,14 @@ def register(req: RegisterRequest):
         user_id = cur.lastrowid
         user = {"id": user_id, "username": username, "email": req.email,
                 "display_name": display, "color": req.color, "avatar": req.avatar}
+        # Auto-create accepted friendship if user arrived via a share link invite
+        if req.invite_from_user:
+            inviter = conn.execute("SELECT id FROM users WHERE username = ?", (req.invite_from_user,)).fetchone()
+            if inviter and inviter["id"] != user_id:
+                conn.execute(
+                    "INSERT INTO user_friends (requester_id, addressee_id, status) VALUES (?,?,'accepted')",
+                    (user_id, inviter["id"])
+                )
     token = create_access_token({"sub": str(user_id)})
     return {"access_token": token, "token_type": "bearer", "user": user}
 
