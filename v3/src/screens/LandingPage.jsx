@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import whatsapp from '../../public/branding/wp.png';
+import './LandingPage.css';
 import { FaPlay, FaListUl, FaWifi, FaSearch, FaEllipsisH } from 'react-icons/fa';
 
 const POSTERS = [
@@ -102,45 +103,43 @@ const PosterGrid = () => (
 )
 
 const FeatureCard = ({ title, subtitle, icon }) => (
-  <div style={{
-    background: 'radial-gradient(ellipse at 50% 0%, #373439, #1E232E',
-    border: '1px solid rgba(255,255,255,0.12)',
-    borderRadius: 8,
-    padding: '10px 24px 26px',
-    textAlign: 'left',
-    flex: 1, minWidth: 280,
-    boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-  }}>
-    <div style={{ fontSize: 28, color: '#F5C518', marginBottom: 5, display: 'flex', gap: 3, letterSpacing: 2 }}>
+  <div className="feature-carousel-card">
+    <div className="feature-carousel-stars">
       {Array(5).fill(0).map((_, i) => <span key={i}>★</span>)}
     </div>
-    <div style={{ fontWeight: 700, fontSize: 20, color: '#ffffff', marginBottom: 6, lineHeight: 1.35 }}>&ldquo;{title}&rdquo;</div>
-    <div style={{ fontSize: 16, color: '#DFDFE0', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div className="feature-carousel-title">&ldquo;{title}&rdquo;</div>
+    <div className="feature-carousel-subtitle">
       — {subtitle}
       {icon && icon}
     </div>
   </div>
 )
 
-const StepCard = ({ icon, title, subtitle }) => (
-  <div style={{
-    background: 'radial-gradient(ellipse at 50% 0%, #373439, #1E232E)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    padding: '24px 16px 20px',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-  }}>
+const StepCard = ({ icon, title, subtitle, showArrow }) => (
+  <div style={{ position: 'relative', height: '100%' }}>
     <div style={{
-      width: 64, height: 64,
-      borderRadius: 14,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      margin: '0 auto 16px',
-      overflow: 'hidden',
+      background: 'radial-gradient(ellipse at 50% 0%, #373439, #1E232E)',
+      border: '1px solid rgba(255,255,255,0.1)',
+      borderRadius: 12,
+      padding: '24px 16px 20px',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+      height: '100%',
     }}>
-      <img src={icon.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <div style={{
+        width: 64, height: 64,
+        borderRadius: 14,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        margin: '0 auto 16px',
+        overflow: 'hidden',
+      }}>
+        <img src={icon.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      </div>
+      <div className="step-card-title" style={{ fontWeight: 600, fontSize: 18, color: '#fff', marginBottom: 6, lineHeight: 1.3, textAlign: 'start' }}>{title}</div>
+      <div className="step-card-subtitle" style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.87)', lineHeight: 1.5, textAlign: 'start' }}>{subtitle}</div>
     </div>
-    <div style={{ fontWeight: 600, fontSize: 18, color: '#fff', marginBottom: 6, lineHeight: 1.3, textAlign: 'start' }}>{title}</div>
-    <div style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.87)', lineHeight: 1.5, textAlign: 'start' }}>{subtitle}</div>
+    {showArrow && (
+      <img src="/branding/arrow.png" alt="" className="step-arrow-img" />
+    )}
   </div>
 )
 
@@ -161,25 +160,18 @@ const ChevronLeft = () => (
 )
 
 const FriendCard = ({ name, img, label, quote }) => (
-  <div style={{
-    background: 'radial-gradient(ellipse at 50% 0%, #373439, #1E232E)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 6,
-    display: 'flex', alignItems: 'stretch', overflow: 'hidden',
-    boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
-    padding: 12,
-  }}>
+  <div className="friend-card-container">
     {/* Rectangular left image */}
-    <img src={img} alt={name} style={{ width: 100, height: 140, objectFit: 'cover', flexShrink: 0, display: 'block', borderRadius: 4 }} />
+    <img className="friend-card-img" src={img} alt={name} />
     {/* Content */}
-    <div style={{ flex: 1, padding: '16px 18px 8px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+    <div className="friend-card-content">
       <div>
         <div style={{ fontSize: 18, fontWeight: 600, color: '#fff', marginBottom: 2 }}>
           {name} {label}:
         </div>
         <div style={{ fontWeight: 500, fontSize: 18, color: '#fff', lineHeight: 1.4 }}>{quote}</div>
       </div>
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div className="friend-card-btns">
         <button style={{
           background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
           borderRadius: 6, padding: '10px 18px', fontSize: 14, fontWeight: 600,
@@ -234,10 +226,29 @@ const SliderButton = ({ direction, onClick }) => (
 export default function LandingPage({ onShowLogin, onShowRegister }) {
   const trendingRef = useRef(null)
   const friendsRef = useRef(null)
+  const featureScrollRef = useRef(null)
+  const [isScrolled, setIsScrolled] = useState(false)
 
   useEffect(() => {
     window.scrollTo(0, 0)
+    const handleScroll = () => setIsScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (window.innerWidth <= 768 && featureScrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = featureScrollRef.current;
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          featureScrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          featureScrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+        }
+      }
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
 
   const scroll = (ref, direction) => {
     if (ref.current) {
@@ -256,22 +267,18 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
       <PosterGrid />
 
       {/* Navigation */}
-      <header style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '24px 32px', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+      <header className="header-nav" style={{
+        background: isScrolled ? 'rgba(0, 0, 0, 0.4)' : 'transparent',
+        backdropFilter: isScrolled ? 'blur(12px)' : 'none',
+        WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 36, height: 36, background: 'var(--red)', borderRadius: 10,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 15px rgba(229, 9, 20, 0.5)'
-          }}>
-            <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#fff' }} />
-          </div>
-          <span style={{ fontFamily: 'var(--ff-poppins)', fontSize: 32, fontWeight: 700, color: 'var(--text)', letterSpacing: -1.2 }}>reel.</span>
+        <div className="header-logo">
+          <FaWifi className="header-logo-icon" />
+          <span className="header-logo-text">Reel</span>
         </div>
         <button
           onClick={onShowLogin}
+          className="header-btn"
           style={{
             background: 'linear-gradient(180deg, #E83536, #B1211E)', color: '#fff', border: 'none',
             borderRadius: 5, padding: '12px 34px', fontSize: 18, fontWeight: 700,
@@ -292,26 +299,17 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
         textAlign: 'center', padding: '160px 24px 10px', position: 'relative',
         zIndex: 5, maxWidth: 1024, margin: '0 auto'
       }}>
-        <h1 style={{
-          fontFamily: 'var(--ff-poppins)', fontSize: 'clamp(48px, 10vw, 84px)',
-          fontWeight: 700, color: 'var(--text)', lineHeight: 1.2,
-          letterSpacing: -3, marginBottom: 20, textShadow: '0 10px 30px rgba(0,0,0,0.5)'
-        }}>
-          Stop scrolling.<br />Start watching better.
+        <h1 className="hero-title">
+          Stop scrolling. <br />Start watching better.
         </h1>
-        <p style={{ fontSize: 'clamp(18px, 4vw, 22px)', color: 'var(--white)', marginBottom: 50, fontWeight: 500 }}>
+        <p className="hero-subtitle">
           See what your friends are recommending across every platform.
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 400, margin: '0 auto' }}>
+        <div className="hero-buttons-container">
           <button
             onClick={onShowRegister}
-            style={{
-              background: 'linear-gradient(180deg, #E83536, #B1211E)', color: '#fff', border: 'none',
-              borderRadius: 6, padding: '16px 0', fontSize: 26, fontWeight: 900,
-              cursor: 'pointer', boxShadow: '0 10px 40px rgba(229, 9, 20, 0.45)',
-              transition: 'transform 0.1s ease, filter 0.1s ease',
-            }}
+            className="hero-btn-primary"
             onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.97)'}
             onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
@@ -319,12 +317,7 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
           </button>
           <button
             onClick={onShowLogin}
-            style={{
-              background: '#fff', color: '#111', border: 'none',
-              borderRadius: 6, padding: '16px 0', fontSize: 20, fontWeight: 800,
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(255,255,255,0.1)',
-            }}
+            className="hero-btn-secondary"
           >
             <GoogleIcon /> Continue with Google
           </button>
@@ -333,15 +326,7 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
 
       {/* Features Block with BlurableBackground */}
       <div style={{ position: 'relative', overflow: 'hidden' }}>
-        {/* <BlurableBackground src={POSTERS[0]} opacity={0.6} /> */}
-        {/* Features Row */}
-        <section style={{
-          padding: '40px 24px 100px', display: 'flex', gap: 20, overflowX: 'auto',
-          maxWidth: 1440, margin: '0 auto', scrollPadding: '0 24px',
-          msOverflowStyle: 'none', scrollbarWidth: 'none',
-          position: 'relative', zIndex: 5
-        }}>
-          <style>{`section::-webkit-scrollbar { display: none; }`}</style>
+        <section ref={featureScrollRef} className="feature-carousel">
           <FeatureCard title="No more scrolling for hours" subtitle="Watch trailers instantly" />
           <FeatureCard title="Add to your watchlist" subtitle="Save the good stuff" />
           <FeatureCard title="Recommend to friends" subtitle="Share via app or WhatsApp" icon={
@@ -357,36 +342,40 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
         <section style={{ position: 'relative', zIndex: 2, padding: '20px 24px 20px', textAlign: 'center' }}>
           {/* Ruled title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'center' }}>
-            <div style={{ flex: 1, maxWidth: 160, height: 2, background: 'rgba(255,255,255,0.25)' }} />
-            <h2 style={{ fontFamily: 'var(--ff-poppins)', fontSize: 40, fontWeight: 700, color: '#fff', margin: 0, whiteSpace: 'nowrap' }}>
+            <div className="title-line" style={{ flex: 1, maxWidth: 160, height: 2, background: 'rgba(255,255,255,0.25)' }} />
+            <h2 className="section-title-h2">
               How Reel works
             </h2>
-            <div style={{ flex: 1, maxWidth: 160, height: 1, background: 'rgba(255,255,255,0.25)' }} />
+            <div className="title-line" style={{ flex: 1, maxWidth: 160, height: 1, background: 'rgba(255,255,255,0.25)' }} />
           </div>
           <div style={{ fontSize: 20, color: '#fff', marginBottom: 48, letterSpacing: 1, fontWeight: 500 }}>
             Discover ~ Save ~ Share ~ Repeat
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, maxWidth: 1440, margin: '0 auto' }}>
+          <div className="grid-responsive-5" style={{ maxWidth: 1440, margin: '0 auto' }}>
             <StepCard
               icon={{ src: '/branding/image1.png' }}
               title="Find something to watch"
               subtitle="Watch trailers instantly"
+              showArrow
             />
             <StepCard
               icon={{ src: '/branding/image2.png' }}
               title="Add to your watchlist"
               subtitle="Save the good stuff"
+              showArrow
             />
             <StepCard
               icon={{ src: '/branding/image3.png' }}
               title="Recommend to friends"
               subtitle="Share via app or WhatsApp"
+              showArrow
             />
             <StepCard
               icon={{ src: '/branding/image4.png' }}
               title="Friends watch &amp; save"
               subtitle="They watch trailers and add it too."
+              showArrow
             />
             <StepCard
               icon={{ src: '/branding/image5.png' }}
@@ -401,16 +390,16 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
       {/* Trending Section */}
       <div style={{ position: 'relative', overflow: 'hidden' }}>
         <BlurableBackground src={POSTERS[2]} />
-        <section style={{ position: 'relative', zIndex: 2, padding: '48px 32px 64px' }}>
+        <section className="section-padding-trending">
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'center', marginBottom: 32 }}>
-            <div style={{ flex: 1, maxWidth: 160, height: 2, background: 'rgba(255,255,255,0.25)' }} />
-            <h2 style={{ fontFamily: 'var(--ff-poppins)', fontSize: 40, fontWeight: 700, color: '#fff', margin: 0, whiteSpace: 'nowrap' }}>
+            <div className="title-line" style={{ flex: 1, maxWidth: 160, height: 2, background: 'rgba(255,255,255,0.25)' }} />
+            <h2 className="section-title-h2">
               🔥 Trending with Reel users
             </h2>
-            <div style={{ flex: 1, maxWidth: 160, height: 2, background: 'rgba(255,255,255,0.25)' }} />
+            <div className="title-line" style={{ flex: 1, maxWidth: 160, height: 2, background: 'rgba(255,255,255,0.25)' }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16, margin: '0 auto' }}>
+          <div className="grid-responsive-6" style={{ margin: '0 auto' }}>
             {[
               { src: '/branding/trend1.png', num: 1, color: '#e5091493', label: 'Fallout', platform: 'NETFLIX' },
               { src: '/branding/trend2.png', num: 2, color: '#2d2d2da8', label: 'Dune: Part Two', platform: 'PRIME' },
@@ -450,17 +439,17 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
           position: 'absolute', inset: 0, zIndex: 1,
           background: 'linear-gradient(to bottom, var(--ink) 0%, rgba(8,8,12,0.5) 20%, rgba(8,8,12,0.5) 80%, var(--ink) 100%)',
         }} />
-        <section style={{ position: 'relative', zIndex: 2, padding: '48px 32px 130px' }}>
+        <section className="section-padding-friends">
           {/* Ruled title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'center', marginBottom: 32 }}>
-            <div style={{ flex: 1, maxWidth: 160, height: 1, background: 'rgba(255,255,255,0.25)' }} />
-            <h2 style={{ fontFamily: 'var(--ff-poppins)', fontSize: 40, fontWeight: 700, color: '#fff', margin: 0, whiteSpace: 'nowrap' }}>
-              <span style={{ fontSize: 62, lineHeight: 0 }}>&#8734;</span> What your friends are watching
+            <div className="title-line" style={{ flex: 1, maxWidth: 160, height: 1, background: 'rgba(255,255,255,0.25)' }} />
+            <h2 className="section-title-h2">
+              <span className="section-title-icon">&#8734;</span> What your friends are watching
             </h2>
-            <div style={{ flex: 1, maxWidth: 160, height: 1, background: 'rgba(255,255,255,0.25)' }} />
+            <div className="title-line" style={{ flex: 1, maxWidth: 160, height: 1, background: 'rgba(255,255,255,0.25)' }} />
           </div>
           {/* 2-column grid — only 2 cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, maxWidth: 1140, margin: '0 auto' }}>
+          <div className="grid-responsive-2" style={{ maxWidth: 1140, margin: '0 auto' }}>
             <FriendCard
               name="Rik"
               img="/branding/trend1.png"
@@ -476,18 +465,18 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
           </div>
 
           {/* 4 feature icons strip */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 48, margin: '40px auto 32px', maxWidth: 940 }}>
+          <div className="flex-responsive-4" style={{ margin: '40px auto 32px', maxWidth: 940 }}>
             {[
               { src: '/branding/image6.png', label: 'All platforms in one place' },
               { src: '/branding/image7.png', label: 'Powered by friends' },
               { src: '/branding/image8.png', label: 'Find anything instantly' },
               { src: '/branding/image9.png', label: 'Never miss a show' },
             ].map(({ src, label }) => (
-              <div key={label} style={{ textAlign: 'center', flex: 1 }}>
-                <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}>
-                  <img src={src} alt={label} style={{ width: 80, height: 80, objectFit: 'contain' }} />
+              <div key={label} className="feature-icon-item">
+                <div className="feature-icon-img-wrapper">
+                  <img src={src} alt={label} className="feature-icon-img" />
                 </div>
-                <div style={{ fontSize: 20, color: 'rgba(255, 255, 255, 0.86)', fontWeight: 600, lineHeight: 1.2, maxWidth: 150, margin: 'auto' }}>{label}</div>
+                <div className="feature-icon-label">{label}</div>
               </div>
             ))}
           </div>
@@ -497,17 +486,12 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
 
           {/* Tagline + CTA */}
           <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <p style={{ color: '#fff', fontSize: 20, marginBottom: 24 }}>
+            <p className="cta-text">
               Fed up with scrolling for hours and finding nothing? We built Reel to fix it.
             </p>
             <button
               onClick={onShowRegister}
-              style={{
-                background: 'linear-gradient(180deg, #E83536, #B1211E)', color: '#fff', border: 'none',
-                borderRadius: 6, padding: '16px 40px', fontSize: 26, fontWeight: 900,
-                cursor: 'pointer', boxShadow: '0 10px 40px rgba(229, 9, 20, 0.45)',
-                transition: 'transform 0.1s ease, filter 0.1s ease',
-              }}
+              className="cta-btn-primary"
               onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.97)'}
               onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >

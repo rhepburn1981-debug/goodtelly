@@ -16,15 +16,13 @@ import RecommendModal from './components/RecommendModal'
 import SearchOverlay from './components/SearchOverlay'
 
 import LandingPage from './screens/LandingPage'
-import HomeTab from './screens/HomeTab'
-import DiscoverTab from './screens/DiscoverTab'
-import FriendsTab from './screens/FriendsTab'
-import ProfileTab from './screens/ProfileTab'
 import FilmDetailPage from './screens/FilmDetailPage'
 import WatchlistDashboard from './screens/WatchlistDashboard'
+import HomeDashboard from './screens/HomeDashboard'
+import DiscoverDashboard from './screens/DiscoverDashboard'
+import FriendsDashboard from './screens/FriendsDashboard'
 
 export default function App() {
-  const [tab, setTab] = useState('home')
   const [currentUser, setCurrentUser] = useState(null)
   const [authToken, setAuthToken] = useState(() => getToken())
   const [showAuth, setShowAuth] = useState(false)
@@ -114,11 +112,7 @@ export default function App() {
     return () => clearInterval(id)
   }, [authToken])
 
-  // Log tab change
-  useEffect(() => {
-    if (authToken) logTab(tab)
-    if (tab === 'friends') setFriendsHasUnread(false)
-  }, [tab]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Log tab change lifecycle or route changes could be added here if needed
 
   // --- TMDB search with 500ms debounce ---
   useEffect(() => {
@@ -155,7 +149,6 @@ export default function App() {
     setWatchedIds([])
     setFriends([])
     setRecommendations([])
-    setTab('home')
   }, [])
 
   // --- Watchlist actions ---
@@ -256,9 +249,18 @@ export default function App() {
   // --- If not logged in ---
   return (
     <>
-      <Routes>
-        <Route path="/watchlist" element={<WatchlistDashboard onTabChange={setTab} />} />
+      {/* Search Overlay injected globally if actively searching */}
+      {search.trim() && (
+        <SearchOverlay
+          results={combinedSearch}
+          loading={searchLoading}
+          addedIds={addedIds}
+          onOpenFilm={openFilm}
+          onAddToList={handleAddToList}
+        />
+      )}
 
+      <Routes>
         <Route path="/" element={
           !currentUser ? (
             <LandingPage
@@ -266,117 +268,16 @@ export default function App() {
               onShowRegister={() => { setAuthMode('register'); setShowAuth(true) }}
             />
           ) : (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-              <header style={{ padding: '14px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{
-                  fontFamily: 'var(--ff-display)',
-                  fontSize: 28,
-                  fontWeight: 700,
-                  color: 'var(--text)',
-                  letterSpacing: -1,
-                  flexShrink: 0,
-                }}>
-                  reel.
-                </div>
-                <div style={{
-                  flex: 1,
-                  background: 'rgba(255,255,255,0.07)',
-                  borderRadius: 22,
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '0 14px',
-                  border: '1px solid var(--border)',
-                }}>
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search films..."
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text)',
-                      fontSize: 15,
-                      fontFamily: 'var(--ff-body)',
-                      width: '100%',
-                      padding: '9px 0',
-                      outline: 'none',
-                    }}
-                  />
-                  {search && (
-                    <button onClick={() => setSearch('')} style={{
-                      background: 'none', border: 'none', color: 'var(--muted)',
-                      cursor: 'pointer', fontSize: 16, padding: '0 0 0 8px',
-                    }}>✕</button>
-                  )}
-                </div>
-              </header>
-
-              {search.trim() && (
-                <SearchOverlay
-                  results={combinedSearch}
-                  loading={searchLoading}
-                  addedIds={addedIds}
-                  onOpenFilm={openFilm}
-                  onAddToList={handleAddToList}
-                />
-              )}
-
-              {!search.trim() && (
-                <main style={{ paddingTop: 12, paddingBottom: 80 }}>
-                  {tab === 'home' && (
-                    <HomeTab
-                      {...sharedProps}
-                      recommendations={recommendations}
-                      onRecommend={(film) => setRecommendFilm(film)}
-                      onDismissRec={(id) => {
-                        const dismissed = JSON.parse(localStorage.getItem('dismissed_recs') || '[]')
-                        localStorage.setItem('dismissed_recs', JSON.stringify([...dismissed, id]))
-                        setRecommendations((prev) => prev.filter((r) => r.id !== id))
-                      }}
-                    />
-                  )}
-                  {tab === 'list' && (
-                    <WatchlistDashboard
-                      onTabChange={setTab}
-                    />
-                  )}
-                  {tab === 'discover' && (
-                    <DiscoverTab
-                      {...sharedProps}
-                      providers={providers}
-                    />
-                  )}
-                  {tab === 'friends' && (
-                    <FriendsTab
-                      {...sharedProps}
-                      friends={friends}
-                      friendRequests={friendRequests}
-                      onFriendsUpdated={() => getFriends().then(setFriends).catch(() => { })}
-                    />
-                  )}
-                  {tab === 'profile' && (
-                    <ProfileTab
-                      currentUser={currentUser}
-                      myList={myList}
-                      watchedIds={watchedIds}
-                      friends={friends}
-                      onLogout={onLogout}
-                      onToast={showToast}
-                    />
-                  )}
-                </main>
-              )}
-
-              <BottomNav
-                activeTab={tab}
-                onTabChange={setTab}
-                username={currentUser?.username}
-                friendsHasUnread={friendsHasUnread}
-              />
-            </div>
+            <Navigate to="/dashboard/home" replace />
           )
         } />
+
+        <Route path="/dashboard/home" element={<HomeDashboard searchQuery={search} onSearchChange={setSearch} />} />
+        <Route path="/dashboard/watchlist" element={<WatchlistDashboard searchQuery={search} onSearchChange={setSearch} />} />
+        <Route path="/dashboard/discover" element={<DiscoverDashboard searchQuery={search} onSearchChange={setSearch} />} />
+        <Route path="/dashboard/friends" element={<FriendsDashboard searchQuery={search} onSearchChange={setSearch} />} />
+
+        <Route path="/dashboard" element={<Navigate to="/dashboard/home" replace />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
