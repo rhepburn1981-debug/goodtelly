@@ -1,198 +1,307 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { FaPlay, FaPlus, FaShareAlt, FaWhatsapp, FaChevronRight, FaTimes, FaSearchPlus, FaCheck, FaPen, FaUserPlus } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaGlobe, FaEyeSlash, FaTrash, FaCheckCircle, FaFilter } from 'react-icons/fa';
 
-const FeatureCard = () => (
-    <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, color: 'rgba(255,255,255,0.9)', letterSpacing: 0.5 }}>
-            Freddy recommending...
-        </h2>
-        <div style={{
-            position: 'relative',
-            borderRadius: 16,
-            overflow: 'hidden',
-            background: '#0f0f12',
-            border: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
-        }}>
-            {/* Background Image Layer */}
-            <div style={{
-                position: 'absolute', inset: 0, zIndex: 0,
-                backgroundImage: 'url(/branding/terminator_bg.png)',
-                backgroundSize: 'cover', backgroundPosition: 'center',
-                opacity: 0.8
-            }} />
+// Mock data to flesh out the premium UI
+const INITIAL_WATCHLIST = [
+    { id: 1, title: 'Blade Runner 2049', year: 2017, genre: 'Sci-Fi / Thriller', poster: '/branding/poster1.png', isVisible: true, isWatched: false },
+    { id: 2, title: 'The Dark Knight', year: 2008, genre: 'Action / Crime', poster: '/branding/poster2.png', isVisible: true, isWatched: false },
+    { id: 3, title: 'Interstellar', year: 2014, genre: 'Sci-Fi / Drama', poster: '/branding/poster3.png', isVisible: false, isWatched: true },
+    { id: 4, title: 'Parasite', year: 2019, genre: 'Thriller / Comedy', poster: '/branding/poster4.png', isVisible: true, isWatched: false },
+    { id: 5, title: 'Dune: Part Two', year: 2024, genre: 'Sci-Fi / Adventure', poster: '/branding/trend2.png', isVisible: true, isWatched: false },
+    { id: 6, title: 'The Matrix', year: 1999, genre: 'Sci-Fi / Action', poster: '/branding/terminator_poster.png', isVisible: true, isWatched: true },
+];
 
-            {/* Dark Gradient Overlay to make text legible */}
-            <div style={{
-                position: 'absolute', inset: 0, zIndex: 1,
-                background: 'linear-gradient(to right, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0.7) 40%, rgba(10,10,12,0.1) 100%)'
-            }} />
-            <div style={{
-                position: 'absolute', inset: 0, zIndex: 1,
-                background: 'linear-gradient(to top, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0) 60%)'
-            }} />
+const FilterPill = ({ label, active, onClick }) => (
+    <button
+        onClick={onClick}
+        style={{
+            padding: '8px 20px',
+            borderRadius: 100,
+            background: active ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+            border: active ? '1px solid rgba(251, 191, 36, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
+            color: active ? '#fbbf24' : 'rgba(255, 255, 255, 0.6)',
+            fontSize: 14,
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            whiteSpace: 'nowrap',
+            flexShrink: 0
+        }}
+        className="filter-pill"
+    >
+        {label}
+    </button>
+);
 
-            {/* Close Button */}
-            <div style={{
-                position: 'absolute', top: 16, right: 16, zIndex: 10,
-                width: 32, height: 32, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.85)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: '#111',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                transition: 'transform 0.2s ease'
-            }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                <FaTimes size={14} />
-            </div>
-
-            {/* Content Layer */}
-            <div style={{ position: 'relative', zIndex: 2, padding: 24, display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-                {/* Top Section: Poster + Title */}
-                <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-                    <div style={{ position: 'relative', flexShrink: 0 }}>
-                        <img
-                            src="/branding/terminator_poster.png"
-                            alt="The Terminator"
-                            style={{
-                                width: 110, aspectRatio: '2/3', objectFit: 'cover', borderRadius: 10,
-                                border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 10px 20px rgba(0,0,0,0.5)'
-                            }}
-                        />
-                        <div style={{
-                            position: 'absolute', bottom: -10, right: -10,
-                            width: 32, height: 32, borderRadius: '50%',
-                            background: 'rgba(10,10,12,0.8)', backdropFilter: 'blur(5px)',
-                            border: '1px solid rgba(255,255,255,0.2)', color: '#fff',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.4)'
-                        }}>
-                            <FaSearchPlus size={12} />
-                        </div>
-                    </div>
-
-                    <div style={{ alignSelf: 'flex-start', paddingTop: 12 }}>
-                        <h1 style={{ fontSize: 32, fontWeight: 700, color: '#fff', margin: '0 0 6px', letterSpacing: -0.5 }}>
-                            The Terminator
-                        </h1>
-                        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)', margin: 0, fontWeight: 500 }}>
-                            1984
-                        </p>
-                    </div>
-                </div>
-
-                {/* Bottom Section: Buttons */}
-                <div className="feature-btn-container">
-                    <button className="feature-btn feature-btn-secondary">
-                        <FaPlay size={12} color="#fff" /> Watch Trailer
-                    </button>
-
-                    <button className="feature-btn feature-btn-primary">
-                        + Watchlist
-                    </button>
-                </div>
-            </div>
+const StatCard = ({ label, value, active, onClick }) => (
+    <div
+        onClick={onClick}
+        className="stat-card"
+        style={{
+            flex: 1,
+            background: active ? 'rgba(251, 191, 36, 0.08)' : 'rgba(0, 0, 0, 0.3)',
+            backdropFilter: 'blur(12px)',
+            border: active ? '1px solid rgba(251, 191, 36, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: 20,
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: active ? '0 10px 40px rgba(251, 191, 36, 0.15)' : 'none'
+        }}
+    >
+        <div style={{ fontSize: 36, fontWeight: 900, color: active ? '#fbbf24' : '#fff', lineHeight: 1, marginBottom: 8 }}>
+            {value}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: active ? 'rgba(251, 191, 36, 0.8)' : 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>
+            {label}
         </div>
     </div>
 );
 
-const TrendingItem = ({ num, img, platform, label, pColor }) => (
-    <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.2s ease' }}>
-        <img src={img} alt={label} style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover' }} />
-        <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            background: '#e50914',
-            padding: '4px 10px',
-            fontSize: 14,
-            fontWeight: 900,
-            borderBottomRightRadius: 8,
-            boxShadow: '2px 2px 10px rgba(0,0,0,0.5)'
-        }}>{num}</div>
-        <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            padding: '24px 12px 12px',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, transparent 100%)',
+const WatchlistItem = ({ film, onToggleWatched, onRemove }) => (
+    <div
+        className="watchlist-item"
+        style={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: 2
+            background: 'rgba(255, 255, 255, 0.03)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
+            borderRadius: 16,
+            overflow: 'hidden',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            position: 'relative'
+        }}
+    >
+        {/* Glow effect on hover */}
+        <div className="hover-glow" style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, transparent 70%)', opacity: 0, transition: 'opacity 0.3s ease', pointerEvents: 'none' }} />
+
+        {/* Poster */}
+        <div style={{ width: 100, flexShrink: 0, borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+            <img src={film.poster} alt={film.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                <div>
+                    <h3 style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 4px', letterSpacing: -0.3 }}>{film.title}</h3>
+                    <div style={{ fontSize: 13, color: 'rgba(255, 255, 255, 0.4)', fontWeight: 500 }}>
+                        {film.genre} &bull; {film.year}
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 'auto' }}>
+                {film.isVisible ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.06)', padding: '4px 10px', borderRadius: 100 }}>
+                        <FaGlobe size={10} color="rgba(255,255,255,0.6)" />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>Visible to Friends</span>
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: 100 }}>
+                        <FaEyeSlash size={10} color="rgba(255,255,255,0.4)" />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>Private</span>
+                    </div>
+                )}
+            </div>
+        </div>
+
+        {/* Actions - Vertical on the right */}
+        <div style={{
+            display: 'flex', flexDirection: 'column', borderLeft: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.2)', width: 140
         }}>
-            <span style={{ fontSize: 12, fontWeight: 900, color: pColor || '#fff', letterSpacing: 0.5 }}>{platform}</span>
-            <span style={{ fontSize: 16, fontWeight: 800, color: '#fff' }}>{label}</span>
+            <button
+                onClick={() => onToggleWatched(film.id)}
+                className="action-btn-watched"
+                style={{
+                    flex: 1, border: 'none',
+                    background: film.isWatched ? 'rgba(74, 222, 128, 0.15)' : 'transparent',
+                    color: film.isWatched ? '#4ade80' : 'rgba(255,255,255,0.6)',
+                    borderBottom: '1px solid rgba(255,255,255,0.05)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    cursor: 'pointer', transition: 'all 0.2s ease', padding: 12
+                }}
+            >
+                {film.isWatched ? <FaCheckCircle size={18} /> : <FaCheck size={18} />}
+                <span style={{ fontSize: 11, fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>
+                    {film.isWatched ? 'Watched' : "Tap if you've\nseen it"}
+                </span>
+            </button>
+            <button
+                onClick={() => onRemove(film.id)}
+                className="action-btn-remove"
+                style={{
+                    height: 50, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.3)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    cursor: 'pointer', transition: 'all 0.2s ease', fontSize: 11, fontWeight: 700
+                }}
+            >
+                <FaTrash size={12} /> Remove
+            </button>
         </div>
     </div>
 );
 
 export default function WatchlistDashboard(props) {
+    const [films, setFilms] = useState(INITIAL_WATCHLIST);
+    const [isListVisible, setIsListVisible] = useState(true);
+    const [activeStat, setActiveStat] = useState('to_watch'); // 'to_watch', 'watched', 'all'
+
+    // Filters
+    const [activeSort, setActiveSort] = useState('Recently Added');
+    const [activeGenre, setActiveGenre] = useState('All');
+    const [activePlatform, setActivePlatform] = useState('All');
+
+    const handleToggleWatched = (id) => {
+        setFilms(films.map(f => f.id === id ? { ...f, isWatched: !f.isWatched } : f));
+    };
+
+    const handleRemove = (id) => {
+        setFilms(films.filter(f => f.id !== id));
+    };
+
+    const toWatchCount = films.filter(f => !f.isWatched).length;
+    const watchedCount = films.filter(f => f.isWatched).length;
+    const totalCount = films.length;
+
+    const displayFilms = films.filter(f => {
+        if (activeStat === 'to_watch' && f.isWatched) return false;
+        if (activeStat === 'watched' && !f.isWatched) return false;
+        return true;
+    });
+
     return (
-        <DashboardLayout searchQuery={props.searchQuery} onSearchChange={props.onSearchChange}>
-            <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', paddingTop: 24 }}>
-                <FeatureCard />
+        <DashboardLayout
+            searchQuery={props.searchQuery}
+            onSearchChange={props.onSearchChange}
+            activeTab={props.activeTab}
+            onTabChange={props.onTabChange}
+        >
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .watchlist-item:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); z-index: 10; }
+                .watchlist-item:hover .hover-glow { opacity: 1 !important; }
+                .action-btn-watched:hover { background: rgba(74, 222, 128, 0.2) !important; color: #4ade80 !important; }
+                .action-btn-remove:hover { color: #ef4444 !important; background: rgba(239, 68, 68, 0.1) !important; }
+                .filter-pill:hover { background: rgba(255,255,255,0.1) !important; }
+                .toggle-switch { width: 44px; height: 24px; background: rgba(255,255,255,0.1); border-radius: 12px; position: relative; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
+                .toggle-switch.active { background: rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.5); }
+                .toggle-knob { width: 18px; height: 18px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 3px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+                .toggle-switch.active .toggle-knob { left: 21px; background: #fbbf24; }
+                .no-scrollbar::-webkit-scrollbar { display: none; }
+                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                .fade-in { animation: fadeIn 0.4s ease; }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+            `}} />
 
-                {/* Trending Grid */}
-                <div style={{
-                    marginBottom: 24, position: 'relative', overflow: 'hidden',
-                    background: 'rgba(0, 0, 0, 0.6)',
-                    backdropFilter: 'blur(10px)',
-                    padding: '24px',
-                    borderRadius: '16px',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    boxShadow: '0 20px px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)'
-                }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', background: 'radial-gradient(ellipse at top, rgba(255,255,255,0.05), transparent 70%)', zIndex: 0 }} />
-                    <div style={{ position: 'relative', zIndex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                            <span style={{ fontSize: 24 }}>🔖</span>
-                            <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5 }}>Look what&rsquo;s Trending!</h2>
-                        </div>
-                        <div className="grid-responsive-6-dashboard">
-                            <TrendingItem num="1" img="/branding/trend1.png" platform="NETFLIX" label="Fallout" pColor="#E50914" />
-                            <TrendingItem num="2" img="/branding/trend2.png" platform="PRIME" label="Dune: Part Two" pColor="#00A8E1" />
-                            <TrendingItem num="3" img="/branding/trend3.png" platform="HULU" label="Shōgun" pColor="#1CE783" />
-                            <TrendingItem num="4" img="/branding/trend4.png" platform="SILO" label="Silo" pColor="#fff" />
-                            <TrendingItem num="5" img="/branding/trend5.png" platform="PRIME" label="The Boys" pColor="#00A8E1" />
-                            <TrendingItem num="6" img="/branding/trend6.png" platform="NETFLIX" label="Money Heist" pColor="#E50914" />
-                        </div>
+            {/* Background elements for cinematic feel */}
+            <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '50%', height: '50%', background: 'radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, transparent 70%)', filter: 'blur(100px)', zIndex: 0, pointerEvents: 'none' }} />
+            <div style={{ position: 'fixed', bottom: '-20%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%)', filter: 'blur(120px)', zIndex: 0, pointerEvents: 'none' }} />
+
+            <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', paddingBottom: 100 }} className="fade-in">
+
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 32 }}>
+                    <div>
+                        <h1 style={{ fontSize: 40, fontWeight: 900, margin: '0 0 4px', letterSpacing: -1, color: '#fff' }}>
+                            My Watchlist
+                        </h1>
+                        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.4)', margin: 0, fontWeight: 500 }}>
+                            Curated picks and future watches
+                        </p>
+                    </div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#fbbf24', background: 'rgba(251, 191, 36, 0.1)', padding: '8px 16px', borderRadius: 100, border: '1px solid rgba(251, 191, 36, 0.2)' }}>
+                        {totalCount} Films
                     </div>
                 </div>
 
-                {/* Friends Watchlist */}
+                {/* Visibility Toggle Card */}
                 <div style={{
-                    position: 'relative', overflow: 'hidden',
-                    background: 'rgba(0, 0, 0, 0.6)',
+                    marginBottom: 32,
+                    background: 'rgba(255, 255, 255, 0.02)',
                     backdropFilter: 'blur(10px)',
-                    padding: '24px',
-                    borderRadius: '16px',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)'
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: 20,
+                    padding: '24px 32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
                 }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', background: 'radial-gradient(ellipse at top, rgba(255,255,255,0.05), transparent 70%)', zIndex: 0 }} />
-                    <div style={{ position: 'relative', zIndex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                            <span style={{ fontSize: 24 }}>💭</span>
-                            <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5 }}>Friends Watchlist</h2>
-                            <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.4)', marginLeft: 12, fontWeight: 500 }}>See what your friends are recommending</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 14, background: isListVisible ? 'rgba(74, 222, 128, 0.15)' : 'rgba(255, 255, 255, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: isListVisible ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)', transition: 'all 0.3s ease' }}>
+                            {isListVisible ? <FaGlobe size={22} color="#4ade80" /> : <FaEyeSlash size={22} color="rgba(255,255,255,0.4)" />}
                         </div>
-                        <div className="grid-responsive-6-dashboard">
-                            {[1, 2, 3, 4, 1, 2].map((i, idx) => (
-                                <div key={idx} style={{
-                                    borderRadius: 14, overflow: 'hidden',
-                                    border: '1px solid rgba(255,255,255,0.08)',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                                    transition: 'transform 0.3s ease',
-                                    cursor: 'pointer'
-                                }}>
-                                    <img src={`/branding/poster${i}.png`} alt="" style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', display: 'block' }} />
-                                </div>
-                            ))}
+                        <div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 4 }}>List visible to friends</div>
+                            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{isListVisible ? 'Friends can see your picks and activities' : 'Only you can see your watchlist'}</div>
                         </div>
                     </div>
+                    <div className={`toggle-switch ${isListVisible ? 'active' : ''}`} onClick={() => setIsListVisible(!isListVisible)}>
+                        <div className="toggle-knob" />
+                    </div>
                 </div>
+
+                {/* Stats Section */}
+                <div style={{ display: 'flex', gap: 20, marginBottom: 40 }}>
+                    <StatCard label="To Watch" value={toWatchCount} active={activeStat === 'to_watch'} onClick={() => setActiveStat('to_watch')} />
+                    <StatCard label="Watched" value={watchedCount} active={activeStat === 'watched'} onClick={() => setActiveStat('watched')} />
+                    <StatCard label="All" value={totalCount} active={activeStat === 'all'} onClick={() => setActiveStat('all')} />
+                </div>
+
+                {/* Filters & Sorting */}
+                <div style={{ marginBottom: 40, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 32 }}>
+
+                    {/* Row 1: Sorting */}
+                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 16 }} className="no-scrollbar">
+                        <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.3)', marginRight: 8, fontSize: 14, fontWeight: 700 }}><FaFilter size={12} style={{ marginRight: 6 }} /> Sort:</div>
+                        {['Recently Added', 'Friends\' Rating', 'A–Z'].map(sort => (
+                            <FilterPill key={sort} label={sort} active={activeSort === sort} onClick={() => setActiveSort(sort)} />
+                        ))}
+                    </div>
+
+                    {/* Row 2: Genres */}
+                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 16 }} className="no-scrollbar">
+                        <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.3)', marginRight: 8, fontSize: 14, fontWeight: 700, width: 50 }}>Genre:</div>
+                        {['All', 'Drama', 'History', 'Thriller', 'Crime', 'Action', 'Comedy'].map(g => (
+                            <FilterPill key={g} label={g} active={activeGenre === g} onClick={() => setActiveGenre(g)} />
+                        ))}
+                    </div>
+
+                    {/* Row 3: Platforms */}
+                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto' }} className="no-scrollbar">
+                        <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.3)', marginRight: 8, fontSize: 14, fontWeight: 700, width: 50 }}>Watch:</div>
+                        {['All', 'Netflix', 'Apple TV+', 'Prime', 'Paramount+'].map(p => (
+                            <FilterPill key={p} label={p} active={activePlatform === p} onClick={() => setActivePlatform(p)} />
+                        ))}
+                    </div>
+                </div>
+
+                {/* Grid List */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(480px, 1fr))', gap: 24 }}>
+                    {displayFilms.map((film) => (
+                        <WatchlistItem
+                            key={film.id}
+                            film={film}
+                            onToggleWatched={handleToggleWatched}
+                            onRemove={handleRemove}
+                        />
+                    ))}
+                </div>
+
+                {displayFilms.length === 0 && (
+                    <div style={{ padding: '80px 0', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
+                        <div style={{ fontSize: 48, marginBottom: 16 }}>🎬</div>
+                        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.6)' }}>Nothing here yet</h3>
+                        <p style={{ fontSize: 15 }}>Try adjusting your filters or adding some films.</p>
+                    </div>
+                )}
+
             </div>
         </DashboardLayout>
     );

@@ -1,6 +1,23 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { FaPlay, FaPlus, FaSearchPlus, FaCheck, FaInfoCircle } from 'react-icons/fa';
+import { FaPlay, FaPlus, FaSearchPlus, FaCheck, FaInfoCircle, FaStar, FaUserFriends, FaChevronRight } from 'react-icons/fa';
+
+const NavShortcut = ({ icon: Icon, title, subtitle, iconBg, iconColor, onClick }) => (
+    <div onClick={onClick} className="hover-card" style={{
+        display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px',
+        background: '#0a0a0f', border: '1px solid rgba(255,255,255,0.05)',
+        borderRadius: 16, cursor: 'pointer', width: '100%'
+    }}>
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: iconBg, border: `1px solid ${iconColor}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon size={18} color={iconColor} />
+        </div>
+        <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 2, letterSpacing: -0.3 }}>{title}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{subtitle}</div>
+        </div>
+        <FaChevronRight size={12} color="rgba(255,255,255,0.2)" />
+    </div>
+);
 
 const FeatureCard = () => (
     <div style={{ marginBottom: 24 }}>
@@ -159,7 +176,12 @@ const FriendAvatar = ({ name, movie, active }) => (
 
 export default function HomeDashboard(props) {
     return (
-        <DashboardLayout searchQuery={props.searchQuery} onSearchChange={props.onSearchChange}>
+        <DashboardLayout
+            searchQuery={props.searchQuery}
+            onSearchChange={props.onSearchChange}
+            activeTab={props.activeTab}
+            onTabChange={props.onTabChange}
+        >
             <style dangerouslySetInnerHTML={{
                 __html: `
                 .hover-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
@@ -169,7 +191,28 @@ export default function HomeDashboard(props) {
             <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto' }}>
 
                 <div style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <h1 style={{ fontSize: 32, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>Welcome back, Rahul</h1>
+                    <h1 style={{ fontSize: 32, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>
+                        Welcome back, {props.currentUser?.display_name || props.currentUser?.username || 'User'}
+                    </h1>
+                </div>
+
+                <div style={{ marginBottom: 24, display: 'flex', gap: 16 }}>
+                    <NavShortcut
+                        icon={FaStar}
+                        title="My Watchlist"
+                        subtitle="Your saved films and shows to watch"
+                        iconBg="rgba(59, 130, 246, 0.15)"
+                        iconColor="#60a5fa"
+                        onClick={() => props.onTabChange && props.onTabChange('list')}
+                    />
+                    <NavShortcut
+                        icon={FaUserFriends}
+                        title="Friends Watchlist"
+                        subtitle="See what your friends are watching"
+                        iconBg="rgba(255, 255, 255, 0.05)"
+                        iconColor="rgba(255, 255, 255, 0.5)"
+                        onClick={() => props.onTabChange && props.onTabChange('friends')}
+                    />
                 </div>
 
                 <FeatureCard />

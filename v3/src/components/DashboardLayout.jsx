@@ -1,18 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaHome, FaBookmark, FaRegCompass, FaUsers, FaSearch, FaEllipsisH, FaWifi, FaBars, FaBell, FaCheck, FaPen, FaUserPlus, FaWhatsapp, FaTimes } from 'react-icons/fa';
+import { FaHome, FaBookmark, FaRegCompass, FaUsers, FaSearch, FaEllipsisH, FaWifi, FaBars, FaBell, FaCheck, FaPen, FaUserPlus, FaWhatsapp, FaTimes, FaUser } from 'react-icons/fa';
 import './DashboardLayout.css';
 
-const SidebarItem = ({ icon: Icon, label, path, onClick }) => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const active = location.pathname.includes(path) || (path === '/dashboard/home' && location.pathname === '/dashboard');
+const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => {
     return (
         <div
-            onClick={() => {
-                navigate(path);
-                if (onClick) onClick();
-            }}
+            onClick={onClick}
             className={`sidebar-item ${active ? 'active' : ''}`}
         >
             <Icon size={20} className="sidebar-icon" />
@@ -161,8 +155,32 @@ const RightSidebar = ({ isOpen, onClose }) => (
 );
 
 export default function DashboardLayout({ children, searchQuery, onSearchChange }) {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isActivityOpen, setIsActivityOpen] = useState(false);
+
+    const pathToTab = {
+        '/dashboard/home': 'home',
+        '/dashboard/watchlist': 'list',
+        '/dashboard/discover': 'discover',
+        '/dashboard/friends': 'friends',
+        '/dashboard/profile': 'profile',
+    };
+    const activeTab = pathToTab[location.pathname] || 'home';
+
+    function onTabChange(tabId) {
+        const tabToPath = {
+            home: '/dashboard/home',
+            list: '/dashboard/watchlist',
+            discover: '/dashboard/discover',
+            friends: '/dashboard/friends',
+            profile: '/dashboard/profile',
+        };
+        navigate(tabToPath[tabId] || '/dashboard/home');
+    }
+
+    const isProfilePage = location.pathname === '/dashboard/profile';
 
     return (
         <div style={{ display: 'flex', background: '#020202', minHeight: '100vh', width: '100%', position: 'relative' }}>
@@ -185,33 +203,44 @@ export default function DashboardLayout({ children, searchQuery, onSearchChange 
                     searchQuery={searchQuery}
                     onSearchChange={onSearchChange}
                     onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                    onToggleActivity={() => setIsActivityOpen(!isActivityOpen)}
+                    onToggleActivity={isProfilePage ? undefined : () => setIsActivityOpen(!isActivityOpen)}
                 />
                 <div className="dashboard-content-wrapper">
                     <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
                         <SidebarItem
                             icon={FaHome}
                             label="Home"
-                            path="/dashboard/home"
-                            onClick={() => setIsSidebarOpen(false)}
+                            path="home"
+                            active={activeTab === 'home'}
+                            onClick={() => { onTabChange('home'); setIsSidebarOpen(false); }}
                         />
                         <SidebarItem
                             icon={FaBookmark}
                             label="My Watchlist"
-                            path="/dashboard/watchlist"
-                            onClick={() => setIsSidebarOpen(false)}
+                            path="list"
+                            active={activeTab === 'list'}
+                            onClick={() => { onTabChange('list'); setIsSidebarOpen(false); }}
                         />
                         <SidebarItem
                             icon={FaRegCompass}
                             label="Discover"
-                            path="/dashboard/discover"
-                            onClick={() => setIsSidebarOpen(false)}
+                            path="discover"
+                            active={activeTab === 'discover'}
+                            onClick={() => { onTabChange('discover'); setIsSidebarOpen(false); }}
                         />
                         <SidebarItem
                             icon={FaUsers}
                             label="Friends"
-                            path="/dashboard/friends"
-                            onClick={() => setIsSidebarOpen(false)}
+                            path="friends"
+                            active={activeTab === 'friends'}
+                            onClick={() => { onTabChange('friends'); setIsSidebarOpen(false); }}
+                        />
+                        <SidebarItem
+                            icon={FaUser}
+                            label="Profile"
+                            path="profile"
+                            active={activeTab === 'profile'}
+                            onClick={() => { onTabChange('profile'); setIsSidebarOpen(false); }}
                         />
                     </aside>
 
@@ -223,7 +252,7 @@ export default function DashboardLayout({ children, searchQuery, onSearchChange 
                 </div>
             </div>
 
-            <RightSidebar isOpen={isActivityOpen} onClose={() => setIsActivityOpen(false)} />
+            {!isProfilePage && <RightSidebar isOpen={isActivityOpen} onClose={() => setIsActivityOpen(false)} />}
 
             <style dangerouslySetInnerHTML={{
                 __html: `

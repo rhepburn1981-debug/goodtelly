@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { getToken, setToken, clearToken } from './api/client'
 import { getMe } from './api/auth'
 import { getFilms, getFilm, getFilmBySlug, getProviders, searchTmdb, addFilm, logTab } from './api/films'
@@ -17,12 +17,28 @@ import SearchOverlay from './components/SearchOverlay'
 
 import LandingPage from './screens/LandingPage'
 import FilmDetailPage from './screens/FilmDetailPage'
-import WatchlistDashboard from './screens/WatchlistDashboard'
+
+// Desktop Dashboard views
 import HomeDashboard from './screens/HomeDashboard'
+import WatchlistDashboard from './screens/WatchlistDashboard'
 import DiscoverDashboard from './screens/DiscoverDashboard'
 import FriendsDashboard from './screens/FriendsDashboard'
+import ProfileDashboard from './screens/ProfileDashboard'
+
+// Mobile Tab views
+import HomeTab from './screens/HomeTab'
+import ListTab from './screens/ListTab'
+import DiscoverTab from './screens/DiscoverTab'
+import FriendsTab from './screens/FriendsTab'
+import ProfileTab from './screens/ProfileTab'
+
+import useIsMobile from './hooks/useIsMobile'
 
 export default function App() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const isMobile = useIsMobile()
+
   const [currentUser, setCurrentUser] = useState(null)
   const [authToken, setAuthToken] = useState(() => getToken())
   const [showAuth, setShowAuth] = useState(false)
@@ -32,7 +48,6 @@ export default function App() {
   const [allFilms, setAllFilms] = useState([])
   const [providers, setProviders] = useState([])
   const [myList, setMyList] = useState([])
-  // addedIds / watchedIds are plain arrays (matching original)
   const [addedIds, setAddedIds] = useState([])
   const [watchedIds, setWatchedIds] = useState([])
   const [friends, setFriends] = useState([])
@@ -46,11 +61,31 @@ export default function App() {
   const [toast, setToast] = useState('')
   const [userRatings, setUserRatings] = useState({})
 
-  // Search
   const [search, setSearch] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
   const searchTimer = useRef(null)
+
+  // Derive active tab from route for BottomNav
+  const pathToTab = {
+    '/dashboard/home': 'home',
+    '/dashboard/watchlist': 'list',
+    '/dashboard/discover': 'discover',
+    '/dashboard/friends': 'friends',
+    '/dashboard/profile': 'profile',
+  }
+  const activeTab = pathToTab[location.pathname] || 'home'
+
+  function onTabChange(tabId) {
+    const tabToPath = {
+      home: '/dashboard/home',
+      list: '/dashboard/watchlist',
+      discover: '/dashboard/discover',
+      friends: '/dashboard/friends',
+      profile: '/dashboard/profile',
+    }
+    navigate(tabToPath[tabId] || '/dashboard/home')
+  }
 
   // --- Startup ---
   useEffect(() => {
@@ -66,7 +101,6 @@ export default function App() {
       setShowAuth(true)
       window.history.replaceState({}, '', '/')
     }
-    // ?open=SLUG from share link for existing users
     const openSlug = params.get('open')
     if (openSlug) {
       getFilmBySlug(openSlug).then(setSelectedFilm).catch(() => { })
@@ -112,8 +146,6 @@ export default function App() {
     return () => clearInterval(id)
   }, [authToken])
 
-  // Log tab change lifecycle or route changes could be added here if needed
-
   // --- TMDB search with 500ms debounce ---
   useEffect(() => {
     clearTimeout(searchTimer.current)
@@ -138,7 +170,8 @@ export default function App() {
     setAuthToken(token)
     setToken(token)
     setShowAuth(false)
-  }, [])
+    navigate('/dashboard/home')
+  }, [navigate])
 
   const onLogout = useCallback(() => {
     clearToken()
@@ -149,7 +182,8 @@ export default function App() {
     setWatchedIds([])
     setFriends([])
     setRecommendations([])
-  }, [])
+    navigate('/')
+  }, [navigate])
 
   // --- Watchlist actions ---
   async function handleAddToList(film) {
@@ -162,7 +196,6 @@ export default function App() {
     setMyList((prev) => prev.find((f) => f.id === id) ? prev : [...prev, film])
     showToast('"' + film.title + '" added to list')
     try {
-      // If it's a TMDB result, create in DB first
       if (film._fromTmdb && !allFilms.find((f) => f.id === id)) {
         const saved = await addFilm({ title: film.title, year: film.year ? parseInt(film.year) : null, tmdbId: film.tmdb_id, autoEnrich: true })
         setAllFilms((prev) => [...prev, saved])
@@ -191,12 +224,9 @@ export default function App() {
   async function handleMarkWatched(film) {
     const id = film.id
     setWatchedIds((prev) => prev.includes(id) ? prev : [...prev, id])
-    // Also add to list if not already there
     if (!addedIds.includes(id)) handleAddToList(film)
     showToast('Logged as watched!')
     try { await markWatched(id) } catch (_) { }
-    // Prompt for rating
-    setUserRatings((prev) => prev[id] ? prev : prev) // placeholder — rating prompt can be added later
   }
 
   async function handleUnmarkWatched(film) {
@@ -210,7 +240,6 @@ export default function App() {
   function openFilm(film) {
     const normalized = normalizeFilm(film)
     setSelectedFilm(normalized)
-    // Enrich: fetch full DB record to get trailer, stills etc.
     if (film.id > 0 && !film._isExternal) {
       getFilm(film.id).then((full) => {
         if (full) setSelectedFilm((prev) => prev?.id === film.id ? { ...prev, ...full } : prev)
@@ -218,7 +247,6 @@ export default function App() {
     }
   }
 
-  // --- Search results handling ---
   const localFiltered = search.trim()
     ? allFilms.filter((f) =>
       f.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -246,10 +274,15 @@ export default function App() {
     userRatings,
   }
 
-  // --- If not logged in ---
+  const dashboardNavProps = {
+    searchQuery: search,
+    onSearchChange: setSearch,
+    activeTab,
+    onTabChange,
+  }
+
   return (
     <>
-      {/* Search Overlay injected globally if actively searching */}
       {search.trim() && (
         <SearchOverlay
           results={combinedSearch}
@@ -261,25 +294,117 @@ export default function App() {
       )}
 
       <Routes>
+        {/* Landing / Auth */}
         <Route path="/" element={
           !currentUser ? (
-            <LandingPage
-              onShowLogin={() => { setAuthMode('login'); setShowAuth(true) }}
-              onShowRegister={() => { setAuthMode('register'); setShowAuth(true) }}
-            />
+            <>
+              <LandingPage
+                onShowLogin={() => { setAuthMode('login'); setShowAuth(true) }}
+                onShowRegister={() => { setAuthMode('register'); setShowAuth(true) }}
+              />
+            </>
           ) : (
             <Navigate to="/dashboard/home" replace />
           )
         } />
 
-        <Route path="/dashboard/home" element={<HomeDashboard searchQuery={search} onSearchChange={setSearch} />} />
-        <Route path="/dashboard/watchlist" element={<WatchlistDashboard searchQuery={search} onSearchChange={setSearch} />} />
-        <Route path="/dashboard/discover" element={<DiscoverDashboard searchQuery={search} onSearchChange={setSearch} />} />
-        <Route path="/dashboard/friends" element={<FriendsDashboard searchQuery={search} onSearchChange={setSearch} />} />
+        {/* Dashboard Routes - Desktop uses Dashboard components, Mobile uses Tab components */}
+        <Route path="/dashboard/home" element={
+          isMobile ? (
+            <>
+              <header style={{ padding: '14px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ fontFamily: 'var(--ff-display)', fontSize: 28, fontWeight: 700, color: 'var(--text)', letterSpacing: -1, flexShrink: 0 }}>reel.</div>
+                <div style={{ flex: 1, background: 'rgba(255,255,255,0.07)', borderRadius: 22, display: 'flex', alignItems: 'center', padding: '0 14px', border: '1px solid var(--border)' }}>
+                  <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search films..." style={{ background: 'none', border: 'none', color: 'var(--text)', fontSize: 15, fontFamily: 'var(--ff-body)', width: '100%', padding: '9px 0', outline: 'none' }} />
+                  {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 16, padding: '0 0 0 8px' }}>✕</button>}
+                </div>
+              </header>
+              <main style={{ paddingTop: 12, paddingBottom: 80 }}>
+                <HomeTab {...sharedProps} recommendations={recommendations} onRecommend={(film) => setRecommendFilm(film)} onDismissRec={(id) => { const d = JSON.parse(localStorage.getItem('dismissed_recs') || '[]'); localStorage.setItem('dismissed_recs', JSON.stringify([...d, id])); setRecommendations((prev) => prev.filter((r) => r.id !== id)) }} />
+              </main>
+              <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />
+            </>
+          ) : (
+            <HomeDashboard {...sharedProps} {...dashboardNavProps} recommendations={recommendations} />
+          )
+        } />
 
+        <Route path="/dashboard/watchlist" element={
+          isMobile ? (
+            <>
+              <header style={{ padding: '14px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ fontFamily: 'var(--ff-display)', fontSize: 28, fontWeight: 700, color: 'var(--text)', letterSpacing: -1, flexShrink: 0 }}>reel.</div>
+                <div style={{ flex: 1, background: 'rgba(255,255,255,0.07)', borderRadius: 22, display: 'flex', alignItems: 'center', padding: '0 14px', border: '1px solid var(--border)' }}>
+                  <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search films..." style={{ background: 'none', border: 'none', color: 'var(--text)', fontSize: 15, fontFamily: 'var(--ff-body)', width: '100%', padding: '9px 0', outline: 'none' }} />
+                  {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 16, padding: '0 0 0 8px' }}>✕</button>}
+                </div>
+              </header>
+              <main style={{ paddingTop: 12, paddingBottom: 80 }}>
+                <ListTab {...sharedProps} myList={myList} />
+              </main>
+              <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />
+            </>
+          ) : (
+            <WatchlistDashboard {...sharedProps} {...dashboardNavProps} myList={myList} />
+          )
+        } />
+
+        <Route path="/dashboard/discover" element={
+          isMobile ? (
+            <>
+              <header style={{ padding: '14px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ fontFamily: 'var(--ff-display)', fontSize: 28, fontWeight: 700, color: 'var(--text)', letterSpacing: -1, flexShrink: 0 }}>reel.</div>
+                <div style={{ flex: 1, background: 'rgba(255,255,255,0.07)', borderRadius: 22, display: 'flex', alignItems: 'center', padding: '0 14px', border: '1px solid var(--border)' }}>
+                  <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search films..." style={{ background: 'none', border: 'none', color: 'var(--text)', fontSize: 15, fontFamily: 'var(--ff-body)', width: '100%', padding: '9px 0', outline: 'none' }} />
+                  {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 16, padding: '0 0 0 8px' }}>✕</button>}
+                </div>
+              </header>
+              <main style={{ paddingTop: 12, paddingBottom: 80 }}>
+                <DiscoverTab {...sharedProps} providers={providers} />
+              </main>
+              <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />
+            </>
+          ) : (
+            <DiscoverDashboard {...sharedProps} {...dashboardNavProps} providers={providers} />
+          )
+        } />
+
+        <Route path="/dashboard/friends" element={
+          isMobile ? (
+            <>
+              <header style={{ padding: '14px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ fontFamily: 'var(--ff-display)', fontSize: 28, fontWeight: 700, color: 'var(--text)', letterSpacing: -1, flexShrink: 0 }}>reel.</div>
+                <div style={{ flex: 1, background: 'rgba(255,255,255,0.07)', borderRadius: 22, display: 'flex', alignItems: 'center', padding: '0 14px', border: '1px solid var(--border)' }}>
+                  <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search films..." style={{ background: 'none', border: 'none', color: 'var(--text)', fontSize: 15, fontFamily: 'var(--ff-body)', width: '100%', padding: '9px 0', outline: 'none' }} />
+                  {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 16, padding: '0 0 0 8px' }}>✕</button>}
+                </div>
+              </header>
+              <main style={{ paddingTop: 12, paddingBottom: 80 }}>
+                <FriendsTab {...sharedProps} friends={friends} friendRequests={friendRequests} onFriendsUpdated={() => getFriends().then(setFriends).catch(() => { })} />
+              </main>
+              <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />
+            </>
+          ) : (
+            <FriendsDashboard {...sharedProps} {...dashboardNavProps} friends={friends} friendRequests={friendRequests} />
+          )
+        } />
+
+        <Route path="/dashboard/profile" element={
+          isMobile ? (
+            <>
+              <main style={{ paddingTop: 12, paddingBottom: 80 }}>
+                <ProfileTab currentUser={currentUser} myList={myList} watchedIds={watchedIds} friends={friends} onLogout={onLogout} onToast={showToast} />
+              </main>
+              <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />
+            </>
+          ) : (
+            <ProfileDashboard {...dashboardNavProps} currentUser={currentUser} myList={myList} watchedIds={watchedIds} friends={friends} onLogout={onLogout} onToast={showToast} />
+          )
+        } />
+
+        {/* Default redirect */}
         <Route path="/dashboard" element={<Navigate to="/dashboard/home" replace />} />
-
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
       {/* Global Overlays */}

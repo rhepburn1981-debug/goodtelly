@@ -2,6 +2,80 @@ import { useState, useEffect, useRef } from 'react';
 import whatsapp from '../../public/branding/wp.png';
 import './LandingPage.css';
 import { FaPlay, FaListUl, FaWifi, FaSearch, FaEllipsisH } from 'react-icons/fa';
+import useIsMobile from '../hooks/useIsMobile';
+
+const MobileSplash = ({ onShowLogin, onShowRegister }) => {
+  return (
+    <div style={{
+      minHeight: '100dvh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '40px 24px',
+      background: 'var(--ink)',
+      textAlign: 'center',
+    }}>
+      {/* Logo */}
+      <div style={{
+        fontFamily: 'var(--ff-display)',
+        fontSize: 72,
+        fontWeight: 700,
+        color: 'var(--text)',
+        letterSpacing: -2,
+        lineHeight: 1,
+        marginBottom: 8,
+      }}>
+        reel.
+      </div>
+
+      <div style={{
+        fontSize: 16,
+        color: 'var(--muted)',
+        marginBottom: 60,
+        fontWeight: 400,
+      }}>
+        TV &amp; film recommended by friends
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 300 }}>
+        <button
+          onClick={onShowRegister}
+          style={{
+            background: 'var(--gold)',
+            border: 'none',
+            borderRadius: 'var(--radius-lg)',
+            color: '#000',
+            padding: '16px 0',
+            fontSize: 16,
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontFamily: 'var(--ff-body)',
+          }}
+        >
+          Join Reel
+        </button>
+
+        <button
+          onClick={onShowLogin}
+          style={{
+            background: 'transparent',
+            border: '1px solid var(--border2)',
+            borderRadius: 'var(--radius-lg)',
+            color: 'var(--text)',
+            padding: '16px 0',
+            fontSize: 16,
+            fontWeight: 500,
+            cursor: 'pointer',
+            fontFamily: 'var(--ff-body)',
+          }}
+        >
+          Sign in
+        </button>
+      </div>
+    </div>
+  )
+}
 
 const POSTERS = [
   '/branding/poster1.png',
@@ -228,6 +302,7 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
   const friendsRef = useRef(null)
   const featureScrollRef = useRef(null)
   const [isScrolled, setIsScrolled] = useState(false)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -259,6 +334,10 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
         behavior: 'smooth'
       });
     }
+  }
+
+  if (isMobile) {
+    return <MobileSplash onShowLogin={onShowLogin} onShowRegister={onShowRegister} />;
   }
 
   return (
@@ -503,3 +582,4 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
     </div>
   )
 }
+
