@@ -1518,7 +1518,9 @@ def discover_tv():
             "id": s.get("id"),
             "name": s.get("name", ""),
             "image": f"https://image.tmdb.org/t/p/w185{poster}" if poster else None,
+            "poster": f"https://image.tmdb.org/t/p/w185{poster}" if poster else None,
             "poster_large": f"https://image.tmdb.org/t/p/w342{poster}" if poster else None,
+            "backdrop": f"https://image.tmdb.org/t/p/w1280{s.get('backdrop_path')}" if s.get('backdrop_path') else None,
             "overview": (s.get("overview") or "")[:200],
             "rating": s.get("vote_average"),
             "first_air_date": s.get("first_air_date", ""),
@@ -1598,14 +1600,14 @@ def trending_watchlist_recent():
     with get_db() as conn:
         rows = conn.execute("""
             SELECT f.*,
-                COUNT(DISTINCT uw.id) as watchlist_count,
+                COUNT(DISTINCT uw.user_id) as watchlist_count,
                 (
                     SELECT COUNT(*) FROM user_watched uwat WHERE uwat.film_id = f.id
-                    AND uwat.created_at >= datetime('now', '-7 days')
+                    AND uwat.watched_at >= datetime('now', '-7 days')
                 ) +
                 (
                     SELECT COUNT(*) FROM user_watchlist uwl WHERE uwl.film_id = f.id
-                    AND uwl.created_at >= datetime('now', '-7 days')
+                    AND uwl.added_at >= datetime('now', '-7 days')
                 ) +
                 (
                     SELECT COUNT(*) FROM user_recommendations ur WHERE ur.film_id = f.id
@@ -1615,7 +1617,7 @@ def trending_watchlist_recent():
             LEFT JOIN user_watchlist uw ON uw.film_id = f.id
             WHERE f.poster IS NOT NULL AND f.poster != ''
             GROUP BY f.id
-            ORDER BY recent_score DESC, COUNT(DISTINCT uw.id) DESC
+            ORDER BY recent_score DESC, COUNT(DISTINCT uw.user_id) DESC
             LIMIT 15
         """).fetchall()
         result = []
@@ -1647,6 +1649,7 @@ def trending_all():
             "title": s.get("name") if is_tv else s.get("title"),
             "poster": f"https://image.tmdb.org/t/p/w185{poster}" if poster else None,
             "poster_large": f"https://image.tmdb.org/t/p/w342{poster}" if poster else None,
+            "backdrop": f"https://image.tmdb.org/t/p/w1280{s.get('backdrop_path')}" if s.get('backdrop_path') else None,
             "overview": (s.get("overview") or "")[:200],
             "rating": round(s.get("vote_average", 0) / 2, 2) if s.get("vote_average") else None,
             "popularity": round(s.get("popularity", 0), 1) if s.get("popularity") else None,

@@ -1,6 +1,14 @@
-// Full-screen trailer overlay — YouTube embed
+import { useState, useEffect } from 'react'
 
 export default function TrailerModal({ url, onClose }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   if (!url) return null
 
   return (
@@ -14,14 +22,36 @@ export default function TrailerModal({ url, onClose }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        animation: 'fadeIn 0.2s ease',
+        backdropFilter: 'blur(10px)',
       }}
     >
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @keyframes popIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .trailer-container {
+          animation: popIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+          width: 100%;
+          max-width: 1000px;
+          padding: 0 16px;
+        }
+      `}} />
+
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ width: '100%', maxWidth: 700, padding: '0 16px' }}
+        className="trailer-container"
       >
-        <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
+        <div style={{
+          position: 'relative',
+          paddingBottom: '56.25%',
+          height: 0,
+          borderRadius: 24,
+          overflow: 'hidden',
+          boxShadow: '0 40px 100px rgba(0,0,0,0.8)',
+          border: '1px solid rgba(255,255,255,0.1)'
+        }}>
           <iframe
             src={url + '?autoplay=1&rel=0'}
             style={{
@@ -29,30 +59,44 @@ export default function TrailerModal({ url, onClose }) {
               top: 0, left: 0,
               width: '100%', height: '100%',
               border: 'none',
-              borderRadius: 12,
             }}
             allow="autoplay; fullscreen"
             allowFullScreen
           />
         </div>
+
         <button
           onClick={onClose}
           style={{
-            marginTop: 16,
+            marginTop: 24,
             display: 'block',
             width: '100%',
-            background: 'var(--surface2)',
-            border: '1px solid var(--border2)',
-            color: 'var(--text)',
-            padding: '10px 0',
-            borderRadius: 'var(--radius-md)',
-            fontSize: 14,
-            fontWeight: 600,
+            maxWidth: 200,
+            margin: '24px auto 0',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: '#fff',
+            padding: '14px 0',
+            borderRadius: 16,
+            fontSize: 16,
+            fontWeight: 800,
             cursor: 'pointer',
             fontFamily: 'var(--ff-body)',
+            backdropFilter: 'blur(10px)',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={e => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+            e.currentTarget.style.borderColor = 'var(--gold)';
+            e.currentTarget.style.color = 'var(--gold-bright)';
+          }}
+          onMouseOut={e => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+            e.currentTarget.style.color = '#fff';
           }}
         >
-          Close
+          Close Trailer
         </button>
       </div>
     </div>

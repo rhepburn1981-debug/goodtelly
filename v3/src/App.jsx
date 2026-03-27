@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { getToken, setToken, clearToken } from './api/client'
 import { getMe } from './api/auth'
-import { getFilms, getFilm, getFilmBySlug, getProviders, searchTmdb, addFilm, logTab } from './api/films'
+import { getFilms, getFilm, getFilmBySlug, getProviders, searchTmdb, addFilm, logTab, getTrending, getUpcomingTv } from './api/films'
 import { getFriends, getFriendRequests } from './api/friends'
 import { getWatchlist, getRecommendations, addToWatchlist, removeFromWatchlist, markWatched, unmarkWatched } from './api/watchlist'
 import { normalizeFilm } from './utils/normalize'
@@ -54,6 +54,8 @@ export default function App() {
   const [friendRequests, setFriendRequests] = useState([])
   const [friendsHasUnread, setFriendsHasUnread] = useState(false)
   const [recommendations, setRecommendations] = useState([])
+  const [trendingAll, setTrendingAll] = useState([])
+  const [upcomingTv, setUpcomingTv] = useState([])
 
   const [selectedFilm, setSelectedFilm] = useState(null)
   const [recommendFilm, setRecommendFilm] = useState(null)
@@ -91,6 +93,8 @@ export default function App() {
   useEffect(() => {
     getFilms().then(setAllFilms).catch(() => { })
     getProviders().then(setProviders).catch(() => { })
+    getTrending().then(setTrendingAll).catch(() => { })
+    getUpcomingTv().then(setUpcomingTv).catch(() => { })
 
     const invite = readInviteFromUrl()
     if (invite) setShareInvite(invite)
@@ -272,6 +276,8 @@ export default function App() {
     onToast: showToast,
     currentUser,
     userRatings,
+    trendingAll,
+    upcomingTv,
   }
 
   const dashboardNavProps = {
@@ -312,15 +318,46 @@ export default function App() {
         <Route path="/dashboard/home" element={
           isMobile ? (
             <>
-              <header style={{ padding: '14px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ fontFamily: 'var(--ff-display)', fontSize: 28, fontWeight: 700, color: 'var(--text)', letterSpacing: -1, flexShrink: 0 }}>reel.</div>
-                <div style={{ flex: 1, background: 'rgba(255,255,255,0.07)', borderRadius: 22, display: 'flex', alignItems: 'center', padding: '0 14px', border: '1px solid var(--border)' }}>
-                  <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search films..." style={{ background: 'none', border: 'none', color: 'var(--text)', fontSize: 15, fontFamily: 'var(--ff-body)', width: '100%', padding: '9px 0', outline: 'none' }} />
-                  {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 16, padding: '0 0 0 8px' }}>✕</button>}
+              <header style={{
+                background: 'radial-gradient(circle at 28% 18%, rgba(63, 118, 255, 0.08), transparent 18%), radial-gradient(circle at 72% 44%, rgba(146, 101, 39, 0.18), transparent 26%), radial-gradient(circle at 86% 20%, rgba(198, 154, 82, 0.09), transparent 17%), linear-gradient(rgb(12, 11, 16) 0%, rgb(9, 9, 13) 100%)',
+                flexShrink: 0, position: 'sticky', top: 0, zIndex: 1
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
+                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
+                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
+                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
+                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
+                      </svg>
+                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                    </div>
+                    <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
+                  </div>
+                  <div style={{ width: '138px', height: '64px', overflow: 'hidden', flexShrink: 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />
+                  </div>
+                </div>
+                <div style={{ padding: '1px 14px 10px', background: 'linear-gradient(rgba(8, 8, 12, 0.98), rgba(8, 8, 12, 0.78))' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '13px', padding: '8px 12px', gap: '8px', border: '1px solid rgba(255, 255, 255, 0.11)', boxShadow: 'rgba(0, 0, 0, 0.14) 0px 4px 10px, rgba(255, 255, 255, 0.02) 0px 1px 0px inset' }}>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" style={{ flexShrink: 0, color: 'rgba(255, 255, 255, 0.42)' }}>
+                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"></circle>
+                      <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path>
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Search films, TV, directors…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      style={{ flex: '1 1 0%', background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '9.75px', fontFamily: 'var(--ff-body)' }}
+                    />
+                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
+                  </div>
                 </div>
               </header>
-              <main style={{ paddingTop: 12, paddingBottom: 80 }}>
-                <HomeTab {...sharedProps} recommendations={recommendations} onRecommend={(film) => setRecommendFilm(film)} onDismissRec={(id) => { const d = JSON.parse(localStorage.getItem('dismissed_recs') || '[]'); localStorage.setItem('dismissed_recs', JSON.stringify([...d, id])); setRecommendations((prev) => prev.filter((r) => r.id !== id)) }} />
+              <main style={{ paddingBottom: 80 }}>
+                <HomeTab {...sharedProps} onTabChange={onTabChange} recommendations={recommendations} onRecommend={(film) => setRecommendFilm(film)} onDismissRec={(id) => { const d = JSON.parse(localStorage.getItem('dismissed_recs') || '[]'); localStorage.setItem('dismissed_recs', JSON.stringify([...d, id])); setRecommendations((prev) => prev.filter((r) => r.id !== id)) }} />
               </main>
               <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />
             </>
@@ -332,14 +369,45 @@ export default function App() {
         <Route path="/dashboard/watchlist" element={
           isMobile ? (
             <>
-              <header style={{ padding: '14px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ fontFamily: 'var(--ff-display)', fontSize: 28, fontWeight: 700, color: 'var(--text)', letterSpacing: -1, flexShrink: 0 }}>reel.</div>
-                <div style={{ flex: 1, background: 'rgba(255,255,255,0.07)', borderRadius: 22, display: 'flex', alignItems: 'center', padding: '0 14px', border: '1px solid var(--border)' }}>
-                  <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search films..." style={{ background: 'none', border: 'none', color: 'var(--text)', fontSize: 15, fontFamily: 'var(--ff-body)', width: '100%', padding: '9px 0', outline: 'none' }} />
-                  {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 16, padding: '0 0 0 8px' }}>✕</button>}
+              <header style={{
+                background: 'radial-gradient(circle at 28% 18%, rgba(63, 118, 255, 0.08), transparent 18%), radial-gradient(circle at 72% 44%, rgba(146, 101, 39, 0.18), transparent 26%), radial-gradient(circle at 86% 20%, rgba(198, 154, 82, 0.09), transparent 17%), linear-gradient(rgb(12, 11, 16) 0%, rgb(9, 9, 13) 100%)',
+                flexShrink: 0, position: 'sticky', top: 0, zIndex: 1
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
+                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
+                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
+                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
+                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
+                      </svg>
+                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                    </div>
+                    <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
+                  </div>
+                  <div style={{ width: '138px', height: '64px', overflow: 'hidden', flexShrink: 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />
+                  </div>
+                </div>
+                <div style={{ padding: '1px 14px 10px', background: 'linear-gradient(rgba(8, 8, 12, 0.98), rgba(8, 8, 12, 0.78))' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '13px', padding: '8px 12px', gap: '8px', border: '1px solid rgba(255, 255, 255, 0.11)', boxShadow: 'rgba(0, 0, 0, 0.14) 0px 4px 10px, rgba(255, 255, 255, 0.02) 0px 1px 0px inset' }}>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" style={{ flexShrink: 0, color: 'rgba(255, 255, 255, 0.42)' }}>
+                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"></circle>
+                      <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path>
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Search films, TV, directors…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      style={{ flex: '1 1 0%', background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '9.75px', fontFamily: 'var(--ff-body)' }}
+                    />
+                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
+                  </div>
                 </div>
               </header>
-              <main style={{ paddingTop: 12, paddingBottom: 80 }}>
+              <main>
                 <ListTab {...sharedProps} myList={myList} />
               </main>
               <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />
@@ -352,14 +420,45 @@ export default function App() {
         <Route path="/dashboard/discover" element={
           isMobile ? (
             <>
-              <header style={{ padding: '14px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ fontFamily: 'var(--ff-display)', fontSize: 28, fontWeight: 700, color: 'var(--text)', letterSpacing: -1, flexShrink: 0 }}>reel.</div>
-                <div style={{ flex: 1, background: 'rgba(255,255,255,0.07)', borderRadius: 22, display: 'flex', alignItems: 'center', padding: '0 14px', border: '1px solid var(--border)' }}>
-                  <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search films..." style={{ background: 'none', border: 'none', color: 'var(--text)', fontSize: 15, fontFamily: 'var(--ff-body)', width: '100%', padding: '9px 0', outline: 'none' }} />
-                  {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 16, padding: '0 0 0 8px' }}>✕</button>}
+              <header style={{
+                background: 'radial-gradient(circle at 28% 18%, rgba(63, 118, 255, 0.08), transparent 18%), radial-gradient(circle at 72% 44%, rgba(146, 101, 39, 0.18), transparent 26%), radial-gradient(circle at 86% 20%, rgba(198, 154, 82, 0.09), transparent 17%), linear-gradient(rgb(12, 11, 16) 0%, rgb(9, 9, 13) 100%)',
+                flexShrink: 0, position: 'sticky', top: 0, zIndex: 1
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
+                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
+                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
+                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
+                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
+                      </svg>
+                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                    </div>
+                    <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
+                  </div>
+                  <div style={{ width: '138px', height: '64px', overflow: 'hidden', flexShrink: 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />
+                  </div>
+                </div>
+                <div style={{ padding: '1px 14px 10px', background: 'linear-gradient(rgba(8, 8, 12, 0.98), rgba(8, 8, 12, 0.78))' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '13px', padding: '8px 12px', gap: '8px', border: '1px solid rgba(255, 255, 255, 0.11)', boxShadow: 'rgba(0, 0, 0, 0.14) 0px 4px 10px, rgba(255, 255, 255, 0.02) 0px 1px 0px inset' }}>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" style={{ flexShrink: 0, color: 'rgba(255, 255, 255, 0.42)' }}>
+                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"></circle>
+                      <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path>
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Search films, TV, directors…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      style={{ flex: '1 1 0%', background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '9.75px', fontFamily: 'var(--ff-body)' }}
+                    />
+                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
+                  </div>
                 </div>
               </header>
-              <main style={{ paddingTop: 12, paddingBottom: 80 }}>
+              <main>
                 <DiscoverTab {...sharedProps} providers={providers} />
               </main>
               <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />
@@ -372,14 +471,45 @@ export default function App() {
         <Route path="/dashboard/friends" element={
           isMobile ? (
             <>
-              <header style={{ padding: '14px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ fontFamily: 'var(--ff-display)', fontSize: 28, fontWeight: 700, color: 'var(--text)', letterSpacing: -1, flexShrink: 0 }}>reel.</div>
-                <div style={{ flex: 1, background: 'rgba(255,255,255,0.07)', borderRadius: 22, display: 'flex', alignItems: 'center', padding: '0 14px', border: '1px solid var(--border)' }}>
-                  <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search films..." style={{ background: 'none', border: 'none', color: 'var(--text)', fontSize: 15, fontFamily: 'var(--ff-body)', width: '100%', padding: '9px 0', outline: 'none' }} />
-                  {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 16, padding: '0 0 0 8px' }}>✕</button>}
+              <header style={{
+                background: 'radial-gradient(circle at 28% 18%, rgba(63, 118, 255, 0.08), transparent 18%), radial-gradient(circle at 72% 44%, rgba(146, 101, 39, 0.18), transparent 26%), radial-gradient(circle at 86% 20%, rgba(198, 154, 82, 0.09), transparent 17%), linear-gradient(rgb(12, 11, 16) 0%, rgb(9, 9, 13) 100%)',
+                flexShrink: 0, position: 'sticky', top: 0, zIndex: 1
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
+                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
+                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
+                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
+                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
+                      </svg>
+                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                    </div>
+                    <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
+                  </div>
+                  <div style={{ width: '138px', height: '64px', overflow: 'hidden', flexShrink: 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />
+                  </div>
+                </div>
+                <div style={{ padding: '1px 14px 10px', background: 'linear-gradient(rgba(8, 8, 12, 0.98), rgba(8, 8, 12, 0.78))' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '13px', padding: '8px 12px', gap: '8px', border: '1px solid rgba(255, 255, 255, 0.11)', boxShadow: 'rgba(0, 0, 0, 0.14) 0px 4px 10px, rgba(255, 255, 255, 0.02) 0px 1px 0px inset' }}>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" style={{ flexShrink: 0, color: 'rgba(255, 255, 255, 0.42)' }}>
+                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"></circle>
+                      <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path>
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Search films, TV, directors…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      style={{ flex: '1 1 0%', background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '9.75px', fontFamily: 'var(--ff-body)' }}
+                    />
+                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
+                  </div>
                 </div>
               </header>
-              <main style={{ paddingTop: 12, paddingBottom: 80 }}>
+              <main>
                 <FriendsTab {...sharedProps} friends={friends} friendRequests={friendRequests} onFriendsUpdated={() => getFriends().then(setFriends).catch(() => { })} />
               </main>
               <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />
@@ -392,7 +522,45 @@ export default function App() {
         <Route path="/dashboard/profile" element={
           isMobile ? (
             <>
-              <main style={{ paddingTop: 12, paddingBottom: 80 }}>
+              <header style={{
+                background: 'radial-gradient(circle at 28% 18%, rgba(63, 118, 255, 0.08), transparent 18%), radial-gradient(circle at 72% 44%, rgba(146, 101, 39, 0.18), transparent 26%), radial-gradient(circle at 86% 20%, rgba(198, 154, 82, 0.09), transparent 17%), linear-gradient(rgb(12, 11, 16) 0%, rgb(9, 9, 13) 100%)',
+                flexShrink: 0, position: 'sticky', top: 0, zIndex: 1
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
+                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
+                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
+                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
+                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
+                      </svg>
+                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                    </div>
+                    <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>Your profile & activity</div>
+                  </div>
+                  <div style={{ width: '138px', height: '64px', overflow: 'hidden', flexShrink: 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />
+                  </div>
+                </div>
+                <div style={{ padding: '1px 14px 10px', background: 'linear-gradient(rgba(8, 8, 12, 0.98), rgba(8, 8, 12, 0.78))' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '13px', padding: '8px 12px', gap: '8px', border: '1px solid rgba(255, 255, 255, 0.11)', boxShadow: 'rgba(0, 0, 0, 0.14) 0px 4px 10px, rgba(255, 255, 255, 0.02) 0px 1px 0px inset' }}>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" style={{ flexShrink: 0, color: 'rgba(255, 255, 255, 0.42)' }}>
+                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"></circle>
+                      <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path>
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Search films, TV, directors…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      style={{ flex: '1 1 0%', background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '9.75px', fontFamily: 'var(--ff-body)' }}
+                    />
+                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
+                  </div>
+                </div>
+              </header>
+              <main>
                 <ProfileTab currentUser={currentUser} myList={myList} watchedIds={watchedIds} friends={friends} onLogout={onLogout} onToast={showToast} />
               </main>
               <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />

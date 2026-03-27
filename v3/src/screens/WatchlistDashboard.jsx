@@ -82,7 +82,7 @@ const WatchlistItem = ({ film, onToggleWatched, onRemove }) => (
 
         {/* Poster */}
         <div style={{ width: 100, flexShrink: 0, borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-            <img src={film.poster} alt={film.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
+            <img src={film.poster_url} alt={film.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
         </div>
 
         {/* Content */}
@@ -148,7 +148,19 @@ const WatchlistItem = ({ film, onToggleWatched, onRemove }) => (
 );
 
 export default function WatchlistDashboard(props) {
-    const [films, setFilms] = useState(INITIAL_WATCHLIST);
+    const {
+        myList = [],
+        watchedIds = [],
+        onOpenFilm,
+        onMarkWatched,
+        onUnmarkWatched,
+        onRemoveFromList,
+        onTabChange,
+        activeTab,
+        searchQuery,
+        onSearchChange
+    } = props;
+
     const [isListVisible, setIsListVisible] = useState(true);
     const [activeStat, setActiveStat] = useState('to_watch'); // 'to_watch', 'watched', 'all'
 
@@ -157,30 +169,50 @@ export default function WatchlistDashboard(props) {
     const [activeGenre, setActiveGenre] = useState('All');
     const [activePlatform, setActivePlatform] = useState('All');
 
-    const handleToggleWatched = (id) => {
-        setFilms(films.map(f => f.id === id ? { ...f, isWatched: !f.isWatched } : f));
+    const handleToggleWatched = (filmId) => {
+        const film = myList.find(f => f.id === filmId);
+        if (!film) return;
+        if (watchedIds.includes(filmId)) {
+            onUnmarkWatched(film);
+        } else {
+            onMarkWatched(film);
+        }
     };
 
-    const handleRemove = (id) => {
-        setFilms(films.filter(f => f.id !== id));
+    const handleRemove = (filmId) => {
+        const film = myList.find(f => f.id === filmId);
+        if (film) onRemoveFromList(film);
     };
 
-    const toWatchCount = films.filter(f => !f.isWatched).length;
-    const watchedCount = films.filter(f => f.isWatched).length;
-    const totalCount = films.length;
+    const toWatchList = myList.filter(f => !watchedIds.includes(f.id));
+    const watchedList = myList.filter(f => watchedIds.includes(f.id));
 
-    const displayFilms = films.filter(f => {
-        if (activeStat === 'to_watch' && f.isWatched) return false;
-        if (activeStat === 'watched' && !f.isWatched) return false;
-        return true;
-    });
+    const toWatchCount = toWatchList.length;
+    const watchedCount = watchedList.length;
+    const totalCount = myList.length;
+
+    // Genres dynamic
+    const allGenres = ["All", ...new Set(myList.flatMap(f => (f.genre || "").split(",").map(g => g.trim()).filter(Boolean)))];
+
+    const displayFilms = (activeStat === 'watched' ? watchedList : activeStat === 'to_watch' ? toWatchList : myList)
+        .filter(f => {
+            if (activeGenre !== 'All' && !(f.genre || "").includes(activeGenre)) return false;
+            // Platform filtering would need mapping of providers/streamers, which is in props.allFilms or similar
+            // For now, let's keep it simple or implement if data is clear
+            return true;
+        })
+        .sort((a, b) => {
+            if (activeSort === 'A–Z') return (a.title || "").localeCompare(b.title || "");
+            // 'Recently Added' is default order usually if sorted by backend
+            return 0;
+        });
 
     return (
         <DashboardLayout
-            searchQuery={props.searchQuery}
-            onSearchChange={props.onSearchChange}
-            activeTab={props.activeTab}
-            onTabChange={props.onTabChange}
+            searchQuery={searchQuery}
+            onSearchChange={onSearchChange}
+            activeTab={activeTab}
+            onTabChange={onTabChange}
         >
             <style dangerouslySetInnerHTML={{
                 __html: `
@@ -203,7 +235,7 @@ export default function WatchlistDashboard(props) {
             <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '50%', height: '50%', background: 'radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, transparent 70%)', filter: 'blur(100px)', zIndex: 0, pointerEvents: 'none' }} />
             <div style={{ position: 'fixed', bottom: '-20%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%)', filter: 'blur(120px)', zIndex: 0, pointerEvents: 'none' }} />
 
-            <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', paddingBottom: 100 }} className="fade-in">
+            <div style={{ position: 'relative', zIndex: 1, paddingBottom: 100 }} className="fade-in">
 
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 32 }}>
@@ -268,16 +300,8 @@ export default function WatchlistDashboard(props) {
                     {/* Row 2: Genres */}
                     <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 16 }} className="no-scrollbar">
                         <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.3)', marginRight: 8, fontSize: 14, fontWeight: 700, width: 50 }}>Genre:</div>
-                        {['All', 'Drama', 'History', 'Thriller', 'Crime', 'Action', 'Comedy'].map(g => (
+                        {allGenres.slice(0, 10).map(g => (
                             <FilterPill key={g} label={g} active={activeGenre === g} onClick={() => setActiveGenre(g)} />
-                        ))}
-                    </div>
-
-                    {/* Row 3: Platforms */}
-                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto' }} className="no-scrollbar">
-                        <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.3)', marginRight: 8, fontSize: 14, fontWeight: 700, width: 50 }}>Watch:</div>
-                        {['All', 'Netflix', 'Apple TV+', 'Prime', 'Paramount+'].map(p => (
-                            <FilterPill key={p} label={p} active={activePlatform === p} onClick={() => setActivePlatform(p)} />
                         ))}
                     </div>
                 </div>
@@ -287,9 +311,10 @@ export default function WatchlistDashboard(props) {
                     {displayFilms.map((film) => (
                         <WatchlistItem
                             key={film.id}
-                            film={film}
-                            onToggleWatched={handleToggleWatched}
-                            onRemove={handleRemove}
+                            film={{ ...film, isWatched: watchedIds.includes(film.id), isVisible: isListVisible }}
+                            onToggleWatched={() => handleToggleWatched(film.id)}
+                            onRemove={() => handleRemove(film.id)}
+                            onClick={() => onOpenFilm(film)}
                         />
                     ))}
                 </div>

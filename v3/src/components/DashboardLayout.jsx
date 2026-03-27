@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaHome, FaBookmark, FaRegCompass, FaUsers, FaSearch, FaEllipsisH, FaWifi, FaBars, FaBell, FaCheck, FaPen, FaUserPlus, FaWhatsapp, FaTimes, FaUser } from 'react-icons/fa';
+import { FaHome, FaBookmark, FaRegCompass, FaUsers, FaSearch, FaEllipsisH, FaWifi, FaBars, FaUser } from 'react-icons/fa';
 import './DashboardLayout.css';
 
 const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => {
@@ -15,12 +15,22 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => {
     );
 };
 
-const Header = ({ onToggleSidebar, onToggleActivity, searchQuery, onSearchChange }) => (
+const Header = ({ onToggleSidebar, searchQuery, onSearchChange }) => (
     <header className="dashboard-header">
         <div className="dashboard-logo">
             <FaBars className="hamburger-menu" onClick={onToggleSidebar} />
-            <FaWifi style={{ color: '#0066FF', fontSize: 36 }} />
-            <span style={{ fontFamily: 'var(--ff-poppins)', fontSize: 36, fontWeight: 700, color: '#fff', letterSpacing: -1 }}>Reel</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
+                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
+                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
+                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
+                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
+                    </svg>
+                    <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                </div>
+                <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
+            </div>
         </div>
 
         <div className="dashboard-search">
@@ -39,10 +49,8 @@ const Header = ({ onToggleSidebar, onToggleActivity, searchQuery, onSearchChange
         </div>
 
         <div className="dashboard-user-actions">
-            <FaBell className="activity-bell-icon" onClick={onToggleActivity} />
             <img src="/branding/popcorn.png" alt="Popcorn" style={{
-                height: 140, objectFit: 'cover', objectPosition: 'top right',
-                marginRight: -10, marginTop: 4, transform: 'scale(1.1)',
+                height: 120, objectFit: 'contain',
                 filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))',
                 cursor: 'pointer'
             }} />
@@ -62,103 +70,12 @@ const BlurredBackground = () => (
     </div>
 );
 
-const ActivityItem = ({ name, action, movie, icon: Icon }) => (
-    <div style={{ display: 'flex', gap: 14, marginBottom: 20, alignItems: 'center' }}>
-        <div style={{ position: 'relative', width: 44, height: 44 }}>
-            <div style={{
-                width: '100%', height: '100%', borderRadius: '50%',
-                background: 'rgba(255,255,255,0.05)', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)'
-            }}>
-                <img src={`https://i.pravatar.cc/100?u=${name.replace(/\s+/g, '')}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            {Icon && (
-                <div style={{
-                    position: 'absolute', bottom: -2, right: -2, width: 16, height: 16, borderRadius: '50%',
-                    background: '#81b67f', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    border: '2px solid #141416', color: '#000'
-                }}>
-                    <Icon size={8} />
-                </div>
-            )}
-        </div>
-        <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{name}</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{action} <span style={{ color: '#fff', fontWeight: 600 }}>{movie}</span></div>
-        </div>
-    </div>
-);
 
-const RightSidebar = ({ isOpen, onClose }) => (
-    <>
-        <div className={`dashboard-overlay right-sidebar-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
-        <aside className={`dashboard-right-sidebar no-scrollbar ${isOpen ? 'open' : ''}`}>
-            <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
-                    <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0, letterSpacing: -0.5 }}>Activity</h3>
-                    <FaTimes className="drawer-close-btn" onClick={onClose} size={28} />
-                </div>
-                <ActivityItem name="Renée Francois" action="Added" movie="Stranger Things" icon={FaCheck} />
-                <ActivityItem name="Róisín Lynn Theodakis" action="Rated" movie="★★★★★" icon={FaPen} />
-                <ActivityItem name="Dwayne Gossett Downe" action="Recommended" movie="| Swear" icon={FaCheck} />
-            </div>
-
-            <div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: 'rgba(255,255,255,0.6)' }}>Buine Franois</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    <button style={{
-                        background: 'rgba(40, 50, 80, 0.4)', color: '#fff', border: '1px solid rgba(100, 150, 255, 0.2)',
-                        borderRadius: 24, padding: '12px', fontSize: 14, fontWeight: 600, display: 'flex',
-                        alignItems: 'center', justifyContent: 'center', gap: 12, cursor: 'pointer'
-                    }}>
-                        <FaUserPlus size={14} /> Share Reel
-                    </button>
-                    <button style={{
-                        background: 'rgba(30, 80, 50, 0.4)', color: '#fff', border: '1px solid rgba(50, 150, 80, 0.3)',
-                        borderRadius: 24, padding: '12px', fontSize: 14, fontWeight: 600, display: 'flex',
-                        alignItems: 'center', justifyContent: 'center', gap: 12, cursor: 'pointer'
-                    }}>
-                        <FaWhatsapp size={16} color="#4ade80" /> Invite or Text/WhatsApp
-                    </button>
-                </div>
-            </div>
-
-            <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <h3 style={{ fontSize: 13, fontWeight: 800, background: '#fff', color: '#000', padding: '4px 8px' }}>Top Picks For You</h3>
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontWeight: 600 }}>Refresh</span>
-                </div>
-                <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 16 }} className="no-scrollbar">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} style={{ flexShrink: 0, width: 85, height: 120, borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <img src={`/branding/poster${i}.png`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-                        </div>
-                    ))}
-                </div>
-                <button style={{ width: '100%', padding: '10px 0', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24, color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>View All</button>
-            </div>
-
-            <div>
-                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 16 }}>
-                    <h3 style={{ fontSize: 13, fontWeight: 800, background: '#fff', color: '#000', padding: '4px 8px' }}>Recently Added</h3>
-                </div>
-                <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 16 }} className="no-scrollbar">
-                    {[4, 3, 1].map(i => (
-                        <div key={i} style={{ flexShrink: 0, width: 85, height: 120, borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <img src={`/branding/poster${i}.png`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-                        </div>
-                    ))}
-                </div>
-                <button style={{ width: '100%', padding: '10px 0', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24, color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>View All</button>
-            </div>
-        </aside>
-    </>
-);
 
 export default function DashboardLayout({ children, searchQuery, onSearchChange }) {
     const navigate = useNavigate();
     const location = useLocation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [isActivityOpen, setIsActivityOpen] = useState(false);
 
     const pathToTab = {
         '/dashboard/home': 'home',
@@ -203,7 +120,6 @@ export default function DashboardLayout({ children, searchQuery, onSearchChange 
                     searchQuery={searchQuery}
                     onSearchChange={onSearchChange}
                     onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                    onToggleActivity={isProfilePage ? undefined : () => setIsActivityOpen(!isActivityOpen)}
                 />
                 <div className="dashboard-content-wrapper">
                     <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
@@ -252,7 +168,7 @@ export default function DashboardLayout({ children, searchQuery, onSearchChange 
                 </div>
             </div>
 
-            {!isProfilePage && <RightSidebar isOpen={isActivityOpen} onClose={() => setIsActivityOpen(false)} />}
+
 
             <style dangerouslySetInnerHTML={{
                 __html: `

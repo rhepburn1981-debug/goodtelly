@@ -89,14 +89,31 @@ const ProfileMovieCard = ({ film, isDimmed }) => (
 
 // --- Main Dashboard ---
 
-export default function ProfileDashboard({ currentUser, myList, watchedIds, friends, onLogout, onToast, searchQuery, onSearchChange, activeTab, onTabChange }) {
+export default function ProfileDashboard(props) {
+    const {
+        currentUser,
+        myList = [],
+        watchedIds = [],
+        friends = [],
+        onLogout,
+        onToast,
+        searchQuery,
+        onSearchChange,
+        activeTab,
+        onTabChange
+    } = props;
+
     const [editing, setEditing] = useState(false);
     const [displayName, setDisplayName] = useState(currentUser?.display_name || '');
     const [saving, setSaving] = useState(false);
 
+    // Filter real data
+    const watchedFilms = myList.filter(f => watchedIds.includes(f.id)).slice(0, 10);
+    const toWatchFilms = myList.filter(f => !watchedIds.includes(f.id)).slice(0, 10);
+
     // Derived stats from real data
-    const unwatchedCount = myList.filter((f) => !watchedIds.includes(f.film_id || f.id)).length;
-    const watchedCount = myList.filter((f) => watchedIds.includes(f.film_id || f.id)).length;
+    const watchedCount = watchedIds.length;
+    const totalCount = myList.length;
 
     async function saveProfile() {
         setSaving(true);
@@ -150,8 +167,6 @@ export default function ProfileDashboard({ currentUser, myList, watchedIds, frie
 
                 {/* --- 1. Hero Profile Header --- */}
                 <div style={{ position: 'relative', borderRadius: 32, overflow: 'hidden', marginBottom: 24, border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 30px 60px rgba(0,0,0,0.5)', background: '#0a0a0f' }}>
-                    {/* Blurred cinematic BG using a poster */}
-                    <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundImage: 'url(/branding/terminator_bg.png)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(40px)', opacity: 0.4 }} />
                     <div style={{ position: 'absolute', inset: 0, zIndex: 0, background: 'linear-gradient(to right, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0.6) 40%, rgba(10,10,12,0.2) 100%)' }} />
                     <div style={{ position: 'absolute', inset: 0, zIndex: 0, background: 'linear-gradient(to top, rgba(10,10,12,0.95) 0%, transparent 80%)' }} />
 
@@ -191,7 +206,7 @@ export default function ProfileDashboard({ currentUser, myList, watchedIds, frie
                                         <h1 style={{ fontSize: 48, fontWeight: 900, color: '#fff', margin: '0 0 8px', letterSpacing: -1.5 }}>{nameToDisplay}</h1>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                             <span style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)', fontWeight: 600, letterSpacing: 0.5 }}>@{usernameToDisplay}</span>
-                                            <span style={{ background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: 1 }}>Pro Member</span>
+                                            <span style={{ background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: 1 }}>Member</span>
                                         </div>
                                     </div>
                                 )}
@@ -202,11 +217,10 @@ export default function ProfileDashboard({ currentUser, myList, watchedIds, frie
                                 )}
                             </div>
 
-                            {/* Stats Row inside Hero */}
                             <div style={{ display: 'flex', gap: 24, marginTop: 'auto' }}>
-                                <StatCard value={myList.length || 18} label="In List" />
-                                <StatCard value={watchedCount || 3} label="Watched" />
-                                <StatCard value={friends.length || 7} label="Friends" />
+                                <StatCard value={totalCount} label="In List" />
+                                <StatCard value={watchedCount} label="Watched" />
+                                <StatCard value={friends.length} label="Friends" />
                             </div>
                         </div>
                     </div>
@@ -223,13 +237,14 @@ export default function ProfileDashboard({ currentUser, myList, watchedIds, frie
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
                                 <span style={{ fontSize: 24 }}>✅</span>
                                 <h2 style={{ fontSize: 28, fontWeight: 900, color: '#fff', margin: 0, letterSpacing: -0.5 }}>Watched</h2>
-                                <div style={{ marginLeft: 'auto', fontSize: 14, fontWeight: 800, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>View All</div>
+                                <div onClick={() => onTabChange('list')} style={{ marginLeft: 'auto', fontSize: 14, fontWeight: 800, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>View All</div>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 24 }}>
-                                {MOCK_WATCHED.map(film => (
-                                    <ProfileMovieCard key={film.id} film={film} isDimmed={false} />
+                                {watchedFilms.map(film => (
+                                    <ProfileMovieCard key={film.id} film={{ ...film, img: film.poster_url }} isDimmed={false} />
                                 ))}
+                                {watchedFilms.length === 0 && <p style={{ color: 'rgba(255,255,255,0.3)' }}>No films watched yet.</p>}
                             </div>
                         </section>
 
@@ -238,13 +253,14 @@ export default function ProfileDashboard({ currentUser, myList, watchedIds, frie
                             <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 48, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
                                 <span style={{ fontSize: 24 }}>⏳</span>
                                 <h2 style={{ fontSize: 28, fontWeight: 900, color: '#fff', margin: 0, letterSpacing: -0.5 }}>To Watch</h2>
-                                <div style={{ marginLeft: 'auto', fontSize: 14, fontWeight: 800, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>View All</div>
+                                <div onClick={() => onTabChange('list')} style={{ marginLeft: 'auto', fontSize: 14, fontWeight: 800, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>View All</div>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 24 }}>
-                                {MOCK_TOWATCH.map(film => (
-                                    <ProfileMovieCard key={film.id} film={film} isDimmed={true} />
+                                {toWatchFilms.map(film => (
+                                    <ProfileMovieCard key={film.id} film={{ ...film, img: film.poster_url }} isDimmed={true} />
                                 ))}
+                                {toWatchFilms.length === 0 && <p style={{ color: 'rgba(255,255,255,0.3)' }}>Your watchlist is empty.</p>}
                             </div>
                         </section>
                     </div>
@@ -254,55 +270,31 @@ export default function ProfileDashboard({ currentUser, myList, watchedIds, frie
 
                         <div className="glass-sidebar-panel">
                             <h4 style={{ fontSize: 16, fontWeight: 800, color: '#fff', margin: '0 0 20px', letterSpacing: -0.5, display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <span style={{ fontSize: 18 }}>👥</span> Your Network
+                                <span style={{ fontSize: 18 }}>👥</span> Your Friends
                             </h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                {MOCK_FRIENDS.map((f, i) => (
-                                    <div key={i} className="friend-list-item" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px', cursor: 'pointer', transition: 'all 0.2s' }}>
-                                        <img src={f.avatar} alt={f.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }} />
+                                {friends.map((f, i) => (
+                                    <div key={i} className="friend-list-item" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px', cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => onTabChange('friends')}>
+                                        <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{f.username[0].toUpperCase()}</div>
                                         <div>
-                                            <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 2 }}>{f.name}</div>
-                                            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>{f.picks} mutual picks</div>
+                                            <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 2 }}>{f.display_name || f.username}</div>
+                                            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>@{f.username}</div>
                                         </div>
                                     </div>
                                 ))}
+                                {friends.length === 0 && <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>No friends yet.</p>}
                             </div>
                         </div>
 
                         <div className="glass-sidebar-panel">
                             <h4 style={{ fontSize: 16, fontWeight: 800, color: '#fff', margin: '0 0 20px', letterSpacing: -0.5, display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <span style={{ fontSize: 18 }}>🔥</span> Recently Active
+                                <span style={{ fontSize: 18 }}>🔥</span> Activity
                             </h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                                {MOCK_RECENT_ACTIVITY.map((activity, idx) => (
-                                    <div key={idx} style={{ padding: '14px 0', borderBottom: idx < MOCK_RECENT_ACTIVITY.length - 1 ? '1px dashed rgba(255,255,255,0.08)' : 'none' }}>
-                                        <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.9)', marginBottom: 6, lineHeight: 1.4 }}>{activity.text}</div>
-                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{activity.time}</div>
-                                    </div>
-                                ))}
+                                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No recent activity to show.</div>
                             </div>
                         </div>
 
-                        <div className="glass-sidebar-panel">
-                            <h4 style={{ fontSize: 16, fontWeight: 800, color: '#fff', margin: '0 0 20px', letterSpacing: -0.5, display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <span style={{ fontSize: 18 }}>🎯</span> Picks For You
-                            </h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                {MOCK_REC_FOR_YOU.map((rec, i) => (
-                                    <div key={i} style={{ display: 'flex', gap: 14, cursor: 'pointer', group: 'true' }}>
-                                        <div style={{ width: 60, height: 90, borderRadius: 8, overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(255,255,255,0.1)' }}>
-                                            <img src={rec.img} alt={rec.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                            <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 6 }}>{rec.title}</div>
-                                            <div style={{ fontSize: 11, fontWeight: 800, color: '#4ade80', background: 'rgba(74, 222, 128, 0.1)', padding: '4px 8px', borderRadius: 6, display: 'inline-block', alignSelf: 'flex-start' }}>{rec.match}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Sign Out Action Sidebar Bottom */}
                         <button
                             onClick={handleLogout}
                             style={{
@@ -311,14 +303,13 @@ export default function ProfileDashboard({ currentUser, myList, watchedIds, frie
                                 color: '#ef4444', fontSize: 14, fontWeight: 800,
                                 cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)'; transform: 'translateY(-2px)' }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)'; transform: 'translateY(0)' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)'; e.currentTarget.style.transform = 'translateY(0)' }}
                         >
-                            <FaSignOutAlt size={16} /> Sign out of reel.
+                            <FaSignOutAlt size={16} /> Sign out
                         </button>
 
                     </div>
-
                 </div>
             </div>
         </DashboardLayout>
