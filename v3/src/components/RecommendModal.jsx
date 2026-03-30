@@ -14,16 +14,17 @@ export default function RecommendModal({ film, currentUser, onClose, onToast }) 
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  if (!film || !currentUser) return null
+  if (!film) return null
 
-  const shareUrl = buildShareUrl(film, currentUser, note, rating)
+  // We should have currentUser, but let's be safe
+  const shareUrl = buildShareUrl(film, currentUser || {}, note, rating)
 
   async function handleSend() {
     setSending(true)
     try {
       await sendRecommendation(null, film.id, note, rating || null)
     } catch (_) { }
-    sendViaWhatsApp(shareUrl, film, currentUser.display_name || currentUser.username, note, rating)
+    sendViaWhatsApp(shareUrl, film, (currentUser?.display_name || currentUser?.username || 'A friend'), note, rating)
     onClose()
     onToast && onToast('Shared via WhatsApp!')
     setSending(false)
@@ -38,7 +39,7 @@ export default function RecommendModal({ film, currentUser, onClose, onToast }) 
         position: 'fixed',
         inset: 0,
         background: 'rgba(0,0,0,0.88)',
-        zIndex: 500,
+        zIndex: 2000,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

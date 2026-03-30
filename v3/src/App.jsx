@@ -236,7 +236,17 @@ export default function App() {
   async function handleUnmarkWatched(film) {
     const id = film.id
     setWatchedIds((prev) => prev.filter((x) => x !== id))
+    showToast(`"${film.title}" moved back to To Watch`)
     try { await unmarkWatched(id) } catch (_) { }
+  }
+
+  async function handleSaveRating(filmId, rating) {
+    try {
+      await saveRating(filmId, rating)
+      setUserRatings(prev => ({ ...prev, [filmId]: rating }))
+    } catch (_) {
+      showToast('Could not save rating')
+    }
   }
 
   function showToast(msg) { setToast(msg) }
@@ -276,6 +286,8 @@ export default function App() {
     onToast: showToast,
     currentUser,
     userRatings,
+    onSaveRating: handleSaveRating,
+    onRecommend: (film) => setRecommendFilm(film),
     trendingAll,
     upcomingTv,
   }
@@ -597,6 +609,7 @@ export default function App() {
           onUnmarkWatched={handleUnmarkWatched}
           onWatchTrailer={(url) => setTrailerUrl(url)}
           onRecommend={(film) => setRecommendFilm(film)}
+          onSaveRating={handleSaveRating}
           currentUser={currentUser}
         />
       )}

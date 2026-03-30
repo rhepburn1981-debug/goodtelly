@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { FaPlus, FaCheck } from 'react-icons/fa'
 
 export default function DiscoverTab({ allFilms, addedIds, onOpenFilm, onAddToList, providers }) {
   const [genreFilter, setGenreFilter] = useState('All')
@@ -126,8 +127,8 @@ export default function DiscoverTab({ allFilms, addedIds, onOpenFilm, onAddToLis
                 <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.15)', color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>{heroFilm.genre} · {heroFilm.year}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
-                <button onClick={(e) => { e.stopPropagation(); onAddToList(heroFilm) }} style={{ width: '32px', height: '32px', borderRadius: '50%', background: addedIds?.includes(heroFilm.id) ? 'var(--green)' : 'var(--gold)', border: 'none', cursor: 'pointer', fontSize: '18px', fontWeight: '700', color: 'rgb(26, 26, 26)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {addedIds?.includes(heroFilm.id) ? '✓' : '+'}
+                <button onClick={(e) => { e.stopPropagation(); onAddToList(heroFilm) }} style={{ width: '32px', height: '32px', borderRadius: '50%', background: addedIds?.includes(heroFilm.id) ? 'var(--green)' : 'var(--gold)', border: 'none', cursor: 'pointer', color: 'rgb(26, 26, 26)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {addedIds?.includes(heroFilm.id) ? <FaCheck size={16} /> : <FaPlus size={16} />}
                 </button>
               </div>
             </div>
@@ -160,10 +161,20 @@ export default function DiscoverTab({ allFilms, addedIds, onOpenFilm, onAddToLis
                   border: addedIds?.includes(film.id) ? '1px solid rgba(46, 204, 138, 0.3)' : '1px solid rgba(201, 168, 76, 0.4)',
                   background: addedIds?.includes(film.id) ? 'rgba(46, 204, 138, 0.08)' : 'rgba(201, 168, 76, 0.08)',
                   color: addedIds?.includes(film.id) ? 'var(--green)' : 'var(--gold-bright)',
-                  fontSize: '12px', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap'
+                  fontSize: '12px', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap',
+                  display: 'flex', alignItems: 'center', gap: '6px'
                 }}
               >
-                {addedIds?.includes(film.id) ? '✓' : '+ Watchlist'}
+                {addedIds?.includes(film.id) ? (
+                  <>
+                    <FaCheck size={11} />
+                  </>
+                ) : (
+                  <>
+                    <FaPlus size={11} />
+                    <span>Watchlist</span>
+                  </>
+                )}
               </button>
             </div>
           ))}

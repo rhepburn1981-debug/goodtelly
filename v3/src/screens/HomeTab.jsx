@@ -20,15 +20,71 @@ const FALLBACK_RECENT = [
   { id: 'f5', title: 'One Bottle After Another', year: 2026, poster_url: '/branding/poster2.png' },
 ]
 
+const RecommendationCard = ({ rec, onOpenFilm, onDismiss, onAddToList, onWatchTrailer }) => {
+  if (!rec) return null;
+  return (
+    <div style={{ margin: '2px 16px 10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0px 2px 6px' }}>
+        <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08))', border: '1px solid rgba(255, 255, 255, 0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+            <circle cx="12" cy="8.2" r="3.2" fill="rgba(255,255,255,0.78)"></circle>
+            <path d="M5.5 18.5C6.7 15.7 9.1 14.2 12 14.2C14.9 14.2 17.3 15.7 18.5 18.5" stroke="rgba(255,255,255,0.78)" strokeWidth="1.8" strokeLinecap="round"></path>
+          </svg>
+        </div>
+        <div style={{ fontSize: '13px', color: 'var(--gold-bright)', fontWeight: 500 }}>{rec._fromFriend || 'A friend'} thinks you’ll like…</div>
+        {rec._recRating && (
+          <div style={{ fontSize: '12px', color: 'var(--gold-bright)', fontWeight: 700, marginLeft: 'auto', whiteSpace: 'nowrap' }}>⭐ {parseFloat(rec._recRating).toFixed(1)}</div>
+        )}
+      </div>
+      <div style={{ background: 'linear-gradient(rgba(24, 24, 31, 0.94), rgba(10, 10, 15, 0.94))', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.09)', boxShadow: 'rgba(0, 0, 0, 0.26) 0px 12px 28px, rgba(255, 255, 255, 0.04) 0px 1px 0px inset', cursor: 'pointer', position: 'relative' }}>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDismiss(rec.id); }}
+          style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10, width: '24px', height: '24px', borderRadius: '50%', background: 'rgb(255, 255, 255)', border: '2px solid rgb(17, 17, 17)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 900, color: 'rgb(17, 17, 17)', lineHeight: 1, padding: '0px' }}
+        >×</button>
+        <div style={{ position: 'absolute', inset: '0px', backgroundImage: `url("${rec.backdrop_url || rec.poster_url}")`, backgroundSize: 'cover', backgroundPosition: 'center center', opacity: 0.45 }}></div>
+        <div style={{ position: 'absolute', inset: '0px', background: 'linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.52))' }}></div>
+        <div
+          onClick={() => onOpenFilm(rec)}
+          style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 10px 7px' }}
+        >
+          <img src={rec.poster_url} alt={rec.title} style={{ width: '46px', height: '72px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, boxShadow: 'rgba(0, 0, 0, 0.45) 0px 6px 16px' }} />
+          <div style={{ flex: '1 1 0%', minWidth: '0px', paddingTop: '2px', textShadow: 'rgba(0, 0, 0, 0.55) 0px 2px 8px' }}>
+            <div style={{ fontSize: '16px', fontWeight: '900', color: 'var(--text)', lineHeight: 1.1, marginBottom: '1px' }}>{rec.title}</div>
+            <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.86)', marginBottom: '3px' }}>{rec.year}</div>
+          </div>
+        </div>
+        <div style={{ position: 'relative', display: 'flex', gap: '8px', padding: '0px 10px 10px' }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); onWatchTrailer(rec.trailer_url); }}
+            style={{ flex: '1 1 0%', padding: '7px 11px', borderRadius: '16px', background: 'linear-gradient(rgba(28, 28, 34, 0.84), rgba(14, 14, 19, 0.84))', border: '1px solid rgba(255, 255, 255, 0.16)', color: 'var(--text)', fontSize: '10px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', boxShadow: 'rgba(255, 255, 255, 0.06) 0px 1px 0px inset' }}
+          >
+            <span style={{ fontSize: '9px' }}>▶</span>Watch Trailer
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onAddToList(rec); }}
+            style={{ flex: '1 1 0%', padding: '7px 11px', borderRadius: '16px', background: 'linear-gradient(rgba(80, 61, 33, 0.52), rgba(39, 28, 14, 0.52))', border: '1px solid rgba(232, 201, 106, 0.3)', color: 'var(--text)', fontSize: '10px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', boxShadow: 'rgba(255, 255, 255, 0.06) 0px 1px 0px inset' }}
+          >
+            + Watchlist
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function HomeTab(props) {
   const {
     onOpenFilm,
-    onTabChange
+    onTabChange,
+    recommendations = [],
+    onDismissRec,
+    onAddToList,
   } = props
 
   const [trendingNow, setTrendingNow] = useState([])
   const [recentWatchlist, setRecentWatchlist] = useState([])
   const [upcomingShows, setUpcomingShows] = useState([])
+  const [localTrailerUrl, setLocalTrailerUrl] = useState('')
 
   useEffect(() => {
     getTrending().then(setTrendingNow).catch(() => { })
@@ -115,6 +171,14 @@ export default function HomeTab(props) {
           </div>
           <div style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.3)', fontWeight: 300 }}>›</div>
         </div>
+
+        <RecommendationCard
+          rec={recommendations && recommendations[0]}
+          onOpenFilm={onOpenFilm}
+          onDismiss={onDismissRec}
+          onAddToList={onAddToList}
+          onWatchTrailer={(url) => setLocalTrailerUrl(url)}
+        />
 
         {/* TRENDING / What's NEW */}
         {trendingNow.length > 0 && (
@@ -242,6 +306,32 @@ export default function HomeTab(props) {
           </div>
         )}
       </div>
+
+      {localTrailerUrl && (
+        <div
+          onClick={() => setLocalTrailerUrl('')}
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0, 0, 0, 0.92)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: '480px', padding: '0px 12px' }}
+          >
+            <iframe
+              src={(localTrailerUrl.includes('embed') ? localTrailerUrl : `https://www.youtube.com/embed/${localTrailerUrl}`) + (localTrailerUrl.includes('?') ? '&' : '?') + 'rel=0&modestbranding=1&autoplay=1&playsinline=1&iv_load_policy=3&showinfo=0&disablekb=1'}
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; autoplay"
+              allowFullScreen
+              title="trailer"
+              style={{ width: '100%', aspectRatio: '16 / 9', border: 'none', borderRadius: '12px' }}
+            ></iframe>
+            <button
+              onClick={() => setLocalTrailerUrl('')}
+              style={{ marginTop: '14px', display: 'block', width: '100%', padding: '10px', background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.14)', borderRadius: '10px', color: 'var(--text)', fontSize: '14px', cursor: 'pointer' }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

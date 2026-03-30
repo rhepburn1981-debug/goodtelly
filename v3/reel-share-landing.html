@@ -2,17 +2,17 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="REEL" />
-  <meta property="og:title" content="Your friend recommended a film on REEL." />
-  <meta property="og:description" content="Watch the trailer and see what your friends are watching." />
-  <meta property="og:image" content="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <title>REEL - your friend sent you a pick</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="REEL">
+  <meta property="og:title" content="Bhavinsen recommends Project Hail Mary">
+  <meta property="og:description" content="2026, ★ 4.08">
+  <meta property="og:image" content="https://image.tmdb.org/t/p/w1280/8Tfys3mDZVp4tNoH2ktm06a0Tau.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>Bhavinsen recommends Project Hail Mary on REEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+    rel="stylesheet">
   <style>
     *,
     *::before,
@@ -64,6 +64,27 @@
       border-radius: 18px;
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
       overflow: hidden;
+      /* Mobile: flex column so we can control order */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Mobile order control — keeps original visual sequence */
+    .card-body {
+      order: 1;
+    }
+
+    .thumb-wrap {
+      order: 2;
+    }
+
+    .card-links {
+      order: 3;
+      padding: 0 20px;
+    }
+
+    .cta-box {
+      order: 4;
     }
 
     .card-body {
@@ -410,6 +431,193 @@
       font-size: 15px;
       flex-shrink: 0;
     }
+
+    /* =============================================
+       DESKTOP LAYOUT — min-width: 768px
+       Mobile styles above are NOT changed at all.
+       ============================================= */
+    @media (min-width: 768px) {
+
+      body {
+        justify-content: center;
+        min-height: 100vh;
+        background-color: #e9e3d8;
+      }
+
+      /* ── Page wrap: wider, vertically centered ── */
+      .page-wrap {
+        max-width: 900px;
+        padding: 40px 32px 64px;
+        width: 100%;
+      }
+
+      /* ── Header: bigger logo ── */
+      .page-header {
+        margin-bottom: 28px;
+        gap: 16px;
+      }
+
+      .reel-logo {
+        font-size: 46px;
+        letter-spacing: -2px;
+      }
+
+      .reel-tagline {
+        font-size: 15px;
+      }
+
+      /* ── Card: two-column grid ── */
+      .card {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto 1fr;
+        border-radius: 22px;
+        box-shadow: 0 8px 48px rgba(0, 0, 0, 0.16);
+        overflow: hidden;
+        min-height: 480px;
+      }
+
+      /* Left column = thumbnail only, fills full height */
+      .thumb-wrap {
+        grid-column: 1;
+        grid-row: 1 / 4;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        margin-bottom: 0;
+      }
+
+      .thumb-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+      }
+
+      /* Right column: body + links + cta stacked */
+      .card-body {
+        grid-column: 2;
+        grid-row: 1;
+        padding: 36px 32px 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+
+      .card-links {
+        grid-column: 2;
+        grid-row: 2;
+        padding: 0 32px 24px;
+        order: unset;
+        /* reset mobile order */
+      }
+
+      .cta-box {
+        grid-column: 2;
+        grid-row: 3;
+        padding: 28px 32px 32px;
+        border-top: 1px solid rgba(0, 0, 0, 0.07);
+        border-radius: 0 0 22px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        margin-top: auto;
+      }
+
+      /* ── Typography upgrades ── */
+      .film-title {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+
+      .film-year {
+        font-size: 24px;
+      }
+
+      .rec-by {
+        font-size: 15px;
+        margin-bottom: 14px;
+      }
+
+      .note {
+        font-size: 16px;
+        margin-bottom: 20px;
+      }
+
+      .trailer-link {
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+
+      .share-url {
+        font-size: 13px;
+        padding-bottom: 20px;
+      }
+
+      /* Play button bigger on desktop */
+      .play-circle {
+        width: 44px;
+        height: 44px;
+        font-size: 15px;
+      }
+
+      .play-label {
+        font-size: 13px;
+        letter-spacing: 1.2px;
+      }
+
+      /* CTA text */
+      .cta-box p {
+        font-size: 16px;
+      }
+
+      /* ── Signin modal: centered dialog instead of bottom sheet ── */
+      .signin-modal {
+        justify-content: center;
+        align-items: center;
+      }
+
+      .signin-sheet {
+        max-width: 440px;
+        border-radius: 24px;
+        padding: 36px 32px 40px;
+        border-top: none;
+        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.25);
+      }
+
+      .signin-handle {
+        display: none;
+      }
+
+      .signin-title {
+        font-size: 22px;
+      }
+
+      /* ── Trailer modal: wider video ── */
+      .modal-video {
+        max-width: 760px;
+        width: 100%;
+      }
+
+      .modal-video iframe {
+        height: 428px;
+      }
+
+      .modal-cta {
+        max-width: 760px;
+      }
+
+      .modal-bullets {
+        max-width: 760px;
+        flex-direction: row;
+        justify-content: center;
+        gap: 28px;
+      }
+
+      .modal-film-title {
+        font-size: 17px;
+      }
+    }
   </style>
 </head>
 
@@ -421,71 +629,74 @@
     </div>
     <div class="card">
       <div class="card-body">
-        <div class="film-title"><span id="filmTitle">Oppenheimer</span><span class="film-year" id="filmYear">
-            (2023)</span></div>
-        <div class="rec-by">&#x1F3AC; <span>Recommended by <strong id="fromName">A friend</strong></span></div>
+        <div class="film-title"><span id="filmTitle">Project Hail Mary</span><span class="film-year" id="filmYear">
+            (2026)</span></div>
+        <div class="rec-by">🎬 <span>Recommended by <strong id="fromName">Bhavinsen</strong></span></div>
         <div class="note" id="filmNote"></div>
-        <div class="thumb-wrap" onclick="openTrailer()">
-          <img class="thumb-img" id="thumbImg" src="" alt="Film still" />
-          <div class="thumb-overlay"></div>
-          <div class="play-btn">
-            <div class="play-circle">&#9654;</div><span class="play-label">Watch trailer</span>
-          </div>
+      </div>
+      <div class="thumb-wrap" onclick="openTrailer()">
+        <img class="thumb-img" id="thumbImg" src="https://img.youtube.com/vi/NKYea63tQmI/hqdefault.jpg"
+          alt="Film still">
+        <div class="thumb-overlay"></div>
+        <div class="play-btn">
+          <div class="play-circle">▶</div><span class="play-label">Watch trailer</span>
         </div>
-        <div class="trailer-link" onclick="openTrailer()">&#9654; Watch the trailer</div>
-        <div class="share-url" id="shareUrl"></div>
+      </div>
+      <div class="card-links">
+        <div class="trailer-link" onclick="openTrailer()">▶ Watch the trailer</div>
+        <div class="share-url" id="shareUrl">https://goodtelly-production.up.railway.app/</div>
       </div>
       <div class="cta-box">
-        <p>Join the TV revolution with <span id="ctaName">your friend</span><span class="period">.</span></p>
+        <p>Join the TV revolution with <span id="ctaName">Bhavinsen</span><span class="period">.</span></p>
         <p>Find <strong>ONLY</strong> the good content. Stop the scroll.</p>
         <button onclick="goToRegister()"
           style="margin-top:14px;width:100%;padding:14px;background:#D72B2B;border:none;border-radius:14px;font-size:15px;font-weight:800;color:#fff;cursor:pointer;font-family:Inter,sans-serif">Save
-          this film &mdash; join REEL FREE &#x2192;</button>
+          this film — join REEL FREE →</button>
       </div>
     </div>
   </div>
 
   <div class="modal" id="trailerModal">
-    <button class="modal-close" onclick="closeTrailer()">&#x2715; Close</button>
-    <div class="modal-video"><iframe id="trailerFrame" src="" allow="autoplay; fullscreen" allowfullscreen
+    <button class="modal-close" onclick="closeTrailer()">✕ Close</button>
+    <div class="modal-video"><iframe id="trailerFrame" src="" allow="autoplay; fullscreen" allowfullscreen=""
         title="Trailer"></iframe></div>
-    <div class="modal-film-title" id="modalTitle"></div>
-    <button class="modal-cta" onclick="goToRegister()">Save this film &mdash; join REEL FREE &#x2192;</button>
+    <div class="modal-film-title" id="modalTitle">Project Hail Mary — Official Trailer</div>
+    <button class="modal-cta" onclick="goToRegister()">Save this film — join REEL FREE →</button>
     <div class="modal-bullets">
-      <div><span>&#x2713;</span> Save to your watchlist</div>
-      <div><span>&#x2713;</span> Find out what great content is out there</div>
-      <div><span>&#x2713;</span> See what your friends are watching</div>
+      <div><span>✓</span> Save to your watchlist</div>
+      <div><span>✓</span> Find out what great content is out there</div>
+      <div><span>✓</span> See what your friends are watching</div>
     </div>
   </div>
 
   <div class="signin-modal" id="signinModal" onclick="if(event.target===this)closeSignIn()">
     <div class="signin-sheet">
-      <button class="signin-close" onclick="closeSignIn()">&#x2715;</button>
+      <button class="signin-close" onclick="closeSignIn()">✕</button>
       <div class="signin-handle"></div>
       <div id="signinView">
         <div class="signin-title">Welcome back</div>
-        <div class="signin-sub">Sign in to see your list and friends&#x2019; picks</div>
+        <div class="signin-sub">Sign in to see your list and friends’ picks</div>
         <div id="signinError"></div>
-        <input class="signin-input" type="email" placeholder="Email address" id="signinEmail" />
-        <input class="signin-input" type="password" placeholder="Password" id="signinPassword" />
+        <input class="signin-input" type="email" placeholder="Email address" id="signinEmail">
+        <input class="signin-input" type="password" placeholder="Password" id="signinPassword">
         <button class="btn-submit" id="signinBtn" onclick="emailSignIn()">Sign In</button>
-        <div class="signin-switch">Don&#x2019;t have an account? <a onclick="switchToSignUp()">Sign up free &#x2192;</a>
-        </div>
+        <div class="signin-switch">Don’t have an account? <a onclick="switchToSignUp()">Sign up free →</a></div>
       </div>
       <div id="signupView" style="display:none">
         <div class="signin-title">Join REEL</div>
         <div class="signin-sub">Save this film and see everything your friends are watching</div>
         <div id="signupError"></div>
-        <input class="signin-input" type="text" placeholder="Your name" id="signupName" />
-        <input class="signin-input" type="email" placeholder="Email address" id="signupEmail" />
-        <input class="signin-input" type="password" placeholder="Choose a password" id="signupPassword" />
+        <input class="signin-input" type="text" placeholder="Your name" id="signupName">
+        <input class="signin-input" type="email" placeholder="Email address" id="signupEmail">
+        <input class="signin-input" type="password" placeholder="Choose a password" id="signupPassword">
         <button class="btn-submit" id="signupBtn" onclick="emailSignUp()">Create Account</button>
-        <div class="signin-switch">Already on REEL? <a onclick="switchToSignIn()">Sign in &#x2192;</a></div>
+        <div class="signin-switch">Already on REEL? <a onclick="switchToSignIn()">Sign in →</a></div>
       </div>
     </div>
   </div>
 
   <script>
+    window.__FILM__ = { "title": "Project Hail Mary", "year": "2026", "rating": "4.08", "genre": "", "from": "Bhavinsen", "from_user": "bhavinsen5269", "note": "", "poster": "https://image.tmdb.org/t/p/w1280/8Tfys3mDZVp4tNoH2ktm06a0Tau.jpg", "trailer": "https://www.youtube.com/embed/NKYea63tQmI", "runtime": "157m", "color": "", "slug": "" };
     const p = new URLSearchParams(window.location.search);
     const _d = window.__FILM__ || {};
     const _pathParts = window.location.pathname.split('/').filter(Boolean); const _slug = _d.slug || (_pathParts.length >= 2 && _pathParts[0] === 'share' ? _pathParts[1] : '') || '';
