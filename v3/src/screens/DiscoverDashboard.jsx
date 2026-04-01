@@ -107,9 +107,9 @@ export default function DiscoverDashboard(props) {
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             `}} />
 
-            <div style={{ position: 'relative', zIndex: 1, paddingBottom: 100, paddingTop: 24 }} className="fade-in">
+            <div style={{ position: 'relative', zIndex: 1, paddingBottom: 100, paddingTop: 100 }} className="fade-in">
 
-                <div style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ marginBottom: 40, display: 'flex', alignItems: 'center', gap: 14 }}>
                     <span style={{ fontSize: 36, filter: 'drop-shadow(0 0 10px rgba(255,100,0,0.5))' }}>🔥</span>
                     <h1 style={{ fontSize: 38, fontWeight: 900, margin: 0, letterSpacing: -1, color: '#fff' }}>
                         What's Trending
@@ -117,15 +117,26 @@ export default function DiscoverDashboard(props) {
                 </div>
 
                 {/* Filters Section */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 48 }}>
-                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4 }} className="no-scrollbar">
-                        <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', marginRight: 12, letterSpacing: 1 }}>Time:</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginBottom: 56 }}>
+                    {/* Row 1: Time */}
+                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4, alignItems: 'center' }} className="no-scrollbar">
+                        <div style={{ minWidth: 100, color: 'rgba(255,255,255,0.4)', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Time:</div>
                         {FILTERS.time.map(t => (
                             <div key={t} className={`filter-pill ${activeTime === t ? 'active' : 'inactive'}`} onClick={() => setActiveTime(t)}>{t}</div>
                         ))}
                     </div>
-                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4 }} className="no-scrollbar">
-                        <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', marginRight: 12, letterSpacing: 1, minWidth: 50 }}>Genre:</div>
+
+                    {/* Row 2: Services */}
+                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4, alignItems: 'center' }} className="no-scrollbar">
+                        <div style={{ minWidth: 100, color: 'rgba(255,255,255,0.4)', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Services:</div>
+                        {FILTERS.platforms.map(p => (
+                            <div key={p} className={`filter-pill ${activePlatform === p ? 'active' : 'inactive'}`} onClick={() => setActivePlatform(p)}>{p}</div>
+                        ))}
+                    </div>
+
+                    {/* Row 3: Genre */}
+                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4, alignItems: 'center' }} className="no-scrollbar">
+                        <div style={{ minWidth: 100, color: 'rgba(255,255,255,0.4)', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Genre:</div>
                         {FILTERS.genres.map(g => (
                             <div key={g} className={`filter-pill ${activeGenre === g ? 'active' : 'inactive'}`} onClick={() => setActiveGenre(g)}>{g}</div>
                         ))}

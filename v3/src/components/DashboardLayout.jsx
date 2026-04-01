@@ -33,26 +33,27 @@ const Header = ({ onToggleSidebar, searchQuery, onSearchChange }) => (
             </div>
         </div>
 
-        <div className="dashboard-search">
-            <FaSearch style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, flexShrink: 0 }} />
+        <div className="dashboard-search" style={{ background: '#ffffff', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', border: '1px solid #d1d1d1' }}>
+            <FaSearch style={{ color: '#555', fontSize: 16, flexShrink: 0 }} />
             <input
                 type="text"
                 value={searchQuery || ''}
                 onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
                 placeholder="Search films, TV, directors..."
                 style={{
-                    flex: 1, background: 'transparent', border: 'none', color: '#fff',
+                    flex: 1, background: 'transparent', border: 'none', color: '#111',
                     fontSize: 15, outline: 'none'
                 }}
             />
-            <FaEllipsisH style={{ color: 'rgba(255,255,255,0.3)', fontSize: 18, flexShrink: 0, cursor: 'pointer' }} />
+            <FaEllipsisH style={{ color: '#555', fontSize: 18, flexShrink: 0, cursor: 'pointer' }} />
         </div>
 
-        <div className="dashboard-user-actions">
+        <div className="dashboard-user-actions" style={{ position: 'relative', overflow: 'visible' }}>
             <img src="/branding/popcorn.png" alt="Popcorn" style={{
-                height: 120, objectFit: 'contain',
-                filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))',
-                cursor: 'pointer'
+                height: 80, objectFit: 'contain',
+                position: 'absolute', top: 0, right: -12,
+                filter: 'drop-shadow(0 14px 28px rgba(0,0,0,0.7))',
+                cursor: 'pointer', pointerEvents: 'auto'
             }} />
         </div>
     </header>

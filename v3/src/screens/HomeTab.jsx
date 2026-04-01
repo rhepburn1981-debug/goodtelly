@@ -13,59 +13,111 @@ const getChannelStyles = (channel) => {
 }
 
 const FALLBACK_RECENT = [
-  { id: 'f1', title: 'The Lady', year: 2026, poster_url: '/branding/poster1.png' },
-  { id: 'f2', title: 'I Swear', year: 2026, poster_url: '/branding/trend1.png' },
-  { id: 'f3', title: 'Saipan', year: 2026, poster_url: '/branding/poster3.png' },
-  { id: 'f4', title: 'One Bottle After Another', year: 2026, poster_url: '/branding/poster4.png' },
-  { id: 'f5', title: 'One Bottle After Another', year: 2026, poster_url: '/branding/poster2.png' },
+  { id: 'f1', title: 'Saipan', year: 2026, poster_url: '/branding/poster3.png' },
+  { id: 'f2', title: 'The Teacher', year: 2026, poster_url: '/branding/poster2.png' },
+  { id: 'f3', title: 'Beyond Paradise', year: 2026, poster_url: '/branding/poster1.png' },
+  { id: 'f4', title: 'The Capture', year: 2026, poster_url: '/branding/trend1.png' },
+  { id: 'f5', title: 'GOAT', year: 2026, poster_url: '/branding/poster4.png' },
 ]
 
 const RecommendationCard = ({ rec, onOpenFilm, onDismiss, onAddToList, onWatchTrailer }) => {
-  if (!rec) return null;
+  const displayRec = rec || {
+    id: 'mobland-rec',
+    title: 'MobLand - 2025',
+    year: 2025,
+    poster_url: '/branding/mobland_poster.png',
+    backdrop_url: '/branding/mobland_bg.png',
+    _fromFriend: 'Kate'
+  };
+
   return (
-    <div style={{ margin: '2px 16px 10px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0px 2px 6px' }}>
-        <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08))', border: '1px solid rgba(255, 255, 255, 0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-            <circle cx="12" cy="8.2" r="3.2" fill="rgba(255,255,255,0.78)"></circle>
-            <path d="M5.5 18.5C6.7 15.7 9.1 14.2 12 14.2C14.9 14.2 17.3 15.7 18.5 18.5" stroke="rgba(255,255,255,0.78)" strokeWidth="1.8" strokeLinecap="round"></path>
+    <div style={{ margin: '15px 16px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0px 4px 10px' }}>
+        <div style={{
+          width: '28px', height: '28px', borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+        }}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="rgba(255,255,255,0.7)">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
           </svg>
         </div>
-        <div style={{ fontSize: '13px', color: 'var(--gold-bright)', fontWeight: 500 }}>{rec._fromFriend || 'A friend'} thinks you’ll like…</div>
-        {rec._recRating && (
-          <div style={{ fontSize: '12px', color: 'var(--gold-bright)', fontWeight: 700, marginLeft: 'auto', whiteSpace: 'nowrap' }}>⭐ {parseFloat(rec._recRating).toFixed(1)}</div>
-        )}
+        <span style={{ fontSize: '14.5px', color: '#c5a36e', fontWeight: '600', letterSpacing: '0.2px' }}>
+          {displayRec._fromFriend || 'Kate'} thinks you'll like...
+        </span>
       </div>
-      <div style={{ background: 'linear-gradient(rgba(24, 24, 31, 0.94), rgba(10, 10, 15, 0.94))', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.09)', boxShadow: 'rgba(0, 0, 0, 0.26) 0px 12px 28px, rgba(255, 255, 255, 0.04) 0px 1px 0px inset', cursor: 'pointer', position: 'relative' }}>
-        <button
-          onClick={(e) => { e.stopPropagation(); onDismiss(rec.id); }}
-          style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10, width: '24px', height: '24px', borderRadius: '50%', background: 'rgb(255, 255, 255)', border: '2px solid rgb(17, 17, 17)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 900, color: 'rgb(17, 17, 17)', lineHeight: 1, padding: '0px' }}
-        >×</button>
-        <div style={{ position: 'absolute', inset: '0px', backgroundImage: `url("${rec.backdrop_url || rec.poster_url}")`, backgroundSize: 'cover', backgroundPosition: 'center center', opacity: 0.45 }}></div>
-        <div style={{ position: 'absolute', inset: '0px', background: 'linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.52))' }}></div>
-        <div
-          onClick={() => onOpenFilm(rec)}
-          style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 10px 7px' }}
-        >
-          <img src={rec.poster_url} alt={rec.title} style={{ width: '46px', height: '72px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, boxShadow: 'rgba(0, 0, 0, 0.45) 0px 6px 16px' }} />
-          <div style={{ flex: '1 1 0%', minWidth: '0px', paddingTop: '2px', textShadow: 'rgba(0, 0, 0, 0.55) 0px 2px 8px' }}>
-            <div style={{ fontSize: '16px', fontWeight: '900', color: 'var(--text)', lineHeight: 1.1, marginBottom: '1px' }}>{rec.title}</div>
-            <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.86)', marginBottom: '3px' }}>{rec.year}</div>
+
+      <div style={{
+        position: 'relative',
+        background: '#0a0a0c',
+        borderRadius: '20px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
+        cursor: 'pointer'
+      }} onClick={() => onOpenFilm(displayRec)}>
+
+        {/* Backdrop Background */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `url("${displayRec.backdrop_url}")`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          opacity: 0.8
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(90deg, rgba(10, 10, 12, 1) 0%, rgba(10, 10, 12, 0.85) 30%, rgba(10, 10, 12, 0.4) 100%)'
+        }} />
+
+        <div style={{ position: 'relative', padding: '12px', display: 'flex', gap: '16px' }}>
+          <div style={{
+            width: '88px', height: '128px', borderRadius: '10px',
+            background: 'rgba(255, 255, 255, 0.05)', overflow: 'hidden',
+            border: '1px solid rgba(255, 255, 255, 0.12)', flexShrink: 0,
+            boxShadow: '0 8px 16px rgba(0,0,0,0.5)'
+          }}>
+            <img
+              src={displayRec.poster_url}
+              alt={displayRec.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </div>
-        </div>
-        <div style={{ position: 'relative', display: 'flex', gap: '8px', padding: '0px 10px 10px' }}>
-          <button
-            onClick={(e) => { e.stopPropagation(); onWatchTrailer(rec.trailer_url); }}
-            style={{ flex: '1 1 0%', padding: '7px 11px', borderRadius: '16px', background: 'linear-gradient(rgba(28, 28, 34, 0.84), rgba(14, 14, 19, 0.84))', border: '1px solid rgba(255, 255, 255, 0.16)', color: 'var(--text)', fontSize: '10px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', boxShadow: 'rgba(255, 255, 255, 0.06) 0px 1px 0px inset' }}
-          >
-            <span style={{ fontSize: '9px' }}>▶</span>Watch Trailer
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onAddToList(rec); }}
-            style={{ flex: '1 1 0%', padding: '7px 11px', borderRadius: '16px', background: 'linear-gradient(rgba(80, 61, 33, 0.52), rgba(39, 28, 14, 0.52))', border: '1px solid rgba(232, 201, 106, 0.3)', color: 'var(--text)', fontSize: '10px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', boxShadow: 'rgba(255, 255, 255, 0.06) 0px 1px 0px inset' }}
-          >
-            + Watchlist
-          </button>
+          <div style={{ flex: 1, paddingTop: '6px' }}>
+            <h3 style={{ fontSize: '22px', fontWeight: '800', color: '#fff', marginBottom: '4px', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {displayRec.title}
+            </h3>
+            <div style={{ fontSize: '15px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: '600', marginBottom: '16px' }}>
+              {displayRec.year}
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={(e) => { e.stopPropagation(); onWatchTrailer('https://www.youtube.com/watch?v=zSWdZVtXT7E'); }}
+                style={{
+                  flex: 1, background: 'rgba(255, 255, 255, 0.05)', borderRadius: '30px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  padding: '10px 12px', border: '1px solid rgba(255, 255, 255, 0.14)', cursor: 'pointer',
+                  color: '#fff', fontSize: '12px', fontWeight: '700'
+                }}
+              >
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="white">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Watch Trailer
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onAddToList(displayRec); }}
+                style={{
+                  flex: 1, background: 'rgba(255, 255, 255, 0.05)', borderRadius: '30px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  padding: '10px 12px', border: '1px solid rgba(255, 255, 255, 0.14)', cursor: 'pointer',
+                  color: '#c5a36e', fontSize: '12px', fontWeight: '700'
+                }}
+              >
+                <span style={{ fontSize: '16px', fontWeight: '400' }}>+</span>
+                Watchlist
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -106,205 +158,192 @@ export default function HomeTab(props) {
   return (
     <div style={{
       flex: '1 1 0%',
-      overflow: 'hidden auto',
+      overflowY: 'auto',
       position: 'relative',
-      // paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
-      minHeight: '100vh',
+      minHeight: '100%',
       color: 'white',
       fontFamily: 'var(--ff-body)',
-    }}>
+      background: '#040404',
+      paddingTop: '12px'
+    }} className="no-scrollbar">
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .hover-scale { transition: transform 0.2s ease; cursor: pointer; }
         .hover-scale:active { transform: scale(0.96); }
-        .section-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px 8px; }
-        .section-title { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.2px; display: flex; align-items: center; gap: 6px; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 10px; }
+        .section-title { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.4px; display: flex; align-items: center; gap: 8px; }
       `}</style>
 
-      <div className="no-scrollbar" style={{ height: '100%', overflowY: 'auto' }}>
-        {/* Watchlist Quick Links */}
-        <div
-          onClick={() => handleTabClick('list')}
-          className="hover-scale"
-          style={{
-            margin: '10px 16px 5px',
-            background: 'linear-gradient(rgba(24, 24, 31, 0.94), rgba(10, 10, 15, 0.94))',
-            border: '1px solid rgba(255, 255, 255, 0.09)',
-            boxShadow: 'rgba(0, 0, 0, 0.26) 0px 12px 28px, rgba(255, 255, 255, 0.04) 0px 1px 0px inset',
-            borderRadius: '15px',
-            padding: '11px 13px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
-          }}
-        >
-          <div style={{ width: '38px', height: '38px', borderRadius: '12px', flexShrink: 0, background: 'rgba(59, 130, 246, 0.18)', border: '1px solid rgba(59, 130, 246, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: 'rgb(96, 165, 250)' }}>★</div>
-          <div style={{ flex: '1 1 0%' }}>
-            <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text)' }}>My Watchlist</div>
-            <div style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.48)', marginTop: '2px', letterSpacing: '0.02px' }}>Your saved films and shows to watch</div>
-          </div>
-          <div style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.3)', fontWeight: 300 }}>›</div>
+      {/* Watchlist Quick Links */}
+      <div
+        onClick={() => handleTabChange('list')}
+        className="hover-scale"
+        style={{
+          margin: '0px 16px 8px',
+          background: 'linear-gradient(rgba(20, 20, 25, 0.95), rgba(10, 10, 15, 0.95))',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 12px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)',
+          borderRadius: '16px',
+          padding: '14px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px'
+        }}
+      >
+        <div style={{
+          width: '42px', height: '42px', borderRadius: '10px', flexShrink: 0,
+          background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="#3b82f6" style={{ filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))' }}>
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          </svg>
         </div>
-
-        <div
-          onClick={() => handleTabClick('friends')}
-          className="hover-scale"
-          style={{
-            margin: '5px 16px 10px',
-            background: 'linear-gradient(rgba(24, 24, 31, 0.94), rgba(10, 10, 15, 0.94))',
-            border: '1px solid rgba(255, 255, 255, 0.09)',
-            boxShadow: 'rgba(0, 0, 0, 0.26) 0px 12px 28px, rgba(255, 255, 255, 0.04) 0px 1px 0px inset',
-            borderRadius: '15px',
-            padding: '11px 13px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
-          }}
-        >
-          <div style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0, background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="9" cy="8" r="3.5" fill="rgba(255,255,255,0.5)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"></circle><path d="M2.5 20.5C2.5 17.5 5.5 15 9 15C12.5 15 15.5 17.5 15.5 20.5" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" strokeLinecap="round"></path><circle cx="17.5" cy="8" r="2.5" stroke="rgba(255,255,255,0.5)" strokeWidth="1.4"></circle><path d="M20.5 19.5C20.5 17.3 19.2 15.5 17.5 15.5" stroke="rgba(255,255,255,0.5)" strokeWidth="1.4" strokeLinecap="round"></path></svg>
-          </div>
-          <div style={{ flex: '1 1 0%' }}>
-            <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text)' }}>Friends Watchlist</div>
-            <div style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.48)', marginTop: '2px', letterSpacing: '0.02px' }}>See what your friends are watching</div>
-          </div>
-          <div style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.3)', fontWeight: 300 }}>›</div>
+        <div style={{ flex: '1 1 0%' }}>
+          <div style={{ fontSize: '16px', fontWeight: 800, color: '#fff', letterSpacing: '-0.2px' }}>My Watchlist</div>
+          <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.45)', marginTop: '2px' }}>Your saved films and shows to watch</div>
         </div>
+        <div style={{ fontSize: '20px', color: 'rgba(255, 255, 255, 0.3)', fontWeight: 300 }}>›</div>
+      </div>
 
-        <RecommendationCard
-          rec={recommendations && recommendations[0]}
-          onOpenFilm={onOpenFilm}
-          onDismiss={onDismissRec}
-          onAddToList={onAddToList}
-          onWatchTrailer={(url) => setLocalTrailerUrl(url)}
-        />
+      <div
+        onClick={() => handleTabChange('friends')}
+        className="hover-scale"
+        style={{
+          margin: '8px 16px 16px',
+          background: 'linear-gradient(rgba(20, 20, 25, 0.95), rgba(10, 10, 15, 0.95))',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 12px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)',
+          borderRadius: '16px',
+          padding: '14px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px'
+        }}
+      >
+        <div style={{
+          width: '42px', height: '42px', borderRadius: '50%', flexShrink: 0,
+          background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="rgba(255,255,255,0.6)">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>
+        </div>
+        <div style={{ flex: '1 1 0%' }}>
+          <div style={{ fontSize: '16px', fontWeight: 800, color: '#fff', letterSpacing: '-0.2px' }}>Friends Watchlist</div>
+          <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.45)', marginTop: '2px' }}>See what your friends are watching</div>
+        </div>
+        <div style={{ fontSize: '20px', color: 'rgba(255, 255, 255, 0.3)', fontWeight: 300 }}>›</div>
+      </div>
 
-        {/* TRENDING / What's NEW */}
-        {trendingNow.length > 0 && (
-          <div>
-            <div className="section-header">
-              <div className="section-title">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" style={{ flexShrink: 0 }}><path d="M12 2c0 0-1.5 2.5-1.5 5.5 0 .8.2 1.6.6 2.2C10.4 9 9.5 7.8 9.5 6.5c0 0-3.5 2.8-3.5 6.5a6 6 0 0 0 12 0C18 8.5 14.5 4.5 12 2z" fill="url(#flameG)"></path><path d="M12 10.5c0 0-1 1.5-1 3a1 1 0 0 0 2 0c0-1.5-1-3-1-3z" fill="#a8e8ff"></path><defs><linearGradient id="flameG" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse"><stop stopColor="#60c8ff"></stop><stop offset="1" stopColor="#1a6fff"></stop></linearGradient></defs></svg>
-                What’s NEW
-              </div>
-            </div>
-            <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '0px 16px 12px' }}>
-              {trendingNow.map(film => (
-                <button
-                  key={film.id}
-                  onClick={() => onOpenFilm(film)}
-                  className="hover-scale"
-                  style={{ flexShrink: 0, width: '82px', background: 'none', border: 'none', padding: 0, textAlign: 'left' }}
-                >
-                  <img
-                    src={film.poster_url}
-                    alt={film.title}
-                    style={{ width: '82px', height: '118px', objectFit: 'cover', borderRadius: '7px', display: 'block', boxShadow: 'rgba(0, 0, 0, 0.28) 0px 10px 20px' }}
-                  />
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text)', marginTop: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{film.title}</div>
-                  <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.58)', marginTop: '1px', fontWeight: 500 }}>{film.year}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+      <RecommendationCard
+        rec={recommendations && recommendations[0]}
+        onOpenFilm={onOpenFilm}
+        onDismiss={onDismissRec}
+        onAddToList={onAddToList}
+        onWatchTrailer={(url) => setLocalTrailerUrl(url)}
+      />
 
-        {/* RECENT / Users are watching - ALWAYS RENDERED */}
-        <div>
+      {/* TRENDING / What's NEW */}
+      {trendingNow.length > 0 && (
+        <div style={{ paddingBottom: '8px' }}>
           <div className="section-header">
-            <div className="section-title">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" style={{ flexShrink: 0 }}><path d="M3 17L9 11L13 15L21 7" stroke="url(#arrowG)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"></path><path d="M15 7h6v6" stroke="url(#arrowG)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"></path><defs><linearGradient id="arrowG" x1="3" y1="12" x2="21" y2="12" gradientUnits="userSpaceOnUse"><stop stopColor="#c084fc"></stop><stop offset="1" stopColor="#818cf8"></stop></linearGradient></defs></svg>
-              What Reel users are watching right now
+            <div className="section-title" style={{ color: '#c5a36e' }}>
+              <div style={{
+                position: 'relative', width: '20px', height: '20px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginRight: '8px'
+              }}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" style={{ filter: 'drop-shadow(0 0 5px #3b82f6)' }}>
+                  <path d="M17.66 11.2c-.23-.3-.51-.56-.84-.77-.62-.39-1.32-.53-1.92-.47-.56.05-1.07.26-1.5.59-.1.08-.2.16-.29.25-.32.32-.32.32-.32.32s0 0-.01 0c-.01.01-.02.03-.03.04-.01.02-.03.04-.05.07-.03.05-.08.13-.15.24-.13.21-.31.53-.49.94-.37.82-.72 1.96-.72 3.32 0 .36.03.7.08 1.02.01.07.03.14.04.2.03.13.06.26.1.38.01.04.03.07.04.1.04.12.08.23.12.33l.03.08c.04.1.09.18.13.26l.04.07c.05.08.1.15.15.21l.05.06c.05.06.1.11.16.16l.05.04c.07.05.13.1.2.14l.05.03c.14.07.28.11.43.14l.07.01c.1.02.21.03.32.03h.11c.14-.01.27-.03.41-.06l.08-.02c.11-.03.22-.07.32-.12l.06-.03c.12-.06.23-.13.33-.21l.04-.04c.09-.08.18-.17.26-.26l.03-.04c.07-.09.13-.18.19-.27l.03-.05c.05-.08.09-.17.13-.25l.03-.06c.03-.08.07-.16.1-.25l.02-.05c.03-.09.06-.18.08-.28l.02-.07c.02-.1.04-.2.05-.31l.01-.06c.01-.11.02-.23.02-.35V15c0-1.12-.2-2.12-.59-2.94-.1-.19-.22-.38-.35-.55l-.12-.11c.18.15.34.33.48.53.25.37.44.78.56 1.2.14.48.2 1 .2 1.54 0 .28-.02.55-.05.81-.03.26-.08.51-.15.75-.07.24-.16.47-.27.69-.11.22-.24.42-.4.61-.16.19-.34.36-.55.51-.21.15-.43.27-.68.37-.25.10-.51.17-.79.2-.28.03-.57.03-.86.01-.29-.02-.58-.08-.86-.17s-.55-.21-.8-.36l-.37-.24-.09-.07c-.12-.09-.23-.2-.33-.31l-.1-.12c-.09-.11-.17-.23-.25-.36l-.08-.13c-.07-.14-.13-.29-.18-.45l-.05-.16c-.05-.17-.08-.34-.1-.53l-.02-.19c-.01-.2-.02-.4-.02-.61 0-1.52.28-2.8.8-3.79.23-.42.5-.78.8-1.07.15-.15.31-.27.48-.38.17-.11.35-.19.53-.26.18-.07.38-.11.58-.13.2-.02.42-.01.62.03.21.04.42.11.61.21.2.1.38.22.54.37.16.15.3.32.41.51.11.19.19.4.24.61.05.21.07.44.07.67 0 .21-.02.42-.05.62l-.12-.13z" fill="#3b82f6" />
+                </svg>
+              </div>
+              What’s NEW
             </div>
           </div>
-          <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '0px 16px 12px' }}>
-            {(recentWatchlist.length > 0 ? recentWatchlist : FALLBACK_RECENT).map(film => (
-              <button
+          <div className="no-scrollbar" style={{ display: 'flex', gap: '14px', overflowX: 'auto', padding: '0px 16px 16px' }}>
+            {trendingNow.map(film => (
+              <div
                 key={film.id}
                 onClick={() => onOpenFilm(film)}
                 className="hover-scale"
-                style={{ flexShrink: 0, width: '82px', background: 'none', border: 'none', padding: 0, textAlign: 'left' }}
+                style={{
+                  flexShrink: 0, width: '110px', height: '160px',
+                  position: 'relative', borderRadius: '16px', overflow: 'hidden',
+                  background: 'rgba(255,255,255,0.05)',
+                  boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                  cursor: 'pointer', border: '1px solid rgba(255, 255, 255, 0.08)'
+                }}
               >
                 <img
                   src={film.poster_url}
                   alt={film.title}
-                  style={{ width: '82px', height: '118px', objectFit: 'cover', borderRadius: '7px', display: 'block', boxShadow: 'rgba(0, 0, 0, 0.34) 0px 10px 22px' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
-                <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text)', marginTop: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{film.title}</div>
-                <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.58)', marginTop: '1px', fontWeight: 500 }}>{film.year}</div>
-              </button>
+                <div style={{
+                  position: 'absolute', bottom: 0, left: 0, right: 0,
+                  background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.95) 100%)',
+                  padding: '28px 10px 10px', display: 'flex', flexDirection: 'column', gap: '2px'
+                }}>
+                  {/* <div style={{
+                    fontSize: '11.5px', fontWeight: '800', color: '#fff',
+                    letterSpacing: '0.2px', textTransform: film.title.length < 10 ? 'uppercase' : 'none',
+                    lineHeight: '1.1', textShadow: '0 1px 3px rgba(0,0,0,1)'
+                  }}>
+                    {film.title}
+                  </div> */}
+                  <div style={{ fontSize: '14px', textAlign: 'center', fontWeight: '600', color: 'rgba(255, 255, 255, 1)' }}>
+                    {(Math.random() * 20 + 20).toFixed(1)}K
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
+      )}
 
-        {/* UPCOMING / This week */}
-        {upcomingShows.length > 0 && (
-          <div style={{ margin: '25px 0px 0px' }}>
-            <div className="section-header">
-              <div className="section-title">
-                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" style={{ flexShrink: 0 }}><path d="M4 17.8h16" stroke="#d4d8ff" strokeWidth="1.5" strokeLinecap="round"></path><path d="M6.2 15.3V11M11.2 15.3V8M16.2 15.3V5.5" stroke="#d4d8ff" strokeWidth="1.8" strokeLinecap="round"></path></svg>
-                What's on this week
-              </div>
-              <button style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.11)', borderRadius: '999px', padding: '4px 10px', color: 'rgba(255, 255, 255, 0.64)', fontSize: '9px', fontWeight: '600', cursor: 'pointer' }}>See all</button>
-            </div>
-
-            <div style={{ margin: '0px 16px 14px', background: 'linear-gradient(rgba(22, 22, 29, 0.96), rgba(11, 11, 16, 0.98))', borderRadius: '15px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.09)', boxShadow: 'rgba(0, 0, 0, 0.26) 0px 12px 28px, rgba(255, 255, 255, 0.04) 0px 1px 0px inset' }}>
-              {upcomingShows.slice(0, 10).map((show, idx) => {
-                const styles = getChannelStyles(show.channel)
-                return (
-                  <div
-                    key={show.id || idx}
-                    onClick={() => onOpenFilm({ ...show, title: show.name || show.title, poster_url: show.image || show.poster_url, _isExternal: true })}
-                    className="hover-scale"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '8px 11px',
-                      borderBottom: idx === 9 ? 'none' : '1px solid rgba(255, 255, 255, 0.05)',
-                      width: '100%'
-                    }}
-                  >
-                    <img
-                      src={show.image || show.poster_url}
-                      alt={show.name || show.title}
-                      style={{ width: '38px', height: '52px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, boxShadow: 'rgba(0, 0, 0, 0.3) 0px 8px 18px' }}
-                    />
-                    <div style={{ flex: '1 1 0%', minWidth: '0px' }}>
-                      <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '1px' }}>{show.name || show.title}</div>
-                      <div style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.55)', display: 'flex', alignItems: 'center', gap: '5px', minWidth: '0px' }}>
-                        <span style={{
-                          background: styles.background,
-                          color: styles.color,
-                          fontSize: '9px',
-                          fontWeight: '800',
-                          borderRadius: '4px',
-                          padding: '2px 5px',
-                          letterSpacing: '0.3px',
-                          lineHeight: 1,
-                          display: 'inline-block',
-                          flexShrink: 0,
-                          whiteSpace: 'nowrap',
-                          maxWidth: '60px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}>{show.channel || 'TV'}</span>
-                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{show.airdate}</span>
-                      </div>
-                      {show.genre && <div style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.38)', marginTop: '1px' }}>{show.genre}</div>}
-                    </div>
-                    {show.rating && (
-                      <div style={{ fontSize: '10px', color: 'var(--gold-bright)', fontWeight: '800', flexShrink: 0, alignSelf: 'center', paddingLeft: '4px' }}>
-                        ★{show.rating}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
+      {/* RECENT / Trending with Reel Users */}
+      <div style={{ paddingBottom: '24px' }}>
+        <div className="section-header">
+          <div className="section-title">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+            Trending with Reel Users
           </div>
-        )}
+        </div>
+
+        <div style={{ margin: '0px 16px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.05)', overflow: 'hidden' }}>
+          {(upcomingShows.length > 0 ? upcomingShows.slice(0, 5) : FALLBACK_RECENT).map((item, idx) => (
+            <div
+              key={item.id || idx}
+              onClick={() => onOpenFilm(item)}
+              className="hover-scale"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px',
+                borderBottom: idx === 4 ? 'none' : '1px solid rgba(255, 255, 255, 0.04)'
+              }}
+            >
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, background: 'rgba(255,255,255,0.05)' }}>
+                <img src={item.poster_url || item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {item.title || item.name}
+                </div>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
+                  {item.channel || 'TV Series'} • {item.airdate || 'Fri 15 May'}
+                </div>
+              </div>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: '500' }}>
+                {item.airdate || 'Fri 15 May'}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {localTrailerUrl && (

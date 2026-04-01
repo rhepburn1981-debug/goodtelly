@@ -4,13 +4,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 32px;
+    padding-left: 32px;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 100;
-    background: linear-gradient(to bottom, rgba(5, 5, 8, 0.9) 0%, rgba(5, 5, 8, 0) 100%);
+    background-color: #000;
     height: 80px;
     pointer-events: none;
 }
@@ -34,29 +34,29 @@
 
 .dashboard-search {
     flex: 1;
-    max-width: 740px;
-    background: rgba(20, 20, 28, 0.65);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    max-width: 600px;
+    background: #ffffff;
     border-radius: 12px;
-    padding: 0 20px;
+    padding: 0 16px;
     display: flex;
     align-items: center;
     height: 44px;
-    gap: 16px;
+    gap: 12px;
     pointer-events: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border: 1px solid #d1d1d1;
 }
 
 .dashboard-user-actions {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-end;
     flex-shrink: 0;
-    width: 248px;
+    width: 200px;
     height: 80px;
-    overflow: hidden;
     pointer-events: auto;
     margin-left: 16px;
+    position: relative;
 }
 
 .dashboard-sidebar {

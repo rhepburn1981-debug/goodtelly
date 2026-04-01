@@ -64,39 +64,51 @@ export default function FriendsTab({
 
       <div className="no-scrollbar" style={{ height: '100%', overflowY: 'auto' }}>
         {/* Row 1: Friends Header / Invite row */}
-        <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ flex: '1 1 0%', minWidth: '0px' }}>
-            <div style={{ fontSize: '10px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '10px' }}>Your Friends</div>
-            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px' }} className="no-scrollbar">
-              {(friends || []).map(f => (
-                <button key={f.username} onClick={() => selectFriend(f)} style={{
-                  flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', padding: 0
-                }}>
-                  <div style={{
-                    width: '44px', height: '44px', borderRadius: '50%', background: activeFriend?.username === f.username ? 'var(--gold-glow)' : 'rgba(255,255,255,0.05)',
-                    border: activeFriend?.username === f.username ? '2px solid var(--gold)' : '1px solid rgba(255,255,255,0.1)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
-                  }}>{f.avatar}</div>
-                  <div style={{ fontSize: '10px', fontWeight: activeFriend?.username === f.username ? '800' : '500', color: activeFriend?.username === f.username ? 'var(--gold-bright)' : 'var(--muted)', width: '48px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.username}</div>
-                </button>
-              ))}
-              {(!friends || friends.length === 0) && <div style={{ fontSize: '12px', color: 'var(--muted)', padding: '10px 0' }}>None yet</div>}
-            </div>
+        {/* Row 1: Friends Header / Avatar list */}
+        <div style={{ padding: '14px 16px 14px', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>Your Friends</div>
+          <div style={{ display: 'flex', gap: '14px', overflowX: 'auto', paddingBottom: '4px' }} className="no-scrollbar">
+            {(friends || []).map(f => (
+              <button key={f.username} onClick={() => selectFriend(f)} style={{
+                flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: 'none', border: 'none', cursor: 'pointer', padding: 0
+              }}>
+                <div style={{
+                  width: '46px', height: '46px', borderRadius: '50%', background: activeFriend?.username === f.username ? '#e2b644' : 'rgba(255,255,255,0.05)',
+                  border: activeFriend?.username === f.username ? '2px solid #fff' : '1px solid rgba(255,255,255,0.1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px',
+                  boxShadow: activeFriend?.username === f.username ? '0 0 15px rgba(226, 182, 68, 0.4)' : 'none',
+                  transition: '0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}>{f.avatar}</div>
+                <div style={{ fontSize: '11px', fontWeight: activeFriend?.username === f.username ? '800' : '500', color: activeFriend?.username === f.username ? '#e2b644' : 'rgba(255,255,255,0.5)', width: '54px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.username}</div>
+              </button>
+            ))}
+            {(!friends || friends.length === 0) && <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', padding: '10px 0' }}>None yet</div>}
+          </div>
+        </div>
+
+        {/* Row 1b: Full-Width Slim Invite Block */}
+        <div style={{ padding: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%)' }}>
+          <div style={{ marginBottom: '14px', paddingLeft: '2px' }}>
+            <div style={{ fontSize: '15px', fontWeight: '800', color: '#fff', marginBottom: '2px' }}>Invite Friends to Join Reel</div>
+            <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.45)', lineHeight: 1.4 }}>Send them a link — friends appear here when they join</div>
           </div>
 
-          <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', textAlign: 'center' }}>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text)', lineHeight: '1.3' }}>Invite Friends to Join Reel</div>
-            <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent("Join me on Reel to find the best TV & films! " + inviteLink)}`, '_blank')} style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', background: 'rgba(37, 211, 102, 0.1)', border: '1.5px solid rgb(37, 211, 102)', borderRadius: '14px', cursor: 'pointer', padding: '10px 12px', color: 'rgb(37, 211, 102)', transition: '0.2s'
-            }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.857L0 24l6.335-1.51A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.368l-.36-.214-3.733.89.923-3.638-.235-.374A9.818 9.818 0 1112 21.818z" />
-              </svg>
-              <span style={{ fontSize: '9px', fontWeight: '700', textAlign: 'center', lineHeight: '1.3' }}>Invite via WhatsApp</span>
-            </button>
-            <div style={{ fontSize: '9px', color: 'var(--muted)', lineHeight: '1.4', textAlign: 'center' }}>Send them a link — friends<br />appear here when they join</div>
-          </div>
+          <button
+            onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent("Join me on Reel to find the best TV & films! " + inviteLink)}`, '_blank')}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              background: 'rgba(37, 211, 102, 0.08)', border: '1px solid rgba(37, 211, 102, 0.25)',
+              borderRadius: '12px', padding: '9px 16px', cursor: 'pointer', color: 'rgb(37, 211, 102)',
+              fontSize: '12.5px', fontWeight: '700', transition: '0.2s',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.857L0 24l6.335-1.51A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.368l-.36-.214-3.733.89.923-3.638-.235-.374A9.818 9.818 0 1112 21.818z" />
+            </svg>
+            Invite via WhatsApp
+          </button>
         </div>
 
         {/* Row 2: Empty Friends State (Only show if no friends) */}

@@ -351,20 +351,32 @@ export default function App() {
                     <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />
                   </div>
                 </div>
-                <div style={{ padding: '1px 14px 10px', background: 'linear-gradient(rgba(8, 8, 12, 0.98), rgba(8, 8, 12, 0.78))' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '13px', padding: '8px 12px', gap: '8px', border: '1px solid rgba(255, 255, 255, 0.11)', boxShadow: 'rgba(0, 0, 0, 0.14) 0px 4px 10px, rgba(255, 255, 255, 0.02) 0px 1px 0px inset' }}>
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" style={{ flexShrink: 0, color: 'rgba(255, 255, 255, 0.42)' }}>
-                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"></circle>
-                      <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path>
+
+                <div style={{ padding: '0 14px' }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center',
+                    background: '#ffffff',
+                    borderRadius: '12px',
+                    padding: '10px 14px', gap: '10px',
+                    border: '1px solid #d1d1d1',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
+                  }}>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#555" strokeWidth="2.5">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <input
                       type="text"
                       placeholder="Search films, TV, directors…"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      style={{ flex: '1 1 0%', background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '9.75px', fontFamily: 'var(--ff-body)' }}
+                      style={{
+                        flex: 1, background: 'none', border: 'none', outline: 'none',
+                        color: '#111', fontSize: '15px', fontWeight: '500',
+                        placeholderColor: '#666'
+                      }}
                     />
-                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
+                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: '#111', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
                   </div>
                 </div>
               </header>
@@ -402,20 +414,31 @@ export default function App() {
                     <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />
                   </div>
                 </div>
-                <div style={{ padding: '1px 14px 10px', background: 'linear-gradient(rgba(8, 8, 12, 0.98), rgba(8, 8, 12, 0.78))' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '13px', padding: '8px 12px', gap: '8px', border: '1px solid rgba(255, 255, 255, 0.11)', boxShadow: 'rgba(0, 0, 0, 0.14) 0px 4px 10px, rgba(255, 255, 255, 0.02) 0px 1px 0px inset' }}>
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" style={{ flexShrink: 0, color: 'rgba(255, 255, 255, 0.42)' }}>
-                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"></circle>
-                      <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path>
+                <div style={{ padding: '0 14px' }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center',
+                    background: '#ffffff',
+                    borderRadius: '12px',
+                    padding: '10px 14px', gap: '10px',
+                    border: '1px solid #d1d1d1',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
+                  }}>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#555" strokeWidth="2.5">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <input
                       type="text"
                       placeholder="Search films, TV, directors…"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      style={{ flex: '1 1 0%', background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '9.75px', fontFamily: 'var(--ff-body)' }}
+                      style={{
+                        flex: 1, background: 'none', border: 'none', outline: 'none',
+                        color: '#111', fontSize: '15px', fontWeight: '500',
+                        placeholderColor: '#666'
+                      }}
                     />
-                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
+                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: '#111', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
                   </div>
                 </div>
               </header>
@@ -453,20 +476,31 @@ export default function App() {
                     <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />
                   </div>
                 </div>
-                <div style={{ padding: '1px 14px 10px', background: 'linear-gradient(rgba(8, 8, 12, 0.98), rgba(8, 8, 12, 0.78))' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '13px', padding: '8px 12px', gap: '8px', border: '1px solid rgba(255, 255, 255, 0.11)', boxShadow: 'rgba(0, 0, 0, 0.14) 0px 4px 10px, rgba(255, 255, 255, 0.02) 0px 1px 0px inset' }}>
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" style={{ flexShrink: 0, color: 'rgba(255, 255, 255, 0.42)' }}>
-                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"></circle>
-                      <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path>
+                <div style={{ padding: '0 14px' }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center',
+                    background: '#ffffff',
+                    borderRadius: '12px',
+                    padding: '10px 14px', gap: '10px',
+                    border: '1px solid #d1d1d1',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
+                  }}>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#555" strokeWidth="2.5">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <input
                       type="text"
                       placeholder="Search films, TV, directors…"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      style={{ flex: '1 1 0%', background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '9.75px', fontFamily: 'var(--ff-body)' }}
+                      style={{
+                        flex: 1, background: 'none', border: 'none', outline: 'none',
+                        color: '#111', fontSize: '15px', fontWeight: '500',
+                        placeholderColor: '#666'
+                      }}
                     />
-                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
+                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: '#111', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
                   </div>
                 </div>
               </header>
@@ -504,20 +538,31 @@ export default function App() {
                     <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />
                   </div>
                 </div>
-                <div style={{ padding: '1px 14px 10px', background: 'linear-gradient(rgba(8, 8, 12, 0.98), rgba(8, 8, 12, 0.78))' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '13px', padding: '8px 12px', gap: '8px', border: '1px solid rgba(255, 255, 255, 0.11)', boxShadow: 'rgba(0, 0, 0, 0.14) 0px 4px 10px, rgba(255, 255, 255, 0.02) 0px 1px 0px inset' }}>
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" style={{ flexShrink: 0, color: 'rgba(255, 255, 255, 0.42)' }}>
-                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"></circle>
-                      <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path>
+                <div style={{ padding: '0 14px' }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center',
+                    background: '#ffffff',
+                    borderRadius: '12px',
+                    padding: '10px 14px', gap: '10px',
+                    border: '1px solid #d1d1d1',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
+                  }}>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#555" strokeWidth="2.5">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <input
                       type="text"
                       placeholder="Search films, TV, directors…"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      style={{ flex: '1 1 0%', background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '9.75px', fontFamily: 'var(--ff-body)' }}
+                      style={{
+                        flex: 1, background: 'none', border: 'none', outline: 'none',
+                        color: '#111', fontSize: '15px', fontWeight: '500',
+                        placeholderColor: '#666'
+                      }}
                     />
-                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
+                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: '#111', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
                   </div>
                 </div>
               </header>
@@ -555,20 +600,31 @@ export default function App() {
                     <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />
                   </div>
                 </div>
-                <div style={{ padding: '1px 14px 10px', background: 'linear-gradient(rgba(8, 8, 12, 0.98), rgba(8, 8, 12, 0.78))' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '13px', padding: '8px 12px', gap: '8px', border: '1px solid rgba(255, 255, 255, 0.11)', boxShadow: 'rgba(0, 0, 0, 0.14) 0px 4px 10px, rgba(255, 255, 255, 0.02) 0px 1px 0px inset' }}>
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" style={{ flexShrink: 0, color: 'rgba(255, 255, 255, 0.42)' }}>
-                      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"></circle>
-                      <path d="M16 16L21 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path>
+                <div style={{ padding: '0 14px' }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center',
+                    background: '#ffffff',
+                    borderRadius: '12px',
+                    padding: '10px 14px', gap: '10px',
+                    border: '1px solid #d1d1d1',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)'
+                  }}>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#555" strokeWidth="2.5">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <input
                       type="text"
                       placeholder="Search films, TV, directors…"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      style={{ flex: '1 1 0%', background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '9.75px', fontFamily: 'var(--ff-body)' }}
+                      style={{
+                        flex: 1, background: 'none', border: 'none', outline: 'none',
+                        color: '#111', fontSize: '15px', fontWeight: '500',
+                        placeholderColor: '#666'
+                      }}
                     />
-                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
+                    {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: '#111', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px' }}>✕</button>}
                   </div>
                 </div>
               </header>

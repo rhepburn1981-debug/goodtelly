@@ -22,7 +22,7 @@ export default function SearchOverlay({ results, loading, addedIds, onOpenFilm, 
     <div style={{ padding: '12px 16px', paddingBottom: 100 }}>
       {results.map((film) => {
         const isAdded = addedIds.includes(film.id)
-        const isTmdb  = film._fromTmdb || film._fromTvmaze
+        const isTmdb = film._fromTmdb || film._fromTvmaze
 
         return (
           <div
