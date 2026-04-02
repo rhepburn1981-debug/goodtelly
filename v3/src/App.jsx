@@ -337,15 +337,15 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
+                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '2px' }}>
                         <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
                         <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
                         <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
                         <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
                       </svg>
-                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: '1.1' }}>Reel</div>
                     </div>
-                    <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
+                    <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: '1.2' }}>TV recommended by friends</div>
                   </div>
                   <div style={{ width: '138px', height: '64px', overflow: 'hidden', flexShrink: 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                     <img src="/branding/popcorn.png" alt="" style={{ height: '78px', width: 'auto', marginTop: '0px', marginRight: '-10px', filter: 'drop-shadow(rgba(0, 0, 0, 0.36) 0px 3px 10px)', userSelect: 'none', flexShrink: 0 }} />

@@ -1,19 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
+import { getTrending, getProviders, getFilms, getUpcomingTv } from '../api/films';
 import { FaSearch, FaPlay, FaPlus, FaCheck, FaStar, FaChevronRight } from 'react-icons/fa';
 
 // Filters Data
 const FILTERS = {
     genres: ['All', 'Drama', 'Crime', 'History', 'Thriller', 'Action', 'Sci-Fi'],
-    platforms: ['All Services', 'Netflix', 'Paramount+', 'Apple TV+', 'Prime', 'Hulu'],
     time: ['This Week', 'This Month', 'This Year', 'All Time']
 };
 
+const FEATURED_PROVIDERS = [
+    { name: 'Netflix', logo: 'https://image.tmdb.org/t/p/w45/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg' },
+    { name: 'Paramount+', logo: 'https://image.tmdb.org/t/p/w45/h5DcR0J2EESLitnhR8xLG1QymTE.jpg' },
+    { name: 'Apple TV+', logo: 'https://image.tmdb.org/t/p/w45/mcbz1LgtErU9p4UdbZ0rG6RTWHX.jpg' },
+    { name: 'Prime', logo: 'https://image.tmdb.org/t/p/w45/pvske1MyAoymrs5bguRfVqYiM9a.jpg' },
+    { name: 'Hulu', logo: 'https://image.tmdb.org/t/p/w45/pqUTCleNUiTLAVlelGxUgWn1ELh.png' }
+];
+
 export default function DiscoverDashboard(props) {
     const {
-        trendingAll = [],
         onOpenFilm,
         onAddToList,
+        onWatchTrailer,
         addedIds,
         searchQuery,
         onSearchChange,
@@ -24,17 +32,48 @@ export default function DiscoverDashboard(props) {
     const [activeGenre, setActiveGenre] = useState('All');
     const [activePlatform, setActivePlatform] = useState('All Services');
     const [activeTime, setActiveTime] = useState('This Week');
+    const [trendingAll, setTrendingAll] = useState(props.trendingAll || []);
+    const [providers, setProviders] = useState([]);
+    const [allFilms, setAllFilms] = useState(props.allFilms || []);
+    const [upcomingShows, setUpcomingShows] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const heroFilm = trendingAll[0] || {
+    useEffect(() => {
+        Promise.all([
+            getTrending(),
+            getProviders(),
+            getFilms(),
+            getUpcomingTv()
+        ]).then(([trending, fetchedProviders, fetchedFilms, upcoming]) => {
+            setTrendingAll(trending);
+            setProviders(fetchedProviders.slice(0, 8));
+            setAllFilms(fetchedFilms);
+            setUpcomingShows(upcoming);
+            setLoading(false);
+        }).catch(err => {
+            console.error("Error fetching discover data:", err);
+            setLoading(false);
+        });
+    }, []);
+
+    const filteredFilms = React.useMemo(() => {
+        return allFilms.filter(f => {
+            const gMatch = activeGenre === 'All' || (f.genre || '').includes(activeGenre === 'Science Fiction' ? 'Sci-Fi' : activeGenre);
+            const pMatch = activePlatform === 'All Services' || (f.streamers || []).includes(activePlatform);
+            return gMatch && pMatch;
+        });
+    }, [allFilms, activeGenre, activePlatform]);
+
+    const heroFilm = filteredFilms[0] || trendingAll[0] || {
         id: 1,
         title: 'Dune: Part Two',
         year: 2024,
         genre: 'Action / Sci-Fi',
         rating: '9.0',
-        poster: '/branding/trend2.png'
+        poster_url: '/branding/trend2.png'
     };
 
-    const displayFilms = trendingAll.slice(1, 10);
+    const displayFilms = filteredFilms.slice(1, 11);
 
     return (
         <DashboardLayout
@@ -129,8 +168,12 @@ export default function DiscoverDashboard(props) {
                     {/* Row 2: Services */}
                     <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4, alignItems: 'center' }} className="no-scrollbar">
                         <div style={{ minWidth: 100, color: 'rgba(255,255,255,0.4)', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Services:</div>
-                        {FILTERS.platforms.map(p => (
-                            <div key={p} className={`filter-pill ${activePlatform === p ? 'active' : 'inactive'}`} onClick={() => setActivePlatform(p)}>{p}</div>
+                        <div key="All Services" className={`filter-pill ${activePlatform === 'All Services' ? 'active' : 'inactive'}`} onClick={() => setActivePlatform('All Services')}>All Services</div>
+                        {(providers.length > 0 ? providers : FEATURED_PROVIDERS).map(p => (
+                            <div key={p.name} className={`filter-pill ${activePlatform === p.name ? 'active' : 'inactive'}`} onClick={() => setActivePlatform(p.name)} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                {p.logo && <img src={p.logo} alt="" style={{ height: 18, objectFit: 'cover' }} />}
+                                {p.name}
+                            </div>
                         ))}
                     </div>
 
@@ -144,7 +187,7 @@ export default function DiscoverDashboard(props) {
                 </div>
 
                 {/* Hero Trending Section */}
-                <div className="hero-card" style={{ marginBottom: 48 }} onClick={() => onOpenFilm(heroFilm)}>
+                <div className="hero-card" style={{ marginBottom: 48 }} onClick={() => onWatchTrailer && onWatchTrailer(heroFilm.trailer_url || 'https://www.youtube.com/watch?v=zSWdZVtXT7E')}>
                     <img src={heroFilm.poster_url} className="hero-bg" alt="Hero" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0.4) 60%, transparent 100%)' }} />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,10,12,0.9) 0%, transparent 60%)' }} />
@@ -158,7 +201,11 @@ export default function DiscoverDashboard(props) {
                             <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: 600 }}>{heroFilm.year}</div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                            <button className="play-btn" style={{ width: 68, height: 68, borderRadius: '50%', background: 'rgba(255,255,255,0.95)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
+                            <button
+                                className="play-btn"
+                                onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer(heroFilm.trailer_url || 'https://www.youtube.com/watch?v=zSWdZVtXT7E'); }}
+                                style={{ width: 68, height: 68, borderRadius: '50%', background: 'rgba(255,255,255,0.95)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}
+                            >
                                 <FaPlay size={24} style={{ marginLeft: 4 }} />
                             </button>
                             <button
@@ -178,9 +225,13 @@ export default function DiscoverDashboard(props) {
                     </div>
                 </div>
 
-                {/* Ranked List */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 40, alignItems: 'start' }}>
+                {/* Ranked List & Upcoming */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 40, alignItems: 'start', marginBottom: 48 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                            <span style={{ fontSize: 22 }}>📋</span>
+                            <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, margin: 0 }}>Top 10 Today</h2>
+                        </div>
                         {displayFilms.map((item, idx) => (
                             <div key={item.id} className="list-item-card" onClick={() => onOpenFilm(item)}>
                                 <div style={{ position: 'relative', width: 90, height: 130, borderRadius: 12, overflow: 'hidden', flexShrink: 0, zIndex: 1 }}>
@@ -212,8 +263,8 @@ export default function DiscoverDashboard(props) {
                         ))}
                     </div>
 
-                    <div>
-                        <div className="glass-card" style={{ padding: 28 }}>
+                    <div style={{ position: 'sticky', top: 32 }}>
+                        <div className="glass-card" style={{ padding: 28, marginBottom: 24 }}>
                             <h4 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: '0 0 20px' }}>Trending Categories</h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 {['Sci-Fi Hits', 'Oscar Winners', 'Indie Gems'].map(cat => (
@@ -223,8 +274,51 @@ export default function DiscoverDashboard(props) {
                                 ))}
                             </div>
                         </div>
+
+                        {/* Quick View Stats */}
+                        <div className="glass-card" style={{ padding: 28, background: 'linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(0,0,0,0.6) 100%)' }}>
+                            <div style={{ fontSize: 13, fontWeight: 800, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Daily Insight</div>
+                            <div style={{ fontSize: 16, color: '#fff', fontWeight: 600, lineHeight: 1.5 }}>
+                                "Dune: Part Two" remains the most added film this week across your friend groups.
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                {/* Upcoming TV Section */}
+                {upcomingShows.length > 0 && (
+                    <div style={{
+                        marginTop: 48,
+                        padding: '32px',
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        borderRadius: '24px',
+                        border: '1px solid rgba(255,255,255,0.05)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                            <span style={{ fontSize: 24 }}>📺</span>
+                            <h2 style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.5, margin: 0 }}>On TV This Week</h2>
+                        </div>
+                        <div style={{ display: 'flex', gap: 20, overflowX: 'auto', paddingBottom: 10 }} className="no-scrollbar">
+                            {upcomingShows.map((show) => (
+                                <div
+                                    key={show.id}
+                                    onClick={() => onOpenFilm({ ...show, title: show.name, poster_url: show.image, _isExternal: true })}
+                                    style={{
+                                        width: 150, minWidth: 150, borderRadius: 12, overflow: 'hidden', cursor: 'pointer',
+                                        transition: 'transform 0.3s ease', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                >
+                                    <img src={show.image} alt={show.name} style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover' }} />
+                                    <div style={{ padding: '10px', fontSize: 13, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {show.name}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </DashboardLayout>
     );

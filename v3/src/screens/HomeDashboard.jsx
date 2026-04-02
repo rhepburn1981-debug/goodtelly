@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
+import { getTrending, getWatchlistRecent, getUpcomingTv } from '../api/films';
 import { FaPlay, FaPlus, FaSearchPlus, FaCheck, FaInfoCircle, FaStar, FaUserFriends, FaChevronRight } from 'react-icons/fa';
 
 const NavShortcut = ({ icon: Icon, title, subtitle, iconBg, iconColor, onClick }) => (
@@ -19,7 +20,7 @@ const NavShortcut = ({ icon: Icon, title, subtitle, iconBg, iconColor, onClick }
     </div>
 );
 
-const FeatureCard = () => (
+const FeatureCard = ({ onWatchTrailer }) => (
     <div style={{ marginBottom: 24 }}>
         <div style={{
             position: 'relative',
@@ -28,7 +29,8 @@ const FeatureCard = () => (
             background: '#0f0f12',
             border: '1px solid rgba(255,255,255,0.1)',
             boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
-        }}>
+            cursor: 'pointer'
+        }} onClick={() => onWatchTrailer && onWatchTrailer('https://www.youtube.com/watch?v=zSWdZVtXT7E')}>
             <div style={{
                 position: 'absolute', inset: 0, zIndex: 0,
                 backgroundImage: 'url(/branding/terminator_bg.png)',
@@ -82,11 +84,11 @@ const FeatureCard = () => (
                 </div>
 
                 <div className="feature-btn-container" style={{ marginTop: 8 }}>
-                    <button className="feature-btn feature-btn-secondary" style={{ flex: 'none', width: 'auto', padding: '14px 28px' }}>
+                    <button className="feature-btn feature-btn-secondary" style={{ flex: 'none', width: 'auto', padding: '14px 28px' }} onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer('https://www.youtube.com/watch?v=zSWdZVtXT7E'); }}>
                         <FaPlay size={12} color="#fff" /> Watch Now
                     </button>
 
-                    <button className="feature-btn feature-btn-primary" style={{ flex: 'none', width: 'auto', padding: '14px 28px' }}>
+                    <button className="feature-btn feature-btn-primary" style={{ flex: 'none', width: 'auto', padding: '14px 28px' }} onClick={(e) => e.stopPropagation()}>
                         <FaPlus size={12} /> Add to Watchlist
                     </button>
                 </div>
@@ -181,13 +183,31 @@ export default function HomeDashboard(props) {
         friends,
         onOpenFilm,
         onAddToList,
+        onWatchTrailer,
         addedIds,
         onTabChange
     } = props;
 
-    // We'll need to add these to props in App.jsx later, for now we can handle empty states
-    const trendingNow = props.trendingAll || [];
-    const upcomingShows = props.upcomingTv || [];
+    const [trendingNow, setTrendingNow] = useState(props.trendingAll || []);
+    const [upcomingShows, setUpcomingShows] = useState(props.upcomingTv || []);
+    const [watchlistRecent, setWatchlistRecent] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        Promise.all([
+            getTrending(),
+            getWatchlistRecent(),
+            getUpcomingTv()
+        ]).then(([trending, recent, upcoming]) => {
+            setTrendingNow(trending);
+            setWatchlistRecent(recent);
+            setUpcomingShows(upcoming);
+            setLoading(false);
+        }).catch(err => {
+            console.error("Error fetching dashboard data:", err);
+            setLoading(false);
+        });
+    }, []);
 
     return (
         <DashboardLayout
@@ -242,7 +262,7 @@ export default function HomeDashboard(props) {
                             border: '1px solid rgba(255,255,255,0.1)',
                             boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
                             cursor: 'pointer'
-                        }} onClick={() => onOpenFilm(recommendations[0])}>
+                        }} onClick={() => onWatchTrailer && onWatchTrailer(recommendations[0].trailer_url || 'https://www.youtube.com/watch?v=zSWdZVtXT7E')}>
                             <div style={{
                                 position: 'absolute', inset: 0, zIndex: 0,
                                 backgroundImage: `url(${recommendations[0].backdrop_url || recommendations[0].poster_url})`,
@@ -299,7 +319,7 @@ export default function HomeDashboard(props) {
                         </div>
                     </div>
                 ) : (
-                    <FeatureCard />
+                    <FeatureCard onWatchTrailer={onWatchTrailer} />
                 )}
 
                 {/* TRENDING NOW (Real Data) */}
@@ -328,6 +348,37 @@ export default function HomeDashboard(props) {
                                         platform={show.media_type === 'movie' ? 'MOVIE' : 'TV SHOW'}
                                         label={show.title || show.name}
                                         pColor="var(--gold-bright)"
+                                        onClick={() => onOpenFilm(show)}
+                                    />
+                                ))}
+                            </HorizontalScroller>
+                        </div>
+                    </div>
+                )}
+
+                {/* RECENTLY IN WATCHLIST */}
+                {watchlistRecent.length > 0 && (
+                    <div style={{
+                        marginBottom: 24, position: 'relative', overflow: 'hidden',
+                        background: 'rgba(0, 0, 0, 0.6)',
+                        backdropFilter: 'blur(10px)',
+                        padding: '24px',
+                        borderRadius: '16px',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)'
+                    }}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', background: 'radial-gradient(ellipse at top, rgba(255,255,255,0.05), transparent 70%)', zIndex: 0 }} />
+                        <div style={{ position: 'relative', zIndex: 1 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                                <span style={{ fontSize: 22 }}>🔖</span>
+                                <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, margin: 0 }}>Recently in Watchlist</h2>
+                            </div>
+                            <HorizontalScroller>
+                                {watchlistRecent.map((show) => (
+                                    <StandardCard
+                                        key={show.id}
+                                        img={show.poster_url}
+                                        label={show.title}
                                         onClick={() => onOpenFilm(show)}
                                     />
                                 ))}

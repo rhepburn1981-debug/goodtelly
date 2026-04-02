@@ -12,10 +12,10 @@ export default defineConfig({
         target: API_BASE,
         changeOrigin: true,
       },
-      // "/share": {
-      //   target: API_BASE,
-      //   changeOrigin: true,
-      // },
+      "/share": {
+        target: API_BASE,
+        changeOrigin: true,
+      },
     },
   },
 });
