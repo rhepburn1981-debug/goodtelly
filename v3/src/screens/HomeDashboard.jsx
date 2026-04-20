@@ -1,141 +1,288 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { getTrending, getWatchlistRecent, getUpcomingTv } from '../api/films';
-import { FaPlay, FaPlus, FaSearchPlus, FaCheck, FaInfoCircle, FaStar, FaUserFriends, FaChevronRight } from 'react-icons/fa';
+import { FaPlay, FaPlus, FaStar, FaUserFriends, FaChevronRight } from 'react-icons/fa';
+import { TiStarFullOutline } from "react-icons/ti";
+import { HiPlus } from "react-icons/hi";
+import { RiPlayLargeFill } from "react-icons/ri";
+import { IoCloseOutline } from "react-icons/io5";
+import { IoMdStar } from "react-icons/io";
+import { FiChevronRight } from "react-icons/fi";
 
-const NavShortcut = ({ icon: Icon, title, subtitle, iconBg, iconColor, onClick }) => (
-    <div onClick={onClick} className="hover-card" style={{
-        display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px',
-        background: '#0a0a0f', border: '1px solid rgba(255,255,255,0.05)',
-        borderRadius: 16, cursor: 'pointer', width: '100%'
+const FALLBACK_RECENT = [
+    { id: 'f1', title: 'Saipan', year: 2026, poster_url: '/branding/poster3.png' },
+    { id: 'f2', title: 'The Teacher', year: 2026, poster_url: '/branding/poster2.png' },
+    { id: 'f3', title: 'Beyond Paradise', year: 2026, poster_url: '/branding/poster1.png' },
+    { id: 'f4', title: 'The Capture', year: 2026, poster_url: '/branding/trend1.png' },
+    { id: 'f5', title: 'GOAT', year: 2026, poster_url: '/branding/poster4.png' },
+];
+
+const NavShortcut = ({ icon: Icon, title, subtitle, iconColor, onClick, bgColor, borderColor }) => (
+    <div onClick={onClick} style={{
+        display: 'flex', alignItems: 'center', gap: 28, padding: '20px 25px',
+        background: bgColor || '#A09E9F',
+        border: `1px solid ${borderColor || 'rgba(255, 255, 255, 0.1)'}`,
+        borderRadius: '18px', cursor: 'pointer', width: '100%',
+        backdropFilter: 'blur(20px)',
+        transition: 'all 0.2s ease',
     }}>
-        <div style={{ width: 44, height: 44, borderRadius: 12, background: iconBg, border: `1px solid ${iconColor}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon size={18} color={iconColor} />
+        <div style={{
+            width: 45, height: 44, borderRadius: '8px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+        }}>
+            <Icon size={32} color={iconColor || "#fff"} />
         </div>
         <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 2, letterSpacing: -0.3 }}>{title}</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{subtitle}</div>
+            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '3px', letterSpacing: '-0.3px' }}>{title}</div>
+            <div style={{ fontSize: '14px', color: '#A09E9F', fontWeight: '400' }}>{subtitle}</div>
         </div>
-        <FaChevronRight size={12} color="rgba(255,255,255,0.2)" />
+        <FiChevronRight size={20} color="rgba(255, 255, 255, 0.6)" />
     </div>
 );
 
-const FeatureCard = ({ onWatchTrailer }) => (
-    <div style={{ marginBottom: 24 }}>
+const FeatureCard = ({ rec, onAddToList, onWatchTrailer, onDismiss }) => {
+    const displayRec = rec || {
+        id: 'terminator-rec',
+        title: 'The Terminator',
+        year: 1984,
+        poster_url: '/branding/terminator_poster.png',
+        backdrop_url: '/branding/bg-1.jpg',
+        rating: 4.5,
+        genre: 'Sci-Fi/Action'
+    };
+
+    return (
         <div style={{
             position: 'relative',
-            borderRadius: 16,
-            overflow: 'hidden',
-            background: '#0f0f12',
-            border: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
-            cursor: 'pointer'
-        }} onClick={() => onWatchTrailer && onWatchTrailer('https://www.youtube.com/watch?v=zSWdZVtXT7E')}>
+            // flex: 1,
+            width: '100%',
+            // minHeight: '230px',
+            borderRadius: '20px',
+            // overflow: 'hidden',
+            border: '1px solid #FFFFFF33',
+            cursor: 'pointer',
+            background: 'rgba(23, 23, 23, 0.4)',
+            backdropFilter: 'blur(24px)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+            // display: 'flex''
+            padding: '25px',
+        }} onClick={() => onWatchTrailer && onWatchTrailer('https://www.youtube.com/watch?v=k64P4l2Wmeg')}>
             <div style={{
-                position: 'absolute', inset: 0, zIndex: 0,
-                backgroundImage: 'url(/branding/terminator_bg.png)',
-                backgroundSize: 'cover', backgroundPosition: 'center',
-                opacity: 0.8
+                position: 'absolute', inset: 0,
+                background: `linear-gradient(0deg, rgba(0, 0, 0, 0.74), rgba(0, 0, 0, 0.74)), url("${displayRec.backdrop_url || displayRec.poster_url}")`,
+                backgroundSize: '100%', backgroundPosition: 'center',
+                opacity: 1, zIndex: 0, backgroundRepeat: 'no-repeat', borderRadius: '20px'
             }} />
 
-            <div style={{
-                position: 'absolute', inset: 0, zIndex: 1,
-                background: 'linear-gradient(to right, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0.7) 40%, rgba(10,10,12,0.1) 100%)'
-            }} />
-            <div style={{
-                position: 'absolute', inset: 0, zIndex: 1,
-                background: 'linear-gradient(to top, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0) 60%)'
-            }} />
-
-            <div style={{ position: 'relative', zIndex: 2, padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }}>
-                <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-                    <div style={{ position: 'relative', flexShrink: 0 }}>
-                        <img
-                            src="/branding/terminator_poster.png"
-                            alt="The Terminator"
-                            style={{
-                                width: 130, aspectRatio: '2/3', objectFit: 'cover', borderRadius: 10,
-                                border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 10px 20px rgba(0,0,0,0.5)'
-                            }}
-                        />
-                        <div style={{
-                            position: 'absolute', bottom: -10, right: -10,
-                            width: 32, height: 32, borderRadius: '50%',
-                            background: 'rgba(10,10,12,0.8)', backdropFilter: 'blur(5px)',
-                            border: '1px solid rgba(255,255,255,0.2)', color: '#fff',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.4)'
-                        }}>
-                            <FaSearchPlus size={12} />
-                        </div>
-                    </div>
-
-                    <div style={{ alignSelf: 'flex-start', paddingTop: 12 }}>
-                        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--gold-bright)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>
-                            Freddy Recommending
-                        </div>
-                        <h1 style={{ fontSize: 36, fontWeight: 800, color: '#fff', margin: '0 0 6px', letterSpacing: -0.5 }}>
-                            The Terminator
-                        </h1>
-                        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)', margin: 0, fontWeight: 500 }}>
-                            1984 &bull; Sci-Fi/Action
-                        </p>
-                    </div>
+            <div style={{ position: 'relative', zIndex: 2, width: '100%', display: 'flex', gap: '20px' }}>
+                <div style={{ width: '135px', height: '200px', borderRadius: '12.5px', overflow: 'hidden', flexShrink: 0, border: '1px solid #FFFFFF33' }}>
+                    <img src={displayRec.poster_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
 
-                <div className="feature-btn-container" style={{ marginTop: 8 }}>
-                    <button className="feature-btn feature-btn-secondary" style={{ flex: 'none', width: 'auto', padding: '14px 28px' }} onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer('https://www.youtube.com/watch?v=zSWdZVtXT7E'); }}>
-                        <FaPlay size={12} color="#fff" /> Watch Now
-                    </button>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div style={{ fontSize: '14px', color: '#E2C367', fontWeight: '600', textTransform: 'capitalize', marginBottom: '10px' }}>FREDDY'S Recommending</div>
+                    <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#fff', margin: '0 0 10px', letterSpacing: '-0.4px' }}>{displayRec.title}</h2>
 
-                    <button className="feature-btn feature-btn-primary" style={{ flex: 'none', width: 'auto', padding: '14px 28px' }} onClick={(e) => e.stopPropagation()}>
-                        <FaPlus size={12} /> Add to Watchlist
-                    </button>
+                    <div style={{ display: 'flex', gap: '3px', color: '#ffd700', fontSize: '32px', marginBottom: '10px' }}>
+                        {Array(4).fill(0).map((_, i) => <span key={i} style={{ display: 'flex', alignItems: 'center' }}><TiStarFullOutline /></span>)}
+                        <span style={{ color: '#727272', display: 'flex', alignItems: 'center' }}><TiStarFullOutline /></span>
+                    </div>
+
+                    <div style={{ fontSize: '14px', color: '#A09E9F', marginBottom: '10px', fontWeight: '600' }}>
+                        {displayRec.year} • {displayRec.genre}
+                    </div>
+
+                    <p style={{ fontSize: '13px', color: '#fff', lineHeight: '1.4', marginBottom: '20px' }}>
+                        hey, you'll love this.
+                    </p>
+
+                    {/* <div style={{ display: 'flex', gap: '12px' }}>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer('https://www.youtube.com/watch?v=k64P4l2Wmeg'); }}
+                            style={{
+                                padding: '0 24px', height: '44px', borderRadius: '22px', background: '#2979ff',
+                                color: '#fff', border: 'none', fontWeight: '700', fontSize: '14px', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '8px'
+                            }}
+                        >
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M8 5v14l11-7z" /></svg>
+                            Watch Now
+                        </button>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onAddToList && onAddToList(displayRec); }}
+                            style={{
+                                padding: '0 24px', height: '44px', borderRadius: '22px', background: 'rgba(30, 28, 20, 0.6)',
+                                color: '#c5a36e', border: '1px solid #c5a36e66', fontWeight: '700', fontSize: '14px', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '8px'
+                            }}
+                        >
+                            <span style={{ fontSize: '20px', marginBottom: '2px' }}>+</span>
+                            Add to Watchlist
+                        </button>
+                    </div> */}
+                </div>
+
+                <div onClick={(e) => { e.stopPropagation(); onDismiss && onDismiss(); }} style={{
+                    position: 'absolute', top: '16px', right: '16px', width: '36px', height: '36px', borderRadius: '50%',
+                    background: '#353639', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                }}>
+                    <span style={{ color: '#fff', display: 'flex', alignItems: 'center' }}><IoCloseOutline size={34} /></span>
                 </div>
             </div>
+            <div style={{ display: 'flex', gap: '10px', position: 'relative', marginTop: '10px' }}>
+                <button
+                    onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer('https://www.youtube.com/watch?v=k64P4l2Wmeg'); }}
+                    style={{
+                        padding: '0 24px', height: '44px', borderRadius: '22px', background: '#3C81C8',
+                        color: '#D9D9D9', border: 'none', fontWeight: '600', fontSize: '15px', cursor: 'pointer', border: ' 1px solid #727272',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', maxWidth: '275px', width: '100%'
+                    }}
+                >
+                    <RiPlayLargeFill size={24} />
+                    Watch Now
+                </button>
+                <button
+                    onClick={(e) => { e.stopPropagation(); onAddToList && onAddToList(displayRec); }}
+                    style={{
+                        padding: '0 24px', height: '44px', borderRadius: '22px', background: '#2D2715',
+                        color: '#D9D9D9', border: '1px solid #c5a36e66', fontWeight: '700', fontSize: '14px', cursor: 'pointer', justifyContent: 'center',
+                        display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '275px', width: '100%'
+                    }}
+                >
+                    <HiPlus size={24} />
+                    Add to Watchlist
+                </button>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const HorizontalScroller = ({ children }) => (
-    <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 24, margin: '0 -16px', padding: '0 16px 24px' }} className="no-scrollbar">
+    <div style={{ display: 'flex', gap: 25, overflowX: 'auto', paddingBottom: 24, }} className="no-scrollbar">
         {children}
     </div>
 );
 
-const TrendingItem = ({ num, img, platform, label, pColor, onClick }) => (
-    <div onClick={onClick} className="hover-card" style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', cursor: 'pointer', flexShrink: 0, width: 160, minWidth: 160 }}>
-        <img src={img} alt={label} style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover' }} />
-        <div style={{
-            position: 'absolute', top: 0, left: 0, background: '#e50914', padding: '4px 10px',
-            fontSize: 14, fontWeight: 900, borderBottomRightRadius: 8, boxShadow: '2px 2px 10px rgba(0,0,0,0.5)'
-        }}>{num}</div>
-        <div className="hover-overlay" style={{
-            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', opacity: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, transition: 'opacity 0.2s ease', zIndex: 2
-        }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FaPlay size={14} style={{ marginLeft: 3 }} /></div>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FaPlus size={14} /></div>
-        </div>
-        <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 12px 12px',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, transparent 100%)',
-            display: 'flex', flexDirection: 'column', gap: 2, zIndex: 1
-        }}>
-            <span style={{ fontSize: 11, fontWeight: 900, color: pColor || '#fff', letterSpacing: 0.5 }}>{platform}</span>
-            <span style={{ fontSize: 14, fontWeight: 800, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
-        </div>
-    </div>
-);
+// const TrendingItem = ({ num, img, platform, label, pColor, onClick }) => (
+//     <div onClick={onClick} className="hover-card" style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', cursor: 'pointer', flexShrink: 0, width: 160, minWidth: 160 }}>
+//         <img src={img} alt={label} style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover' }} />
+//         <div style={{
+//             position: 'absolute', top: 0, left: 0, background: '#e50914', padding: '4px 10px',
+//             fontSize: 14, fontWeight: 900, borderBottomRightRadius: 8, boxShadow: '2px 2px 10px rgba(0,0,0,0.5)'
+//         }}>{num}</div>
+//         <div className="hover-overlay" style={{
+//             position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', opacity: 0,
+//             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, transition: 'opacity 0.2s ease', zIndex: 2
+//         }}>
+//             <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FaPlay size={14} style={{ marginLeft: 3 }} /></div>
+//             <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FaPlus size={14} /></div>
+//         </div>
+//         <div style={{
+//             position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 12px 12px',
+//             background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, transparent 100%)',
+//             display: 'flex', flexDirection: 'column', gap: 2, zIndex: 1
+//         }}>
+//             <span style={{ fontSize: 11, fontWeight: 900, color: pColor || '#fff', letterSpacing: 0.5 }}>{platform}</span>
+//             <span style={{ fontSize: 14, fontWeight: 800, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+//         </div>
+//     </div>
+// );
 
-const StandardCard = ({ img, label, onClick }) => (
-    <div onClick={onClick} className="hover-card" style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', cursor: 'pointer', flexShrink: 0, width: 140, minWidth: 140 }}>
-        <img src={img} alt={label} style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover' }} />
-        <div className="hover-overlay" style={{
-            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', opacity: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, transition: 'opacity 0.2s ease', zIndex: 2
-        }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FaPlay size={12} style={{ marginLeft: 3 }} /></div>
+const StandardCard = ({ img, label, year, platform, onClick }) => {
+    const renderPlatformLogo = () => {
+        if (platform === 'netflix') return <img src="/branding/netflix.png" alt="Netflix" style={{ width: '18px', height: 'auto', objectFit: 'contain' }} />;
+        if (platform === 'apple') return <img src="/branding/I-tv.png" alt="Apple TV" style={{ width: '38px', height: 'auto', objectFit: 'contain' }} />;
+        if (platform === 'hbo') return <img src="/branding/hbo.png" alt="HBO" style={{ width: '40px', height: 'auto', objectFit: 'contain' }} />;
+        return null;
+    };
+
+    return (
+        <div onClick={onClick} style={{ cursor: 'pointer', flexShrink: 0, maxWidth: '185px', }}>
+            <div className="hover-card" style={{ position: 'relative', borderRadius: '18px', overflow: 'hidden', marginBottom: '12px', border: '1px solid rgba(255,255,255,0.08)', height: '260px' }}>
+                <img src={img} alt={label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {platform && (
+                    <div style={{
+                        position: 'absolute', bottom: 0, right: 0,
+                        width: '56px', height: '70px',
+                        background: 'rgba(0,0,0,0.85)',
+                        borderTopLeftRadius: '28px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 2
+                    }}>
+                        {renderPlatformLogo()}
+                    </div>
+                )}
+            </div>
+            <div style={{ padding: '0 4px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</h4>
+                <p style={{ fontSize: '16px', color: '#727272', margin: 0 }}>{year}</p>
+            </div>
+        </div>
+    );
+};
+
+const RankedPoster = ({ num, img, title, year, platform, onClick }) => {
+    const renderPlatformLogo = () => {
+        if (platform === 'netflix') return <img src="/branding/netflix.png" alt="Netflix" style={{ width: '18px', height: 'auto', objectFit: 'contain' }} />;
+        if (platform === 'apple') return <img src="/branding/I-tv.png" alt="Apple TV" style={{ width: '38px', height: 'auto', objectFit: 'contain' }} />;
+        if (platform === 'hbo') return <img src="/branding/hbo.png" alt="HBO" style={{ width: '40px', height: 'auto', objectFit: 'contain' }} />;
+        return null;
+    };
+
+    return (
+        <div onClick={onClick} style={{ cursor: 'pointer', flexShrink: 0, maxWidth: '185px', }}>
+            <div style={{ position: 'relative', borderRadius: '18px', overflow: 'hidden', marginBottom: '10px', border: '1px solid #FFFFFF33', height: '260px' }}>
+                <img src={img} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(151.67deg, #000000 16.51%, rgba(0, 0, 0, 0) 55.9%)', zIndex: 1 }} />
+                <div style={{
+                    position: 'absolute', top: '10px', left: '10px', fontSize: '40px', fontWeight: '900',
+                    color: '#E0C36A', WebkitTextStroke: '1px rgba(255,255,255,0.3)',
+                    lineHeight: 1, zIndex: 1, pointerEvents: 'none', letterSpacing: '-2px',
+                    textShadow: '0 0 20px rgba(0,0,0,0.5)'
+                }}>
+                    {num}
+                </div>
+                {platform && (
+                    <div style={{
+                        position: 'absolute', bottom: 0, right: 0,
+                        width: '56px', height: '70px',
+                        background: 'rgba(0,0,0,0.85)',
+                        borderTopLeftRadius: '28px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 2,
+                    }}>
+                        {renderPlatformLogo()}
+                    </div>
+                )}
+            </div>
+            <div style={{ padding: '0 4px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</h4>
+                <p style={{ fontSize: '16px', color: '#727272', margin: 0 }}>{year}</p>
+            </div>
+        </div>
+    );
+};
+
+const OnTVCard = ({ img, title, date, provider, onClick }) => (
+    <div onClick={onClick} style={{ cursor: 'pointer', flexShrink: 0, width: 462 }}>
+        <div className="hover-card" style={{ position: 'relative', overflow: 'hidden', marginBottom: '10px', }}>
+            <img src={img} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ padding: '0 4px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#fff', margin: '0 0 10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</h4>
+                <p style={{ fontSize: '14px', color: '#727272', margin: 0 }}>{date}</p>
+            </div>
+            {provider && (
+                <div style={{
+                    padding: '8px 16px',
+                    background: '#FFFFFF33', borderRadius: '100px',
+                    fontSize: '16px', fontWeight: '600', color: '#fff'
+                }}>
+                    {provider}
+                </div>
+            )}
         </div>
     </div>
 );
@@ -184,6 +331,7 @@ export default function HomeDashboard(props) {
         onOpenFilm,
         onAddToList,
         onWatchTrailer,
+        onDismissRec,
         addedIds,
         onTabChange
     } = props;
@@ -191,20 +339,25 @@ export default function HomeDashboard(props) {
     const [trendingNow, setTrendingNow] = useState(props.trendingAll || []);
     const [upcomingShows, setUpcomingShows] = useState(props.upcomingTv || []);
     const [watchlistRecent, setWatchlistRecent] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!props.trendingAll?.length);
+
+    // Sync from props (fixes refresh issue)
+    useEffect(() => {
+        if (props.trendingAll?.length) setTrendingNow(props.trendingAll);
+        if (props.upcomingTv?.length) setUpcomingShows(props.upcomingTv);
+    }, [props.trendingAll, props.upcomingTv]);
 
     useEffect(() => {
-        Promise.all([
-            getTrending(),
-            getWatchlistRecent(),
-            getUpcomingTv()
-        ]).then(([trending, recent, upcoming]) => {
-            setTrendingNow(trending);
-            setWatchlistRecent(recent);
-            setUpcomingShows(upcoming);
-            setLoading(false);
-        }).catch(err => {
-            console.error("Error fetching dashboard data:", err);
+        setLoading(true);
+        // Independent fetches for better resilience
+        getTrending().then(setTrendingNow).catch(() => { });
+        getUpcomingTv().then(setUpcomingShows).catch(() => { });
+        getWatchlistRecent().then(data => {
+            if (data && data.length > 0) setWatchlistRecent(data);
+            else setWatchlistRecent(FALLBACK_RECENT);
+        }).catch(() => {
+            setWatchlistRecent(FALLBACK_RECENT);
+        }).finally(() => {
             setLoading(false);
         });
     }, []);
@@ -226,214 +379,161 @@ export default function HomeDashboard(props) {
             `}} />
             <div style={{ position: 'relative', zIndex: 1 }}>
 
-                <div style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <h1 style={{ fontSize: 32, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>
+                <div style={{ marginBottom: 35, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <h1 style={{ fontSize: 30, fontWeight: 600, margin: 0, letterSpacing: -0.5 }}>
                         Welcome back, {currentUser?.display_name || currentUser?.username || 'User'}
                     </h1>
                 </div>
-
-                <div style={{ marginBottom: 24, display: 'flex', gap: 16 }}>
+                {/* FEATURED: Real Friend Recommendation pair style */}
+                <div style={{ display: 'flex', gap: '24px', marginBottom: '25px' }}>
+                    <FeatureCard
+                        rec={recommendations && recommendations[0]}
+                        onAddToList={onAddToList}
+                        onWatchTrailer={onWatchTrailer}
+                        onDismiss={() => onDismissRec && onDismissRec(recommendations[0]?.id)}
+                    />
+                    <FeatureCard
+                        rec={recommendations && recommendations[1] ? recommendations[1] : {
+                            id: 'crime101-rec',
+                            title: 'Crime 101',
+                            year: 1984,
+                            poster_url: '/branding/poster2.png',
+                            backdrop_url: '/branding/image3.png',
+                            genre: 'Sci-Fi/Action'
+                        }}
+                        onAddToList={onAddToList}
+                        onWatchTrailer={onWatchTrailer}
+                        onDismiss={() => { }}
+                    />
+                </div>
+                <div style={{ marginBottom: 25, display: 'flex', gap: 24, padding: '0 80px' }}>
                     <NavShortcut
-                        icon={FaStar}
+                        icon={IoMdStar}
                         title="My Watchlist"
                         subtitle="Your saved films and shows to watch"
-                        iconBg="rgba(59, 130, 246, 0.15)"
-                        iconColor="#60a5fa"
+                        bgColor="rgba(60, 129, 200, 0.15)"
+                        borderColor="#3C81C8"
+                        iconColor="#fff"
                         onClick={() => onTabChange && onTabChange('list')}
                     />
                     <NavShortcut
                         icon={FaUserFriends}
                         title="Friends Watchlist"
                         subtitle="See what your friends are watching"
-                        iconBg="rgba(255, 255, 255, 0.05)"
-                        iconColor="rgba(255, 255, 255, 0.5)"
+                        iconColor="#727272"
+                        bgColor="rgba(23, 23, 23, 0.4)"
+                        borderColor="rgba(255, 255, 255, 0.1)"
                         onClick={() => onTabChange && onTabChange('friends')}
                     />
                 </div>
 
-                {/* FEATURED: Real Friend Recommendation if available, otherwise fallback */}
-                {recommendations && recommendations.length > 0 ? (
-                    <div style={{ marginBottom: 24 }}>
+
+                {/* Redesigned Sections Area */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', marginTop: '10px' }}>
+
+                    {/* What's NEW (Ranked) */}
+                    {trendingNow.length > 0 && (
                         <div style={{
-                            position: 'relative',
-                            borderRadius: 16,
-                            overflow: 'hidden',
-                            background: '#0f0f12',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
-                            cursor: 'pointer'
-                        }} onClick={() => onWatchTrailer && onWatchTrailer(recommendations[0].trailer_url || 'https://www.youtube.com/watch?v=zSWdZVtXT7E')}>
-                            <div style={{
-                                position: 'absolute', inset: 0, zIndex: 0,
-                                backgroundImage: `url(${recommendations[0].backdrop_url || recommendations[0].poster_url})`,
-                                backgroundSize: 'cover', backgroundPosition: 'center',
-                                opacity: 0.4
-                            }} />
-
-                            <div style={{
-                                position: 'absolute', inset: 0, zIndex: 1,
-                                background: 'linear-gradient(to right, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0.7) 40%, rgba(10,10,12,0.1) 100%)'
-                            }} />
-
-                            <div style={{ position: 'relative', zIndex: 2, padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }}>
-                                <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-                                    <div style={{ position: 'relative', flexShrink: 0 }}>
-                                        <img
-                                            src={recommendations[0].poster_url}
-                                            alt={recommendations[0].title}
-                                            style={{
-                                                width: 130, aspectRatio: '2/3', objectFit: 'cover', borderRadius: 10,
-                                                border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 10px 20px rgba(0,0,0,0.5)'
-                                            }}
+                            background: '#352F21',
+                            borderRadius: '20px', padding: '25px',
+                            border: '1px solid #E2C36780',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.3)', position: 'relative', overflow: 'hidden'
+                        }}>
+                            {/* <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', background: 'radial-gradient(ellipse at top, rgba(255,255,255,0.03), transparent 70%)', pointerEvents: 'none' }} /> */}
+                            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '10px', position: 'relative', padding: '10px' }}>What's NEW</div>
+                            <HorizontalScroller>
+                                {trendingNow.slice(0, 8).map((show, idx) => {
+                                    const platforms = ['netflix', null, 'apple', 'hbo', null, null, null, null];
+                                    const designTitles = [
+                                        'Beyond Pradise', 'Invincible', 'Punisher', 'Jujutsu Kaizen',
+                                        'Thrash', 'Mercy', 'Mario Galaxy', 'Avatar: Fire and Ash'
+                                    ];
+                                    return (
+                                        <RankedPoster
+                                            key={show.id}
+                                            num={idx + 1}
+                                            img={show.poster_url}
+                                            title={designTitles[idx] || (show.title || show.name)}
+                                            year={show.year || (show.first_air_date ? show.first_air_date.split('-')[0] : '2025')}
+                                            platform={platforms[idx]}
+                                            onClick={() => onOpenFilm(show)}
                                         />
-                                    </div>
-
-                                    <div style={{ alignSelf: 'flex-start', paddingTop: 12 }}>
-                                        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--gold-bright)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>
-                                            {recommendations[0]._fromFriend || recommendations[0].sharedBy || "A Friend"} thinks you'll like
-                                        </div>
-                                        <h1 style={{ fontSize: 36, fontWeight: 800, color: '#fff', margin: '0 0 6px', letterSpacing: -0.5 }}>
-                                            {recommendations[0].title}
-                                        </h1>
-                                        {recommendations[0]._recNote && (
-                                            <p style={{ fontSize: 16, color: 'var(--gold-bright)', margin: '8px 0', fontWeight: 500, fontStyle: 'italic' }}>
-                                                "{recommendations[0]._recNote}"
-                                            </p>
-                                        )}
-                                        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)', margin: 0, fontWeight: 500 }}>
-                                            {recommendations[0].year} &bull; {recommendations[0].genre}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="feature-btn-container" style={{ marginTop: 8 }}>
-                                    <button
-                                        className="feature-btn feature-btn-primary"
-                                        style={{ flex: 'none', width: 'auto', padding: '14px 28px' }}
-                                        onClick={(e) => { e.stopPropagation(); onAddToList(recommendations[0]); }}
-                                    >
-                                        <FaPlus size={12} /> {addedIds.includes(recommendations[0].id) ? 'In Watchlist' : 'Add to Watchlist'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <FeatureCard onWatchTrailer={onWatchTrailer} />
-                )}
-
-                {/* TRENDING NOW (Real Data) */}
-                {trendingNow.length > 0 && (
-                    <div style={{
-                        marginBottom: 24, position: 'relative', overflow: 'hidden',
-                        background: 'rgba(0, 0, 0, 0.6)',
-                        backdropFilter: 'blur(10px)',
-                        padding: '24px',
-                        borderRadius: '16px',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)'
-                    }}>
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', background: 'radial-gradient(ellipse at top, rgba(255,255,255,0.05), transparent 70%)', zIndex: 0 }} />
-                        <div style={{ position: 'relative', zIndex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                                <span style={{ fontSize: 22 }}>🔥</span>
-                                <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, margin: 0 }}>Trending Now</h2>
-                            </div>
-                            <HorizontalScroller>
-                                {trendingNow.map((show, idx) => (
-                                    <TrendingItem
-                                        key={show.id}
-                                        num={idx + 1}
-                                        img={show.poster_url}
-                                        platform={show.media_type === 'movie' ? 'MOVIE' : 'TV SHOW'}
-                                        label={show.title || show.name}
-                                        pColor="var(--gold-bright)"
-                                        onClick={() => onOpenFilm(show)}
-                                    />
-                                ))}
+                                    );
+                                })}
                             </HorizontalScroller>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* RECENTLY IN WATCHLIST */}
-                {watchlistRecent.length > 0 && (
-                    <div style={{
-                        marginBottom: 24, position: 'relative', overflow: 'hidden',
-                        background: 'rgba(0, 0, 0, 0.6)',
-                        backdropFilter: 'blur(10px)',
-                        padding: '24px',
-                        borderRadius: '16px',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)'
-                    }}>
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', background: 'radial-gradient(ellipse at top, rgba(255,255,255,0.05), transparent 70%)', zIndex: 0 }} />
-                        <div style={{ position: 'relative', zIndex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                                <span style={{ fontSize: 22 }}>🔖</span>
-                                <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, margin: 0 }}>Recently in Watchlist</h2>
-                            </div>
+                    {/* What Reel users are watching right now */}
+                    {(watchlistRecent.length > 0) && (
+                        <div style={{
+                            background: '#000000', borderRadius: '20px', padding: '25px',
+                            border: '1px solid #FFFFFF33',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.3)', position: 'relative', overflow: 'hidden'
+                        }}>
+                            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '10px', padding: '10px' }}>What Reel users are watching right now</div>
                             <HorizontalScroller>
-                                {watchlistRecent.map((show) => (
-                                    <StandardCard
-                                        key={show.id}
-                                        img={show.poster_url}
-                                        label={show.title}
-                                        onClick={() => onOpenFilm(show)}
-                                    />
-                                ))}
+                                {watchlistRecent.map((show, idx) => {
+                                    const platforms = [null, 'netflix', 'apple', 'hbo', null, null, null, null];
+                                    const designTitles = [
+                                        'Thrash', 'Beyond Pradise', 'Punisher', 'Jujutsu Kaizen',
+                                        'Mercy', 'Mario Galaxy', 'Avatar: Fire and Ash', 'Jujutsu Kaizen'
+                                    ];
+                                    return (
+                                        <StandardCard
+                                            key={show.id}
+                                            img={show.poster_url}
+                                            label={designTitles[idx] || show.title}
+                                            year={show.year || '2024'}
+                                            platform={platforms[idx]}
+                                            onClick={() => onOpenFilm(show)}
+                                        />
+                                    );
+                                })}
                             </HorizontalScroller>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* UPCOMING TV (TVmaze) */}
-                {upcomingShows.length > 0 && (
-                    <div style={{
-                        marginBottom: 24, position: 'relative', overflow: 'hidden',
-                        background: 'rgba(0, 0, 0, 0.6)',
-                        backdropFilter: 'blur(10px)',
-                        padding: '24px',
-                        borderRadius: '16px',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)'
-                    }}>
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', background: 'radial-gradient(ellipse at top, rgba(255,255,255,0.05), transparent 70%)', zIndex: 0 }} />
-                        <div style={{ position: 'relative', zIndex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                                <span style={{ fontSize: 22 }}>📺</span>
-                                <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, margin: 0 }}>On TV This Week</h2>
-                            </div>
+                    {/* On TV this week */}
+                    {upcomingShows.length > 0 && (
+                        <div style={{
+                            background: '#000000', borderRadius: '20px', padding: '25px',
+                            border: '1px solid #FFFFFF33',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.3)', position: 'relative', overflow: 'hidden'
+                        }}>
+                            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '10px', padding: '10px' }}>On TV this week</div>
                             <HorizontalScroller>
-                                {upcomingShows.map((show) => (
-                                    <StandardCard
-                                        key={show.id}
-                                        img={show.image}
-                                        label={show.name}
-                                        onClick={() => onOpenFilm({ ...show, title: show.name, poster_url: show.image, _isExternal: true })}
-                                    />
-                                ))}
+                                {upcomingShows.slice(0, 3).map((show, idx) => {
+                                    const designData = [
+                                        { title: 'EFL Highlights', date: '11th Mar', provider: 'Skysports', img: '/branding/on-week1.png' },
+                                        { title: 'Football Focus', date: '12th Mar', provider: 'BBC sports', img: '/branding/on-week2.png' },
+                                        { title: 'The Capture', date: '12th Mar', provider: 'Peacock', img: '/branding/on-week3.png' }
+                                    ];
+                                    const item = designData[idx] || {};
+                                    return (
+                                        <OnTVCard
+                                            key={show.id}
+                                            img={item.img || show.image}
+                                            title={item.title || show.name}
+                                            date={item.date || (show.airdate ? new Date(show.airdate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '11th Mar')}
+                                            provider={item.provider || show.network?.name || 'BBC'}
+                                            onClick={() => onOpenFilm({ ...show, title: show.name, poster_url: show.image, _isExternal: true })}
+                                        />
+                                    );
+                                })}
                             </HorizontalScroller>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* FRIENDS ACTIVITY (Using Real Friends) */}
-                {friends && friends.length > 0 && (
-                    <div style={{
-                        marginBottom: 24, position: 'relative', overflow: 'hidden',
-                        background: 'rgba(0, 0, 0, 0.6)',
-                        backdropFilter: 'blur(10px)',
-                        padding: '24px 16px',
-                        borderRadius: '16px',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)'
-                    }}>
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', background: 'radial-gradient(ellipse at top, rgba(255,255,255,0.05), transparent 70%)', zIndex: 0 }} />
-                        <div style={{ position: 'relative', zIndex: 1 }}>
+                    {/* Friends Activity */}
+                    {friends && friends.length > 0 && (
+                        <div style={{
+                            background: 'rgba(15, 15, 15, 0.4)', borderRadius: '24px', padding: '24px',
+                            border: '1px solid rgba(255,255,255,0.05)',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.3)', position: 'relative', overflow: 'hidden'
+                        }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-                                <span style={{ fontSize: 22 }}>👥</span>
-                                <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, margin: 0 }}>Friends Activity</h2>
+                                <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff' }}>Friends Activity</div>
                             </div>
                             <div style={{ display: 'flex', gap: 24, overflowX: 'auto', paddingBottom: 16 }} className="no-scrollbar">
                                 {friends.map(friend => (
@@ -453,8 +553,8 @@ export default function HomeDashboard(props) {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
 
             </div>
         </DashboardLayout>

@@ -290,6 +290,7 @@ export default function App() {
     onRecommend: (film) => setRecommendFilm(film),
     trendingAll,
     upcomingTv,
+    friends,
   }
 
   const dashboardNavProps = {
@@ -308,6 +309,7 @@ export default function App() {
           addedIds={addedIds}
           onOpenFilm={openFilm}
           onAddToList={handleAddToList}
+          onClose={() => setSearch('')}
         />
       )}
 
@@ -386,7 +388,7 @@ export default function App() {
               <BottomNav activeTab={activeTab} onTabChange={onTabChange} username={currentUser?.username} friendsHasUnread={friendsHasUnread} />
             </>
           ) : (
-            <HomeDashboard {...sharedProps} {...dashboardNavProps} recommendations={recommendations} />
+            <HomeDashboard {...sharedProps} {...dashboardNavProps} friends={friends} recommendations={recommendations} onDismissRec={(id) => { const d = JSON.parse(localStorage.getItem('dismissed_recs') || '[]'); localStorage.setItem('dismissed_recs', JSON.stringify([...d, id])); setRecommendations((prev) => prev.filter((r) => r.id !== id)) }} />
           )
         } />
 

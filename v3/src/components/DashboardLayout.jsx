@@ -1,69 +1,82 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaHome, FaBookmark, FaRegCompass, FaUsers, FaSearch, FaEllipsisH, FaWifi, FaBars, FaUser } from 'react-icons/fa';
+import Search from '../../public/branding/search.png'
 import './DashboardLayout.css';
 
-const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => {
-    return (
-        <div
-            onClick={onClick}
-            className={`sidebar-item ${active ? 'active' : ''}`}
-        >
-            <Icon size={20} className="sidebar-icon" />
-            <span className="sidebar-label">{label}</span>
-        </div>
-    );
-};
+const NavItem = ({ label, icon: Icon, active, onClick }) => (
+    <div
+        onClick={onClick}
+        style={{
+            cursor: 'pointer',
+            padding: '15px 24px',
+            borderRadius: '30px',
+            background: active ? '#FFFFFF1A' : 'transparent',
+            color: active ? '#fff' : '#A09E9F',
+            fontSize: '20px',
+            fontWeight: active ? '700' : '500',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+        }}
+    >
+        {Icon && <Icon size={24} style={{ color: active && label === 'Home' ? '#E5B800' : 'inherit' }} />}
+        {label}
+    </div>
+);
 
-const Header = ({ onToggleSidebar, searchQuery, onSearchChange }) => (
-    <header className="dashboard-header">
-        <div className="dashboard-logo">
-            <FaBars className="hamburger-menu" onClick={onToggleSidebar} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
-                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
-                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
-                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
-                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
-                    </svg>
-                    <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
-                </div>
-                <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
+const Header = ({ searchQuery, onSearchChange, activeTab, onTabChange }) => (
+    <header className="dashboard-header" style={{ background: 'linear-gradient(180deg, #000000 0%, rgba(0, 0, 0, 0) 100%)', height: '114px', display: 'flex', alignItems: 'center', padding: '0 25px', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }}>
+        <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginRight: '24px' }}>
+            <img src='/branding/logo.png' style={{ height: '60px' }} />
+        </div>
+
+        <nav style={{ display: 'flex', flex: 1, alignItems: 'center' }}>
+            <NavItem label="Home" icon={FaHome} active={activeTab === 'home'} onClick={() => onTabChange('home')} />
+            <NavItem label="My Watchlist" icon={FaBookmark} active={activeTab === 'list'} onClick={() => onTabChange('list')} />
+            <NavItem label="Discover" icon={FaRegCompass} active={activeTab === 'discover'} onClick={() => onTabChange('discover')} />
+            <NavItem label="Friends" icon={FaUsers} active={activeTab === 'friends'} onClick={() => onTabChange('friends')} />
+        </nav>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <div className="dashboard-search" style={{
+                background: '#171717',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                padding: '0 25px',
+                display: 'flex',
+                alignItems: 'center',
+                height: '44px',
+                width: '300px',
+                border: '1px solid #727272'
+            }}>
+                <input
+                    type="text"
+                    value={searchQuery || ''}
+                    onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                    placeholder="Search films, TV, directors..."
+                    style={{
+                        flex: 1, background: 'transparent', border: 'none', color: '#fff',
+                        fontSize: '20px', outline: 'none'
+                    }}
+                />
+                {/* <FaSearch style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: 16 }} /> */}
+                <img src={Search} alt='search' />
             </div>
-        </div>
 
-        <div className="dashboard-search" style={{ background: '#ffffff', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', border: '1px solid #d1d1d1' }}>
-            <FaSearch style={{ color: '#555', fontSize: 16, flexShrink: 0 }} />
-            <input
-                type="text"
-                value={searchQuery || ''}
-                onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-                placeholder="Search films, TV, directors..."
-                style={{
-                    flex: 1, background: 'transparent', border: 'none', color: '#111',
-                    fontSize: 15, outline: 'none'
-                }}
-            />
-            <FaEllipsisH style={{ color: '#555', fontSize: 18, flexShrink: 0, cursor: 'pointer' }} />
-        </div>
-
-        <div className="dashboard-user-actions" style={{ position: 'relative', overflow: 'visible' }}>
-            <img src="/branding/popcorn.png" alt="Popcorn" style={{
-                height: 80, objectFit: 'contain',
-                position: 'absolute', top: 0, right: -12,
-                filter: 'drop-shadow(0 14px 28px rgba(0,0,0,0.7))',
-                cursor: 'pointer', pointerEvents: 'auto'
-            }} />
+            {/* <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}> */}
+            <FaUser size={24} color="#fff" />
+            {/* </div> */}
         </div>
     </header>
 );
 
 const BlurredBackground = () => (
     <div style={{
-        position: 'fixed', inset: 0, zIndex: 0, opacity: .6,
+        position: 'fixed', inset: 0, zIndex: 0, opacity: 0.3,
         display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 8,
-        pointerEvents: 'none', filter: 'blur(3px)'
+        pointerEvents: 'none', filter: 'blur(20px)'
     }}>
         {Array(60).fill(0).map((_, i) => (
             <img key={i} src={`/branding/poster${(i % 5) + 1}.png`} style={{ width: '100%', opacity: 0.5 }} alt="" />
@@ -71,12 +84,9 @@ const BlurredBackground = () => (
     </div>
 );
 
-
-
 export default function DashboardLayout({ children, searchQuery, onSearchChange }) {
     const navigate = useNavigate();
     const location = useLocation();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const pathToTab = {
         '/dashboard/home': 'home',
@@ -98,10 +108,8 @@ export default function DashboardLayout({ children, searchQuery, onSearchChange 
         navigate(tabToPath[tabId] || '/dashboard/home');
     }
 
-    const isProfilePage = location.pathname === '/dashboard/profile';
-
     return (
-        <div style={{ display: 'flex', background: '#020202', minHeight: '100vh', width: '100%', position: 'relative' }}>
+        <div style={{ display: 'flex', background: '#020202', minHeight: '100vh', width: '100%', position: 'relative', flexDirection: 'column' }}>
             <BlurredBackground />
 
             <div style={{
@@ -113,70 +121,27 @@ export default function DashboardLayout({ children, searchQuery, onSearchChange 
                 display: 'flex',
                 flexDirection: 'column'
             }}>
-                <div
-                    className={`dashboard-overlay left-sidebar-overlay ${isSidebarOpen ? 'open' : ''}`}
-                    onClick={() => setIsSidebarOpen(false)}
-                />
                 <Header
                     searchQuery={searchQuery}
                     onSearchChange={onSearchChange}
-                    onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                    activeTab={activeTab}
+                    onTabChange={onTabChange}
                 />
-                <div className="dashboard-content-wrapper">
-                    <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
-                        <SidebarItem
-                            icon={FaHome}
-                            label="Home"
-                            path="home"
-                            active={activeTab === 'home'}
-                            onClick={() => { onTabChange('home'); setIsSidebarOpen(false); }}
-                        />
-                        <SidebarItem
-                            icon={FaBookmark}
-                            label="My Watchlist"
-                            path="list"
-                            active={activeTab === 'list'}
-                            onClick={() => { onTabChange('list'); setIsSidebarOpen(false); }}
-                        />
-                        <SidebarItem
-                            icon={FaRegCompass}
-                            label="Discover"
-                            path="discover"
-                            active={activeTab === 'discover'}
-                            onClick={() => { onTabChange('discover'); setIsSidebarOpen(false); }}
-                        />
-                        <SidebarItem
-                            icon={FaUsers}
-                            label="Friends"
-                            path="friends"
-                            active={activeTab === 'friends'}
-                            onClick={() => { onTabChange('friends'); setIsSidebarOpen(false); }}
-                        />
-                        <SidebarItem
-                            icon={FaUser}
-                            label="Profile"
-                            path="profile"
-                            active={activeTab === 'profile'}
-                            onClick={() => { onTabChange('profile'); setIsSidebarOpen(false); }}
-                        />
-                    </aside>
-
+                <div className="dashboard-content-wrapper" style={{ marginTop: '114px', display: 'block' }}>
                     <div className="dashboard-main-area">
-                        <main className="dashboard-main-content">
+                        <main className="dashboard-main-content" style={{ padding: '0 40px 40px' }}>
                             {children}
                         </main>
                     </div>
                 </div>
             </div>
 
-
-
             <style dangerouslySetInnerHTML={{
                 __html: `
-            @media (min-width: 1024px) {
-                nav[style*="position: fixed"][style*="bottom: 0"] {
-                    display: none !important;
-                }
+            @media (max-width: 1024px) {
+                .dashboard-header nav { display: none !important; }
+                .dashboard-search { width: 40px !important; padding: 0 !important; justify-content: center; }
+                .dashboard-search input { display: none; }
             }
         `}} />
         </div>

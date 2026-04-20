@@ -1,211 +1,67 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { FaCheck, FaTimes, FaGlobe, FaEyeSlash, FaTrash, FaCheckCircle, FaFilter } from 'react-icons/fa';
+import { FaFilter } from 'react-icons/fa';
 
-// Mock data to flesh out the premium UI
-const INITIAL_WATCHLIST = [
-    { id: 1, title: 'Blade Runner 2049', year: 2017, genre: 'Sci-Fi / Thriller', poster: '/branding/poster1.png', isVisible: true, isWatched: false },
-    { id: 2, title: 'The Dark Knight', year: 2008, genre: 'Action / Crime', poster: '/branding/poster2.png', isVisible: true, isWatched: false },
-    { id: 3, title: 'Interstellar', year: 2014, genre: 'Sci-Fi / Drama', poster: '/branding/poster3.png', isVisible: false, isWatched: true },
-    { id: 4, title: 'Parasite', year: 2019, genre: 'Thriller / Comedy', poster: '/branding/poster4.png', isVisible: true, isWatched: false },
-    { id: 5, title: 'Dune: Part Two', year: 2024, genre: 'Sci-Fi / Adventure', poster: '/branding/trend2.png', isVisible: true, isWatched: false },
-    { id: 6, title: 'The Matrix', year: 1999, genre: 'Sci-Fi / Action', poster: '/branding/terminator_poster.png', isVisible: true, isWatched: true },
+const STATIC_FILMS = [
+    { id: 1,  title: 'Thrash',             year: 2026, genre: 'Action',    poster: '/branding/poster1.png' },
+    { id: 2,  title: 'Mercy',              year: 2026, genre: 'Action',    poster: '/branding/poster2.png' },
+    { id: 3,  title: 'Jujutsu Kaizen',     year: 2022, genre: 'Fantasy',   poster: '/branding/poster3.png' },
+    { id: 4,  title: 'Beyond Paradise',    year: 2017, genre: 'Adventure', poster: '/branding/poster4.png' },
+    { id: 5,  title: 'Punisher',           year: 2026, genre: 'Action',    poster: '/branding/terminator_poster.png' },
+    { id: 6,  title: 'Mario: Galaxy Movie',year: 2024, genre: 'Comedy',    poster: '/branding/trend2.png' },
+    { id: 7,  title: 'One Piece',          year: 2023, genre: 'Adventure', poster: '/branding/one_piece_poster.png' },
+    { id: 8,  title: 'Mobland',            year: 2025, genre: 'Crime',     poster: '/branding/mobland_poster.png' },
+    { id: 9,  title: 'Avatar',             year: 2022, genre: 'Fantasy',   poster: '/branding/avatar_poster.png' },
+    { id: 10, title: 'Burldg',             year: 2024, genre: 'Adventure', poster: '/branding/burldg_poster.png' },
+    { id: 11, title: 'Safe Sock',          year: 2023, genre: 'Comedy',    poster: '/branding/safesock_poster.png' },
+    { id: 12, title: 'Terminator',         year: 2024, genre: 'Action',    poster: '/branding/trend3.png' },
 ];
 
-const FilterPill = ({ label, active, onClick }) => (
-    <button
-        onClick={onClick}
-        style={{
-            padding: '8px 20px',
-            borderRadius: 100,
-            background: active ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-            border: active ? '1px solid rgba(251, 191, 36, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
-            color: active ? '#fbbf24' : 'rgba(255, 255, 255, 0.6)',
-            fontSize: 14,
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            whiteSpace: 'nowrap',
-            flexShrink: 0
-        }}
-        className="filter-pill"
-    >
+const GENRES = ['All', 'Action', 'Adventure', 'Fantasy', 'Comedy', 'Crime'];
+const SORTS  = ['All', 'Recently Added', 'Friends Rolling', 'A-Z'];
+
+const Pill = ({ label, active, onClick }) => (
+    <button onClick={onClick} style={{
+        padding: '5px 14px',
+        borderRadius: 100,
+        background: active ? 'rgba(255,255,255,0.15)' : 'transparent',
+        border: active ? '1px solid rgba(255,255,255,0.5)' : '1px solid rgba(255,255,255,0.18)',
+        color: active ? '#fff' : 'rgba(255,255,255,0.55)',
+        fontSize: 13,
+        fontWeight: 600,
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        transition: 'all 0.2s',
+        lineHeight: 1.4,
+    }}>
         {label}
     </button>
 );
 
-const StatCard = ({ label, value, active, onClick }) => (
-    <div
-        onClick={onClick}
-        className="stat-card"
-        style={{
-            flex: 1,
-            background: active ? 'rgba(251, 191, 36, 0.08)' : 'rgba(0, 0, 0, 0.3)',
-            backdropFilter: 'blur(12px)',
-            border: active ? '1px solid rgba(251, 191, 36, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: 20,
-            padding: '24px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            boxShadow: active ? '0 10px 40px rgba(251, 191, 36, 0.15)' : 'none'
-        }}
-    >
-        <div style={{ fontSize: 36, fontWeight: 900, color: active ? '#fbbf24' : '#fff', lineHeight: 1, marginBottom: 8 }}>
-            {value}
-        </div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: active ? 'rgba(251, 191, 36, 0.8)' : 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>
-            {label}
-        </div>
-    </div>
-);
-
-const WatchlistItem = ({ film, onToggleWatched, onRemove }) => (
-    <div
-        className="watchlist-item"
-        style={{
-            display: 'flex',
-            background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
-            borderRadius: 16,
-            overflow: 'hidden',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            position: 'relative'
-        }}
-    >
-        {/* Glow effect on hover */}
-        <div className="hover-glow" style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, transparent 70%)', opacity: 0, transition: 'opacity 0.3s ease', pointerEvents: 'none' }} />
-
-        {/* Poster */}
-        <div style={{ width: 100, flexShrink: 0, borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-            <img src={film.poster_url} alt={film.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" />
-        </div>
-
-        {/* Content */}
-        <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                <div>
-                    <h3 style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 4px', letterSpacing: -0.3 }}>{film.title}</h3>
-                    <div style={{ fontSize: 13, color: 'rgba(255, 255, 255, 0.4)', fontWeight: 500 }}>
-                        {film.genre} &bull; {film.year}
-                    </div>
-                </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 'auto' }}>
-                {film.isVisible ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.06)', padding: '4px 10px', borderRadius: 100 }}>
-                        <FaGlobe size={10} color="rgba(255,255,255,0.6)" />
-                        <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>Visible to Friends</span>
-                    </div>
-                ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: 100 }}>
-                        <FaEyeSlash size={10} color="rgba(255,255,255,0.4)" />
-                        <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>Private</span>
-                    </div>
-                )}
-            </div>
-        </div>
-
-        {/* Actions - Vertical on the right */}
-        <div style={{
-            display: 'flex', flexDirection: 'column', borderLeft: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.2)', width: 140
-        }}>
-            <button
-                onClick={() => onToggleWatched(film.id)}
-                className="action-btn-watched"
-                style={{
-                    flex: 1, border: 'none',
-                    background: film.isWatched ? 'rgba(74, 222, 128, 0.15)' : 'transparent',
-                    color: film.isWatched ? '#4ade80' : 'rgba(255,255,255,0.6)',
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    cursor: 'pointer', transition: 'all 0.2s ease', padding: 12
-                }}
-            >
-                {film.isWatched ? <FaCheckCircle size={18} /> : <FaCheck size={18} />}
-                <span style={{ fontSize: 11, fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>
-                    {film.isWatched ? 'Watched' : "Tap if you've\nseen it"}
-                </span>
-            </button>
-            <button
-                onClick={() => onRemove(film.id)}
-                className="action-btn-remove"
-                style={{
-                    height: 50, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.3)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    cursor: 'pointer', transition: 'all 0.2s ease', fontSize: 11, fontWeight: 700
-                }}
-            >
-                <FaTrash size={12} /> Remove
-            </button>
-        </div>
-    </div>
-);
-
 export default function WatchlistDashboard(props) {
-    const {
-        myList = [],
-        watchedIds = [],
-        onOpenFilm,
-        onMarkWatched,
-        onUnmarkWatched,
-        onRemoveFromList,
-        onTabChange,
-        activeTab,
-        searchQuery,
-        onSearchChange
-    } = props;
+    const { onTabChange, activeTab, searchQuery, onSearchChange } = props;
 
+    const [films, setFilms]               = useState(STATIC_FILMS);
     const [isListVisible, setIsListVisible] = useState(true);
-    const [activeStat, setActiveStat] = useState('to_watch'); // 'to_watch', 'watched', 'all'
+    const [activeStat, setActiveStat]     = useState('to_watch');
+    const [activeSort, setActiveSort]     = useState('All');
+    const [activeGenre, setActiveGenre]   = useState('All');
 
-    // Filters
-    const [activeSort, setActiveSort] = useState('Recently Added');
-    const [activeGenre, setActiveGenre] = useState('All');
-    const [activePlatform, setActivePlatform] = useState('All');
+    const toWatchList = films.filter(f => !f.watched);
+    const watchedList = films.filter(f =>  f.watched);
 
-    const handleToggleWatched = (filmId) => {
-        const film = myList.find(f => f.id === filmId);
-        if (!film) return;
-        if (watchedIds.includes(filmId)) {
-            onUnmarkWatched(film);
-        } else {
-            onMarkWatched(film);
-        }
-    };
+    const handleToggleWatched = (id) =>
+        setFilms(prev => prev.map(f => f.id === id ? { ...f, watched: !f.watched } : f));
+    const handleRemove = (id) =>
+        setFilms(prev => prev.filter(f => f.id !== id));
 
-    const handleRemove = (filmId) => {
-        const film = myList.find(f => f.id === filmId);
-        if (film) onRemoveFromList(film);
-    };
+    const baseList =
+        activeStat === 'watched'  ? watchedList  :
+        activeStat === 'to_watch' ? toWatchList  : films;
 
-    const toWatchList = myList.filter(f => !watchedIds.includes(f.id));
-    const watchedList = myList.filter(f => watchedIds.includes(f.id));
-
-    const toWatchCount = toWatchList.length;
-    const watchedCount = watchedList.length;
-    const totalCount = myList.length;
-
-    // Genres dynamic
-    const allGenres = ["All", ...new Set(myList.flatMap(f => (f.genre || "").split(",").map(g => g.trim()).filter(Boolean)))];
-
-    const displayFilms = (activeStat === 'watched' ? watchedList : activeStat === 'to_watch' ? toWatchList : myList)
-        .filter(f => {
-            if (activeGenre !== 'All' && !(f.genre || "").includes(activeGenre)) return false;
-            // Platform filtering would need mapping of providers/streamers, which is in props.allFilms or similar
-            // For now, let's keep it simple or implement if data is clear
-            return true;
-        })
-        .sort((a, b) => {
-            if (activeSort === 'A–Z') return (a.title || "").localeCompare(b.title || "");
-            // 'Recently Added' is default order usually if sorted by backend
-            return 0;
-        });
+    const displayFilms = baseList
+        .filter(f => activeGenre === 'All' || f.genre === activeGenre)
+        .sort((a, b) => activeSort === 'A-Z' ? a.title.localeCompare(b.title) : 0);
 
     return (
         <DashboardLayout
@@ -214,118 +70,213 @@ export default function WatchlistDashboard(props) {
             activeTab={activeTab}
             onTabChange={onTabChange}
         >
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                .watchlist-item:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); z-index: 10; }
-                .watchlist-item:hover .hover-glow { opacity: 1 !important; }
-                .action-btn-watched:hover { background: rgba(74, 222, 128, 0.2) !important; color: #4ade80 !important; }
-                .action-btn-remove:hover { color: #ef4444 !important; background: rgba(239, 68, 68, 0.1) !important; }
-                .filter-pill:hover { background: rgba(255,255,255,0.1) !important; }
-                .toggle-switch { width: 44px; height: 24px; background: rgba(255,255,255,0.1); border-radius: 12px; position: relative; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
-                .toggle-switch.active { background: rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.5); }
-                .toggle-knob { width: 18px; height: 18px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 3px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-                .toggle-switch.active .toggle-knob { left: 21px; background: #fbbf24; }
-                .no-scrollbar::-webkit-scrollbar { display: none; }
-                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-                .fade-in { animation: fadeIn 0.4s ease; }
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+            <style dangerouslySetInnerHTML={{ __html: `
+                /* pull content edge-to-edge, removing DashboardLayout padding */
+                .wl-root { margin: 0 -40px; display: flex; min-height: calc(100vh - 114px); }
+
+                /* ── sidebar ── */
+                .wl-sidebar {
+                    width: 395px;
+                    flex-shrink: 0;
+                    background: rgba(10,10,10,0.92);
+                    border: 1px solid rgba(255,255,255,0.07);
+                    padding: 28px 20px 60px;
+                    position: sticky;
+                    top: 114px;
+                    height: calc(100vh - 114px);
+                    overflow-y: auto;
+                    scrollbar-width: none;
+                    border-radius: 20px;
+                }
+                .wl-sidebar::-webkit-scrollbar { display: none; }
+
+                /* stat rows */
+                .wl-stat { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
+                .wl-stat:hover { background: rgba(255,255,255,0.05); }
+                .wl-stat.active {
+                    background: transparent;
+                    border: 1px solid rgba(200,170,60,0.55);
+                    border-radius: 30px;
+                    padding: 9px 16px;
+                }
+
+                /* ── grid area ── */
+                .wl-grid-area { flex: 1; padding: 28px 28px 60px; overflow-y: auto; }
+                .wl-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+                    gap: 25px;
+                }
+
+                /* ── poster card ── */
+                .wl-card {
+                    background: rgba(18,18,18,0.95);
+                    border-radius: 32px;
+                    overflow: hidden;
+                    border: 1px solid rgba(255,255,255,0.08);
+                    display: flex;
+                    flex-direction: column;
+                    transition: transform 0.25s, box-shadow 0.25s;
+                    padding: 26px;
+                }
+                .wl-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.75); border-color: rgba(255,255,255,0.2); }
+
+                .wl-seen-btn {
+                    width: 100%; padding: 9px 0; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.2);
+                    background: #008633; color: #fff; font-weight: 700; font-size: 13px;
+                    cursor: pointer; margin-bottom: 8px; transition: background 0.2s;
+                }
+                .wl-seen-btn:hover { background: #16a34a; }
+                .wl-seen-btn.watched { background: rgba(74,222,128,0.18); color: #4ade80; }
+                .wl-seen-btn.watched:hover { background: rgba(74,222,128,0.3); }
+
+                .wl-remove-btn {
+                    width: 100%; padding: 9px 0; border-radius: 999px; border: none;
+                    background: #B1060F33; color: rgba(255,255,255,0.65); font-weight: 700;
+                    font-size: 13px; cursor: pointer; transition: all 0.2s;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                }
+                .wl-remove-btn:hover { background: rgba(239,68,68,0.22); color: #ef4444; }
+
+                /* toggle */
+                .wl-toggle { width: 40px; height: 22px; border-radius: 11px; position: relative; cursor: pointer; transition: background 0.3s; flex-shrink: 0; }
+                .wl-toggle-knob { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 3px; transition: left 0.3s; box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
             `}} />
 
-            {/* Background elements for cinematic feel */}
-            <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '50%', height: '50%', background: 'radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, transparent 70%)', filter: 'blur(100px)', zIndex: 0, pointerEvents: 'none' }} />
-            <div style={{ position: 'fixed', bottom: '-20%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%)', filter: 'blur(120px)', zIndex: 0, pointerEvents: 'none' }} />
+            <div className="wl-root">
 
-            <div style={{ position: 'relative', zIndex: 1, paddingBottom: 100 }} className="fade-in">
+                {/* ══ SIDEBAR ══ */}
+                <aside className="wl-sidebar">
 
-                {/* Header */}
-                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 32 }}>
-                    <div>
-                        <h1 style={{ fontSize: 40, fontWeight: 900, margin: '0 0 4px', letterSpacing: -1, color: '#fff' }}>
-                            My Watchlist
-                        </h1>
-                        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.4)', margin: 0, fontWeight: 500 }}>
-                            Curated picks and future watches
-                        </p>
-                    </div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: '#fbbf24', background: 'rgba(251, 191, 36, 0.1)', padding: '8px 16px', borderRadius: 100, border: '1px solid rgba(251, 191, 36, 0.2)' }}>
-                        {totalCount} Films
-                    </div>
-                </div>
+                    <h1 style={{ fontSize: 30, fontWeight: 900, color: '#fff', margin: '0 0 4px', letterSpacing: -0.3 }}>
+                        My Watchlist
+                    </h1>
+                    <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.38)', margin: '0 0 22px', fontWeight: 500 }}>
+                        Curated picks and future watches
+                    </p>
 
-                {/* Visibility Toggle Card */}
-                <div style={{
-                    marginBottom: 32,
-                    background: 'rgba(255, 255, 255, 0.02)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: 20,
-                    padding: '24px 32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                        <div style={{ width: 48, height: 48, borderRadius: 14, background: isListVisible ? 'rgba(74, 222, 128, 0.15)' : 'rgba(255, 255, 255, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: isListVisible ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)', transition: 'all 0.3s ease' }}>
-                            {isListVisible ? <FaGlobe size={22} color="#4ade80" /> : <FaEyeSlash size={22} color="rgba(255,255,255,0.4)" />}
-                        </div>
+                    {/* Visibility toggle */}
+                    <div style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: 12, padding: '20px 30px',
+                        marginBottom: 18,
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    }}>
                         <div>
-                            <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 4 }}>List visible to friends</div>
-                            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{isListVisible ? 'Friends can see your picks and activities' : 'Only you can see your watchlist'}</div>
+                            <div style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 2 }}>List visible to friends.</div>
+                            <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.38)' }}>Friends can see your picks.</div>
+                        </div>
+                        <div
+                            className="wl-toggle"
+                            style={{ background: isListVisible ? '#fbbf24' : 'rgba(255,255,255,0.15)' }}
+                            onClick={() => setIsListVisible(v => !v)}
+                        >
+                            <div className="wl-toggle-knob" style={{ left: isListVisible ? 21 : 3 }} />
                         </div>
                     </div>
-                    <div className={`toggle-switch ${isListVisible ? 'active' : ''}`} onClick={() => setIsListVisible(!isListVisible)}>
-                        <div className="toggle-knob" />
-                    </div>
-                </div>
 
-                {/* Stats Section */}
-                <div style={{ display: 'flex', gap: 20, marginBottom: 40 }}>
-                    <StatCard label="To Watch" value={toWatchCount} active={activeStat === 'to_watch'} onClick={() => setActiveStat('to_watch')} />
-                    <StatCard label="Watched" value={watchedCount} active={activeStat === 'watched'} onClick={() => setActiveStat('watched')} />
-                    <StatCard label="All" value={totalCount} active={activeStat === 'all'} onClick={() => setActiveStat('all')} />
-                </div>
-
-                {/* Filters & Sorting */}
-                <div style={{ marginBottom: 40, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 32 }}>
-
-                    {/* Row 1: Sorting */}
-                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 16 }} className="no-scrollbar">
-                        <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.3)', marginRight: 8, fontSize: 14, fontWeight: 700 }}><FaFilter size={12} style={{ marginRight: 6 }} /> Sort:</div>
-                        {['Recently Added', 'Friends\' Rating', 'A–Z'].map(sort => (
-                            <FilterPill key={sort} label={sort} active={activeSort === sort} onClick={() => setActiveSort(sort)} />
+                    {/* Stats */}
+                    <div style={{ marginBottom: 26 }}>
+                        {[
+                            { key: 'to_watch', count: toWatchList.length, label: 'To Watch' },
+                            { key: 'watched',  count: watchedList.length,  label: 'Watched'  },
+                            { key: 'all',      count: films.length,        label: 'All'      },
+                        ].map(({ key, count, label }) => (
+                            <div
+                                key={key}
+                                className={`wl-stat${activeStat === key ? ' active' : ''}`}
+                                onClick={() => setActiveStat(key)}
+                            >
+                                <span style={{
+                                    fontSize: 20, fontWeight: 900, minWidth: 30,
+                                    color: activeStat === key ? '#fbbf24' : '#fff',
+                                }}>
+                                    {String(count).padStart(2, '0')}
+                                </span>
+                                <span style={{
+                                    fontSize: 14, fontWeight: 600,
+                                    color: activeStat === key ? '#fbbf24' : 'rgba(255,255,255,0.55)',
+                                }}>
+                                    {label}
+                                </span>
+                            </div>
                         ))}
                     </div>
 
-                    {/* Row 2: Genres */}
-                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 16 }} className="no-scrollbar">
-                        <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.3)', marginRight: 8, fontSize: 14, fontWeight: 700, width: 50 }}>Genre:</div>
-                        {allGenres.slice(0, 10).map(g => (
-                            <FilterPill key={g} label={g} active={activeGenre === g} onClick={() => setActiveGenre(g)} />
-                        ))}
-                    </div>
-                </div>
+                    {/* Divider */}
+                    <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
 
-                {/* Grid List */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(480px, 1fr))', gap: 24 }}>
-                    {displayFilms.map((film) => (
-                        <WatchlistItem
-                            key={film.id}
-                            film={{ ...film, isWatched: watchedIds.includes(film.id), isVisible: isListVisible }}
-                            onToggleWatched={() => handleToggleWatched(film.id)}
-                            onRemove={() => handleRemove(film.id)}
-                            onClick={() => onOpenFilm(film)}
-                        />
-                    ))}
-                </div>
-
-                {displayFilms.length === 0 && (
-                    <div style={{ padding: '80px 0', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
-                        <div style={{ fontSize: 48, marginBottom: 16 }}>🎬</div>
-                        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.6)' }}>Nothing here yet</h3>
-                        <p style={{ fontSize: 15 }}>Try adjusting your filters or adding some films.</p>
+                    {/* Sort / Filters */}
+                    <div style={{ marginBottom: 22, display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'start', gap: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
+                            <FaFilter size={11} color="#E0C36A" />
+                            <span style={{ fontSize: 13, fontWeight: 700, color: '#E0C36A' }}>Filters:</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                            {SORTS.map(s => (
+                                <Pill key={s} label={s} active={activeSort === s} onClick={() => setActiveSort(s)} />
+                            ))}
+                        </div>
                     </div>
-                )}
+
+                    {/* Divider */}
+                    <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} />
+
+                    {/* Genre */}
+                    <div style={{ marginBottom: 2,display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'start', gap: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
+                            <span style={{ fontSize: 14 }}>🎬</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: '#E0C36A' }}>Genre:</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                            {GENRES.map(g => (
+                                <Pill key={g} label={g} active={activeGenre === g} onClick={() => setActiveGenre(g)} />
+                            ))}
+                        </div>
+                    </div>
+
+                </aside>
+
+                {/* ══ POSTER GRID ══ */}
+                <div className="wl-grid-area">
+                    {displayFilms.length > 0 ? (
+                        <div className="wl-grid">
+                            {displayFilms.map(film => (
+                                <div key={film.id} className="wl-card">
+                                    <img
+                                        src={film.poster}
+                                        alt={film.title}
+                                        style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', display: 'block', borderRadius: 20}}
+                                    />
+                                    <div style={{ padding: '10px 10px 12px' }}>
+                                        <div style={{ fontWeight: 800, fontSize: 14, color: '#fff', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {film.title}
+                                        </div>
+                                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)', marginBottom: 10 }}>
+                                            {film.year}
+                                        </div>
+                                        <button
+                                            className={`wl-seen-btn${film.watched ? ' watched' : ''}`}
+                                            onClick={() => handleToggleWatched(film.id)}
+                                        >
+                                            {film.watched ? '✓ Watched' : '"Tap" if you\'ve seen it'}
+                                        </button>
+                                        <button className="wl-remove-btn" onClick={() => handleRemove(film.id)}>
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ padding: '80px 0', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
+                            <div style={{ fontSize: 48, marginBottom: 16 }}>🎬</div>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.6)' }}>Nothing here yet</h3>
+                            <p style={{ fontSize: 15 }}>Try adjusting your filters or adding some films.</p>
+                        </div>
+                    )}
+                </div>
 
             </div>
         </DashboardLayout>

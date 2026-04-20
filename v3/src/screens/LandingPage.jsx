@@ -336,9 +336,6 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
     }
   }
 
-  if (isMobile) {
-    return <MobileSplash onShowLogin={onShowLogin} onShowRegister={onShowRegister} />;
-  }
 
   return (
     <div style={{ minHeight: '100dvh', overflowX: 'hidden', position: 'relative' }}>
@@ -352,8 +349,9 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
         WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
       }}>
         <div className="header-logo">
-          <FaWifi className="header-logo-icon" />
-          <span className="header-logo-text">Reel</span>
+          {/* <FaWifi className="header-logo-icon" />
+          <span className="header-logo-text">Reel</span> */}
+          <img src='/branding/logo.png' />
         </div>
         <button
           onClick={onShowLogin}
