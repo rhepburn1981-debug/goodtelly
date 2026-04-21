@@ -1,21 +1,105 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { getTrending, getProviders, getFilms, getUpcomingTv } from '../api/films';
-import { FaSearch, FaPlay, FaPlus, FaCheck, FaStar, FaChevronRight } from 'react-icons/fa';
+import { FaPlus, FaCheck, FaChevronRight, FaFilter } from 'react-icons/fa';
+import { TiStarFullOutline } from "react-icons/ti";
+import { MdMovieCreation } from "react-icons/md";
+import { FiPlus } from 'react-icons/fi';
 
-// Filters Data
-const FILTERS = {
-    genres: ['All', 'Drama', 'Crime', 'History', 'Thriller', 'Action', 'Sci-Fi'],
-    time: ['This Week', 'This Month', 'This Year', 'All Time']
-};
-
-const FEATURED_PROVIDERS = [
-    { name: 'Netflix', logo: 'https://image.tmdb.org/t/p/w45/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg' },
-    { name: 'Paramount+', logo: 'https://image.tmdb.org/t/p/w45/h5DcR0J2EESLitnhR8xLG1QymTE.jpg' },
-    { name: 'Apple TV+', logo: 'https://image.tmdb.org/t/p/w45/mcbz1LgtErU9p4UdbZ0rG6RTWHX.jpg' },
-    { name: 'Prime', logo: 'https://image.tmdb.org/t/p/w45/pvske1MyAoymrs5bguRfVqYiM9a.jpg' },
-    { name: 'Hulu', logo: 'https://image.tmdb.org/t/p/w45/pqUTCleNUiTLAVlelGxUgWn1ELh.png' }
+// Constants from Watchlist for consistency
+const GENRES = ['All', 'Action', 'Adventure', 'Fantasy', 'Comedy', 'Drama', 'Thriller', 'Crime'];
+const SORTS = ['All', 'Recently Added', 'Friends Rolling', 'A-Z'];
+const SERVICES = [
+    { name: 'All', color: '#fff' },
+    { name: 'Netflix', logo: '/branding/netflix.png' },
+    { name: 'Prime', logo: '/branding/prime.png' },
+    { name: 'Disney+', logo: '/branding/disney.png' },
+    { name: 'NOW', logo: '/branding/now_logo.png' },
+    { name: 'Apple TV+', logo: '/branding/I-tv.png' },
+    { name: 'Paramount+', logo: '/branding/paramountplus.png' },
+    { name: 'Discovery+', logo: '/branding/discovery.png' }
 ];
+const TIME_FILTERS = ['All', 'This Week', 'This Month', 'This Year'];
+
+const Pill = ({ label, active, onClick }) => (
+    <button onClick={onClick} style={{
+        padding: '12px 25px',
+        borderRadius: 100,
+        background: active ? '#E0C36A33' : '#000',
+        border: '1px solid #FFFFFF33',
+        color: active ? '#fff' : '#A09E9F',
+        fontSize: 16,
+        fontWeight: 600,
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        transition: 'all 0.2s',
+        lineHeight: 1.4,
+    }}>
+        {label}
+    </button>
+);
+
+const ServicePill = ({ label, logo, active, onClick }) => (
+    <button onClick={onClick} style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '12px 25px',
+        borderRadius: 100,
+        background: active ? '#E0C36A33' : '#000',
+        border: '1px solid #FFFFFF33',
+        color: active ? '#fff' : '#A09E9F',
+        fontSize: 16,
+        fontWeight: 600,
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        transition: 'all 0.2s',
+        lineHeight: 1.4,
+    }}>
+        {logo ? (
+            <img src={logo} alt={label} style={{ height: '15px', width: 'auto', objectFit: 'contain' }} />
+        ) : null}
+        {label}
+    </button>
+);
+
+const DiscoverCard = ({ film, isAdded, onAdd, onClick }) => (
+    <div className="wl-card" style={{ cursor: 'copy' }}>
+        <img
+            src={film.poster_url || film.image || '/branding/poster1.png'}
+            alt={film.title || film.name}
+            style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', display: 'block', borderRadius: 20, border: '1px solid #FFFFFF33' }}
+            onClick={onClick}
+        />
+        <div style={{ paddingTop: '10px' }}>
+            <div style={{ fontWeight: 800, fontSize: 16, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {film.title || film.name}
+            </div>
+            <div style={{ fontSize: 16, color: '#727272' }}>
+                {film.year || '2024'}
+            </div>
+
+            {/* Rating */}
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+                {[1, 2, 3, 4, 5].map(star => (
+                    <TiStarFullOutline key={star} size={24} color={star <= 5 ? "#fbbf24" : "rgba(255,255,255,0.2)"} />
+                ))}
+                <span style={{ fontSize: 16, color: '#727272', marginLeft: 10 }}>4.8/5</span>
+            </div>
+
+            <button
+                className={`wl-seen-btn ${isAdded ? 'watched' : ''}`}
+                onClick={(e) => { e.stopPropagation(); onAdd(film); }}
+                style={{ background: isAdded ? '#E0C36A' : '#2D2715', color: isAdded ? '#2D2715' : '#D9D9D9' }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                    {isAdded ? <FaCheck size={24} /> : <FiPlus size={24} />}
+                    <span>{isAdded ? 'Added' : 'Add to Watchlist'}</span>
+                </div>
+            </button>
+        </div>
+    </div>
+);
 
 export default function DiscoverDashboard(props) {
     const {
@@ -30,8 +114,9 @@ export default function DiscoverDashboard(props) {
     } = props;
 
     const [activeGenre, setActiveGenre] = useState('All');
-    const [activePlatform, setActivePlatform] = useState('All Services');
-    const [activeTime, setActiveTime] = useState('This Week');
+    const [activePlatform, setActivePlatform] = useState('All');
+    const [activeTime, setActiveTime] = useState('All');
+    const [activeSort, setActiveSort] = useState('All');
     const [trendingAll, setTrendingAll] = useState(props.trendingAll || []);
     const [providers, setProviders] = useState([]);
     const [allFilms, setAllFilms] = useState(props.allFilms || []);
@@ -58,22 +143,13 @@ export default function DiscoverDashboard(props) {
 
     const filteredFilms = React.useMemo(() => {
         return allFilms.filter(f => {
-            const gMatch = activeGenre === 'All' || (f.genre || '').includes(activeGenre === 'Science Fiction' ? 'Sci-Fi' : activeGenre);
-            const pMatch = activePlatform === 'All Services' || (f.streamers || []).includes(activePlatform);
+            const gMatch = activeGenre === 'All' || (f.genre || '').includes(activeGenre);
+            const pMatch = activePlatform === 'All' || (f.streamers || []).includes(activePlatform);
             return gMatch && pMatch;
         });
     }, [allFilms, activeGenre, activePlatform]);
 
-    const heroFilm = filteredFilms[0] || trendingAll[0] || {
-        id: 1,
-        title: 'Dune: Part Two',
-        year: 2024,
-        genre: 'Action / Sci-Fi',
-        rating: '9.0',
-        poster_url: '/branding/trend2.png'
-    };
-
-    const displayFilms = filteredFilms.slice(1, 11);
+    const displayFilms = filteredFilms.length > 0 ? filteredFilms : trendingAll;
 
     return (
         <DashboardLayout
@@ -84,241 +160,181 @@ export default function DiscoverDashboard(props) {
         >
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .glass-card {
-                    background: rgba(0, 0, 0, 0.6);
-                    backdrop-filter: blur(16px);
-                    border: 1px solid rgba(255, 255, 255, 0.05);
+                .wl-root { display: flex; min-height: calc(100vh - 114px); gap: 24px }
+
+                .wl-sidebar {
+                    width: 395px;
+                    flex-shrink: 0;
+                    background: rgba(10,10,10,0.92);
+                    border: 1px solid rgba(255,255,255,0.07);
+                    padding: 20px;
+                    position: sticky;
+                    top: 134px;
+                    height: calc(100vh - 154px);
+                    overflow-y: auto;
+                    scrollbar-width: none;
                     border-radius: 20px;
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
                 }
-                .filter-pill {
-                    padding: 10px 24px;
-                    border-radius: 100px;
-                    font-size: 14px;
-                    font-weight: 700;
-                    white-space: nowrap;
-                    cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                .wl-sidebar::-webkit-scrollbar { display: none; }
+
+                .wl-grid-area { flex: 1; overflow-y: auto; }
+
+                .wl-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(284px, 1fr));
+                    gap: 25px;
                 }
-                .filter-pill.active {
-                    background: rgba(251, 191, 36, 0.15);
-                    color: #fbbf24;
-                    border: 1px solid rgba(251, 191, 36, 0.5);
-                    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);
-                }
-                .filter-pill.inactive {
-                    background: rgba(255, 255, 255, 0.03);
-                    color: rgba(255, 255, 255, 0.6);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                }
-                .hero-card {
-                    position: relative;
-                    border-radius: 24px;
+
+                .wl-card {
+                    background: #000;
+                    border-radius: 32px;
                     overflow: hidden;
-                    aspect-ratio: 21 / 6;
+                    border: 1px solid #FFFFFF33;
+                    display: flex;
+                    flex-direction: column;
+                    transition: all 0.25s;
+                    padding: 26px;
+                }
+                .wl-card:hover { box-shadow: 0 20px 50px rgba(0,0,0,0.75); border-color: rgba(255,255,255,0.2); transform: translateY(-5px); }
+
+                .wl-seen-btn {
+                    width: 100%; padding: 12px 0; border-radius: 999px; border: 1px solid #FFFFFF33;
+                    background: #008633; color: #fff; font-weight: 700; font-size: 16px;
+                    cursor: pointer; transition: all 0.2s;
+                }
+                .wl-seen-btn:hover { background: #16a34a; }
+                .wl-seen-btn.watched { background: rgba(74,222,128,0.1); color: #4ade80; border-color: rgba(74,222,128,0.2); }
+
+                .time-filter-bar {
+                    display: flex;
+                    justify-content: space-around;
+                    align-items: center;
+                    background: #000;
+                    border: 1px solid #FFFFFF33;
+                    border-radius: 20px;
+                    margin-bottom: 20px;
+                    height: 70px;
+                    padding: 0 31px;
+                }
+                .time-pill {
+                    flex: 1;
+                    height: 100%;
                     display: flex;
                     align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    font-weight: 400;
+                    color: #fff;
                     cursor: pointer;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-                    transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+                    border-radius: 8px;
+                    transition: all 0.3s;
                 }
-                .list-item-card {
+                .time-pill.active {
+                    color: #E0C36A;
+                    font-weight: 700;
                     position: relative;
-                    display: flex;
-                    gap: 20px;
-                    background: rgba(255, 255, 255, 0.03);
-                    backdrop-filter: blur(12px);
-                    border: 1px solid rgba(255, 255, 255, 0.05);
-                    border-radius: 16px;
-                    padding: 16px;
-                    overflow: hidden;
-                    cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-                .add-btn-check {
-                    background: rgba(74, 222, 128, 0.15);
-                    color: #4ade80;
-                    border: 1px solid rgba(74, 222, 128, 0.3);
+                .time-pill.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 3px;
+                    background: #fbbf24;
                 }
-                .no-scrollbar::-webkit-scrollbar { display: none; }
+
                 .fade-in { animation: fadeIn 0.5s ease-out forwards; }
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             `}} />
 
-            <div style={{ position: 'relative', zIndex: 1, paddingBottom: 100, paddingTop: 100 }} className="fade-in">
+            <div className="wl-root fade-in" style={{ paddingTop: '20px' }}>
 
-                <div style={{ marginBottom: 40, display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <span style={{ fontSize: 36, filter: 'drop-shadow(0 0 10px rgba(255,100,0,0.5))' }}>🔥</span>
-                    <h1 style={{ fontSize: 38, fontWeight: 900, margin: 0, letterSpacing: -1, color: '#fff' }}>
-                        What's Trending
-                    </h1>
-                </div>
-
-                {/* Filters Section */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginBottom: 56 }}>
-                    {/* Row 1: Time */}
-                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4, alignItems: 'center' }} className="no-scrollbar">
-                        <div style={{ minWidth: 100, color: 'rgba(255,255,255,0.4)', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Time:</div>
-                        {FILTERS.time.map(t => (
-                            <div key={t} className={`filter-pill ${activeTime === t ? 'active' : 'inactive'}`} onClick={() => setActiveTime(t)}>{t}</div>
-                        ))}
-                    </div>
-
-                    {/* Row 2: Services */}
-                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4, alignItems: 'center' }} className="no-scrollbar">
-                        <div style={{ minWidth: 100, color: 'rgba(255,255,255,0.4)', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Services:</div>
-                        <div key="All Services" className={`filter-pill ${activePlatform === 'All Services' ? 'active' : 'inactive'}`} onClick={() => setActivePlatform('All Services')}>All Services</div>
-                        {(providers.length > 0 ? providers : FEATURED_PROVIDERS).map(p => (
-                            <div key={p.name} className={`filter-pill ${activePlatform === p.name ? 'active' : 'inactive'}`} onClick={() => setActivePlatform(p.name)} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                {p.logo && <img src={p.logo} alt="" style={{ height: 18, objectFit: 'cover' }} />}
-                                {p.name}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Row 3: Genre */}
-                    <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4, alignItems: 'center' }} className="no-scrollbar">
-                        <div style={{ minWidth: 100, color: 'rgba(255,255,255,0.4)', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Genre:</div>
-                        {FILTERS.genres.map(g => (
-                            <div key={g} className={`filter-pill ${activeGenre === g ? 'active' : 'inactive'}`} onClick={() => setActiveGenre(g)}>{g}</div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Hero Trending Section */}
-                <div className="hero-card" style={{ marginBottom: 48 }} onClick={() => onWatchTrailer && onWatchTrailer(heroFilm.trailer_url || 'https://www.youtube.com/watch?v=zSWdZVtXT7E')}>
-                    <img src={heroFilm.poster_url} className="hero-bg" alt="Hero" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0.4) 60%, transparent 100%)' }} />
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,10,12,0.9) 0%, transparent 60%)' }} />
-
-                    <div style={{ position: 'relative', zIndex: 1, padding: '40px 60px', width: '60%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <div style={{ background: 'linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%)', color: '#000', padding: '6px 16px', borderRadius: 8, fontSize: 13, fontWeight: 900, marginBottom: 20, letterSpacing: 1 }}>
-                            #1 TRENDING
+                {/* ══ SIDEBAR ══ */}
+                <aside className="wl-sidebar">
+                    {/* Filters Section */}
+                    <div style={{ marginBottom: 22, display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'start', gap: 10, padding: '20px 0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '12px 25px' }}>
+                            <FaFilter size={24} color="#E0C36A" />
+                            <span style={{ fontSize: 16, fontWeight: 700, color: '#E0C36A' }}>Filters:</span>
                         </div>
-                        <h1 style={{ fontSize: 56, fontWeight: 900, color: '#fff', margin: '0 0 16px', letterSpacing: -1 }}>{heroFilm.title}</h1>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
-                            <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: 600 }}>{heroFilm.year}</div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                            <button
-                                className="play-btn"
-                                onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer(heroFilm.trailer_url || 'https://www.youtube.com/watch?v=zSWdZVtXT7E'); }}
-                                style={{ width: 68, height: 68, borderRadius: '50%', background: 'rgba(255,255,255,0.95)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}
-                            >
-                                <FaPlay size={24} style={{ marginLeft: 4 }} />
-                            </button>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onAddToList(heroFilm); }}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: 10, padding: '16px 32px', borderRadius: 100,
-                                    background: addedIds.includes(heroFilm.id) ? 'rgba(74, 222, 128, 0.15)' : 'rgba(255,255,255,0.05)',
-                                    color: addedIds.includes(heroFilm.id) ? '#4ade80' : '#fff',
-                                    border: addedIds.includes(heroFilm.id) ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(255,255,255,0.2)',
-                                    fontSize: 16, fontWeight: 800, cursor: 'pointer'
-                                }}
-                            >
-                                {addedIds.includes(heroFilm.id) ? <FaCheck /> : <FaPlus />}
-                                {addedIds.includes(heroFilm.id) ? 'Added' : 'Watchlist'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Ranked List & Upcoming */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 40, alignItems: 'start', marginBottom: 48 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                            <span style={{ fontSize: 22 }}>📋</span>
-                            <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, margin: 0 }}>Top 10 Today</h2>
-                        </div>
-                        {displayFilms.map((item, idx) => (
-                            <div key={item.id} className="list-item-card" onClick={() => onOpenFilm(item)}>
-                                <div style={{ position: 'relative', width: 90, height: 130, borderRadius: 12, overflow: 'hidden', flexShrink: 0, zIndex: 1 }}>
-                                    <img src={item.poster_url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                </div>
-                                <div style={{ position: 'absolute', top: -10, left: 110, fontSize: 130, fontWeight: 900, color: 'rgba(255,255,255,0.04)', pointerEvents: 'none', zIndex: 0, lineHeight: 1 }}>
-                                    {idx + 2}
-                                </div>
-                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', zIndex: 1 }}>
-                                    <h3 style={{ fontSize: 22, fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>{item.title}</h3>
-                                    <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', margin: '0' }}>{item.year}</p>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', zIndex: 1 }}>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); onAddToList(item); }}
-                                        className={addedIds.includes(item.id) ? 'add-btn-check' : 'add-btn-hover'}
-                                        style={{
-                                            width: 48, height: 48, borderRadius: '50%',
-                                            background: addedIds.includes(item.id) ? 'rgba(74, 222, 128, 0.15)' : 'rgba(255,255,255,0.05)',
-                                            color: addedIds.includes(item.id) ? '#4ade80' : '#fff',
-                                            border: addedIds.includes(item.id) ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(255,255,255,0.1)',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
-                                        }}
-                                    >
-                                        {addedIds.includes(item.id) ? <FaCheck size={18} /> : <FaPlus size={18} />}
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div style={{ position: 'sticky', top: 32 }}>
-                        <div className="glass-card" style={{ padding: 28, marginBottom: 24 }}>
-                            <h4 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: '0 0 20px' }}>Trending Categories</h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                {['Sci-Fi Hits', 'Oscar Winners', 'Indie Gems'].map(cat => (
-                                    <div key={cat} style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.03)', borderRadius: 12, fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.8)', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between' }}>
-                                        {cat} <FaChevronRight size={10} style={{ alignSelf: 'center' }} />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Quick View Stats */}
-                        <div className="glass-card" style={{ padding: 28, background: 'linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(0,0,0,0.6) 100%)' }}>
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Daily Insight</div>
-                            <div style={{ fontSize: 16, color: '#fff', fontWeight: 600, lineHeight: 1.5 }}>
-                                "Dune: Part Two" remains the most added film this week across your friend groups.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Upcoming TV Section */}
-                {upcomingShows.length > 0 && (
-                    <div style={{
-                        marginTop: 48,
-                        padding: '32px',
-                        background: 'rgba(255, 255, 255, 0.02)',
-                        borderRadius: '24px',
-                        border: '1px solid rgba(255,255,255,0.05)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                            <span style={{ fontSize: 24 }}>📺</span>
-                            <h2 style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.5, margin: 0 }}>On TV This Week</h2>
-                        </div>
-                        <div style={{ display: 'flex', gap: 20, overflowX: 'auto', paddingBottom: 10 }} className="no-scrollbar">
-                            {upcomingShows.map((show) => (
-                                <div
-                                    key={show.id}
-                                    onClick={() => onOpenFilm({ ...show, title: show.name, poster_url: show.image, _isExternal: true })}
-                                    style={{
-                                        width: 150, minWidth: 150, borderRadius: 12, overflow: 'hidden', cursor: 'pointer',
-                                        transition: 'transform 0.3s ease', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)'
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                >
-                                    <img src={show.image} alt={show.name} style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover' }} />
-                                    <div style={{ padding: '10px', fontSize: 13, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        {show.name}
-                                    </div>
-                                </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                            {SORTS.map(s => (
+                                <Pill key={s} label={s} active={activeSort === s} onClick={() => setActiveSort(s)} />
                             ))}
                         </div>
                     </div>
-                )}
+
+                    {/* Genre Section */}
+                    <div style={{ marginBottom: 2, display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'start', gap: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '12px 25px' }}>
+                            <MdMovieCreation size={24} color="#E0C36A" />
+                            <span style={{ fontSize: 16, fontWeight: 700, color: '#E0C36A' }}>Genre:</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                            {GENRES.map(g => (
+                                <Pill key={g} label={g} active={activeGenre === g} onClick={() => setActiveGenre(g)} />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Services Section */}
+                    <div style={{ marginTop: '30px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 15, paddingLeft: '10px' }}>
+                            <MdMovieCreation size={24} color="#E0C36A" />
+                            <span style={{ fontSize: '20px', fontWeight: 600, color: '#E0C36A' }}>Services:</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                            {SERVICES.map(s => (
+                                <ServicePill
+                                    key={s.name}
+                                    label={s.name}
+                                    logo={s.logo}
+                                    active={activePlatform === s.name}
+                                    onClick={() => setActivePlatform(s.name)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </aside>
+
+                {/* ══ MAIN GRID AREA ══ */}
+                <div className="wl-grid-area">
+                    {/* Top Time Filter Bar */}
+                    <div className="time-filter-bar">
+                        {TIME_FILTERS.map(t => (
+                            <div
+                                key={t}
+                                className={`time-pill ${activeTime === t ? 'active' : ''}`}
+                                onClick={() => setActiveTime(t)}
+                            >
+                                {t}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Grid of Movie Cards */}
+                    {displayFilms.length > 0 ? (
+                        <div className="wl-grid">
+                            {displayFilms.map(film => (
+                                <DiscoverCard
+                                    key={film.id}
+                                    film={film}
+                                    isAdded={addedIds.includes(film.id)}
+                                    onAdd={onAddToList}
+                                    onClick={() => onOpenFilm(film)}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ padding: '80px 0', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
+                            <div style={{ fontSize: 48, marginBottom: 16 }}>🎬</div>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, color: 'rgba(255,255,255,0.6)' }}>No results found</h3>
+                            <p style={{ fontSize: 15 }}>Try adjusting your filters to find more great content.</p>
+                        </div>
+                    )}
+                </div>
+
             </div>
         </DashboardLayout>
     );

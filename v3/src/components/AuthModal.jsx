@@ -109,9 +109,9 @@ export default function AuthModal({ mode: initialMode = 'login', onLogin, onClos
           background: isMobile ? 'var(--surface)' : 'rgba(20, 20, 25, 0.8)',
           backdropFilter: isMobile ? 'none' : 'blur(30px)',
           borderRadius: isMobile ? '24px 24px 0 0' : '24px',
-          padding: isMobile ? '28px 24px 40px' : '48px 40px',
+          padding: isMobile ? '20px' : '48px 40px',
           animation: isMobile ? 'slideUp 0.3s ease' : 'popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-          maxHeight: '90dvh',
+          maxHeight: '100dvh',
           overflowY: 'auto',
           position: 'relative',
           border: isMobile ? 'none' : '1px solid rgba(255,255,255,0.1)',
@@ -181,7 +181,7 @@ export default function AuthModal({ mode: initialMode = 'login', onLogin, onClos
         <p style={{
           color: 'var(--muted)',
           fontSize: isMobile ? 14 : 16,
-          marginBottom: 32,
+          marginBottom: 18,
           textAlign: isMobile ? 'left' : 'center'
         }}>
           {mode === 'register'
@@ -289,7 +289,6 @@ export default function AuthModal({ mode: initialMode = 'login', onLogin, onClos
               cursor: loading ? 'not-allowed' : 'pointer',
               fontFamily: 'var(--ff-body)',
               opacity: loading ? 0.7 : 1,
-              marginTop: 8,
               boxShadow: isMobile ? 'none' : '0 10px 25px rgba(186, 33, 30, 0.3)',
               transition: 'transform 0.1s ease',
             }}

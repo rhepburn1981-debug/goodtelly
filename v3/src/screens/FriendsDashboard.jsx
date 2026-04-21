@@ -1,52 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { FaPlus, FaWhatsapp, FaCheck, FaStar, FaShareAlt, FaBell } from 'react-icons/fa';
+import { FaPlus, FaWhatsapp, FaCheck, FaStar, FaShareAlt, FaBell, FaFilter } from 'react-icons/fa';
+import { MdMovieCreation } from "react-icons/md";
+import { TiStarFullOutline } from "react-icons/ti";
+import { FiPlus } from 'react-icons/fi';
 
-// Mocks
 const MOCK_FRIENDS = [
-    { name: 'Alex', avatar: 'https://i.pravatar.cc/100?u=Alex', picks: 24 },
-    { name: 'Sarah', avatar: 'https://i.pravatar.cc/100?u=Sarah', picks: 12 },
-    { name: 'James', avatar: 'https://i.pravatar.cc/100?u=James', picks: 8 },
-    { name: 'Suzanne', avatar: 'https://i.pravatar.cc/100?u=Suzanne', picks: 42 },
-    { name: 'Ryan', avatar: 'https://i.pravatar.cc/100?u=Ryan', picks: 15 }
+    { username: 'Richard', display_name: 'Richard', picks: 18 },
+    { username: 'Ashley', display_name: 'Ashley', picks: 12 },
+    { username: 'Sara', display_name: 'Sara', picks: 8 },
+    { username: 'Peter', display_name: 'Peter', picks: 42 },
+    { username: 'Gerard', display_name: 'Gerard', picks: 15 }
 ];
 
 const MOCK_FILMS = [
-    { id: 11, title: 'The Lady', year: 2011, genre: 'Drama / History', rating: '8.4', platform: 'NETFLIX', img: '/branding/poster4.png', isAdded: true },
-    { id: 12, title: 'The Batman', year: 2022, genre: 'Action / Crime', rating: '8.8', platform: 'PRIME', img: '/branding/poster2.png', isAdded: false },
-    { id: 13, title: 'Oppenheimer', year: 2023, genre: 'Drama / History', rating: '9.2', platform: 'APPLE TV+', img: '/branding/poster3.png', isAdded: false },
-    { id: 14, title: 'Blade Runner 2049', year: 2017, genre: 'Sci-Fi / Thriller', rating: '8.9', platform: 'PRIME', img: '/branding/poster1.png', isAdded: true }
+    { id: 1, title: 'Thrash', year: '2026', poster_url: '/branding/poster1.png', watched: false },
+    { id: 2, title: 'Mercy', year: '2026', poster_url: '/branding/poster2.png', watched: true },
+    { id: 3, title: 'Jujutsu Kaizen', year: '2022', poster_url: '/branding/poster3.png', watched: false },
+    { id: 4, title: 'Beyond Paradise', year: '2017', poster_url: '/branding/poster4.png', watched: true }
 ];
 
-const MOCK_ACTIVITY = [
-    { text: "James added The Batman", time: "2 hours ago", icon: "🎬" },
-    { text: "Suzanne rated Oppenheimer 4.5 ⭐️", time: "5 hours ago", icon: "⭐" },
-    { text: "Ryan started watching Silo", time: "1 day ago", icon: "📺" },
-    { text: "Alex recommended The Lady to you", time: "2 days ago", icon: "💬" }
-];
+const GENRES = ['All', 'Action', 'Adventure', 'Fantasy', 'Comedy', 'Crime', 'Thriller', 'Drama'];
+const SORTS = ['All', 'Recently Added', 'Friends Rolling', 'A-Z'];
 
 // Helper components
-const FilterPill = ({ label, active, onClick }) => (
-    <div
-        className={`filter-pill ${active ? 'active' : 'inactive'}`}
-        onClick={onClick}
-    >
+const Pill = ({ label, active, onClick }) => (
+    <button onClick={onClick} style={{
+        padding: '12px 25px',
+        borderRadius: 100,
+        background: active ? '#E0C36A33' : '#000',
+        border: '1px solid #FFFFFF33',
+        color: active ? '#fff' : '#A09E9F',
+        fontSize: 16,
+        fontWeight: 600,
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        transition: 'all 0.2s',
+        lineHeight: 1.4,
+    }}>
         {label}
-    </div>
+    </button>
 );
 
-const TabCard = ({ title, count, active, onClick }) => (
-    <button
-        className={`tab-card ${active ? 'active' : 'inactive'}`}
-        onClick={onClick}
-    >
-        <div style={{ fontSize: 14, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8, color: active ? '#fbbf24' : 'rgba(255,255,255,0.4)' }}>
-            {title}
+const FriendFilmCard = ({ film, isAdded, onAdd, onClick }) => (
+    <div className="wl-card">
+        <img
+            src={film.poster_url || film.img || '/branding/poster1.png'}
+            alt={film.title}
+            style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', display: 'block', borderRadius: 20, border: '1px solid #FFFFFF33' }}
+            onClick={onClick}
+        />
+        <div style={{ padding: '10px 11px 0' }}>
+            <div style={{ fontWeight: 800, fontSize: 16, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingTop: '5px' }}>
+                {film.title}
+            </div>
+            <div style={{ fontSize: 16, color: '#727272', marginBottom: '15px' }}>
+                {film.year}
+            </div>
+            <button
+                className="wl-seen-btn static-seen"
+                onClick={(e) => { e.stopPropagation(); onAdd(film); }}
+                style={{ background: '#16A34A', color: '#fff' }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                    <span>"Tap" if you've seen it</span>
+                </div>
+            </button>
+            <button className="wl-remove-btn" style={{ marginTop: 10, background: '#1A0505', color: '#fff', borderColor: '#FFFFFF33' }}>
+                Remove
+            </button>
         </div>
-        <div style={{ fontSize: 40, fontWeight: 900, color: active ? '#fff' : 'rgba(255,255,255,0.3)', lineHeight: 1 }}>
-            {count}
-        </div>
-    </button>
+    </div>
 );
 
 const FriendAvatar = ({ friend, active, onClick }) => (
@@ -55,21 +79,22 @@ const FriendAvatar = ({ friend, active, onClick }) => (
         onClick={onClick}
         style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer',
-            opacity: active ? 1 : 0.5, transition: 'all 0.3s ease', minWidth: 80
+            opacity: active ? 1 : 0.6, transition: 'all 0.3s ease', minWidth: 74
         }}
     >
         <div style={{
-            width: 72, height: 72, borderRadius: '50%', padding: 4,
-            background: active ? 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)' : 'transparent',
-            boxShadow: active ? '0 10px 25px rgba(251,191,36,0.3)' : 'none',
-            transition: 'all 0.3s ease'
+            width: 70, height: 70, borderRadius: '50%', padding: 4,
+            background: active ? '#775A00' : '#000000',
+            transition: 'all 0.3s ease',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 40, fontWeight: 700, color: active ? '#fff' : '#A09E9F',
+            border: active ? '2px solid #E0C36A' : '2px solid #FFFFFF33'
         }}>
-            <img src={friend.avatar} alt={friend.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '3px solid #0f0f12' }} />
+            {friend.avatar ? (
+                <img src={friend.avatar} alt={friend.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+            ) : friend.name.charAt(0)}
         </div>
-        <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', marginBottom: 2 }}>{friend.name}</div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>{friend.picks} picks</div>
-        </div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#A09E9F' }}>{friend.name}</div>
     </div>
 );
 
@@ -87,28 +112,23 @@ export default function FriendsDashboard(props) {
         onSearchChange
     } = props;
 
-    const [selectedFriend, setSelectedFriend] = useState(null);
-    const [friendList, setFriendList] = useState([]);
+    const [selectedFriend, setSelectedFriend] = useState('Richard');
+    const [friendList, setFriendList] = useState(MOCK_FILMS);
     const [loadingList, setLoadingList] = useState(false);
     const [activeTabSub, setActiveTabSub] = useState('all');
+    const [activeGenre, setActiveGenre] = useState('All');
+    const [activeSort, setActiveSort] = useState('All');
+    const [isListVisible, setIsListVisible] = useState(true);
 
-    // Fetch friend's list when selected
+    // Static design: no dynamic fetching needed for this specific view
     useEffect(() => {
-        if (!selectedFriend) {
-            if (friends.length > 0) setSelectedFriend(friends[0].username);
-            return;
-        }
-        setLoadingList(true);
-        // We'll need to use a helper or the api client directly
-        import('../api/friends').then(m => m.getFriendFilms(selectedFriend))
-            .then(list => setFriendList(list || []))
-            .catch(() => setFriendList([]))
-            .finally(() => setLoadingList(false));
-    }, [selectedFriend, friends]);
+        // Keeping it empty or set to mock
+    }, [selectedFriend]);
 
     const displayFilms = friendList.filter(f => {
         if (activeTabSub === 'watched' && !f.watched) return false;
         if (activeTabSub === 'to_watch' && f.watched) return false;
+        if (activeGenre !== 'All' && !(f.genre || '').includes(activeGenre)) return false;
         return true;
     });
 
@@ -129,189 +149,214 @@ export default function FriendsDashboard(props) {
         >
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .glass-card {
-                    background: rgba(0, 0, 0, 0.4);
-                    backdrop-filter: blur(20px);
-                    -webkit-backdrop-filter: blur(20px);
-                    border: 1px solid rgba(255, 255, 255, 0.05);
-                    border-radius: 24px;
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
-                }
-                .filter-pill {
-                    padding: 8px 20px;
-                    border-radius: 100px;
-                    font-size: 13px;
-                    font-weight: 700;
-                    white-space: nowrap;
-                    cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                }
-                .filter-pill.active {
-                    background: rgba(251, 191, 36, 0.15);
-                    color: #fbbf24;
-                    border: 1px solid rgba(251, 191, 36, 0.5);
-                    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);
-                }
-                .filter-pill.inactive {
-                    background: rgba(255, 255, 255, 0.02);
-                    color: rgba(255, 255, 255, 0.5);
-                    border: 1px solid rgba(255, 255, 255, 0.08);
-                }
-                .tab-card {
-                    flex: 1;
-                    padding: 32px 24px;
+                .wl-root { display: flex; min-height: calc(100vh - 114px); gap: 24px }
+
+                .wl-sidebar {
+                    width: 395px;
+                    flex-shrink: 0;
+                    background: rgba(10,10,10,0.92);
+                    border: 1px solid rgba(255,255,255,0.07);
+                    padding: 20px;
+                    position: sticky;
+                    top: 134px;
+                    height: calc(100vh - 154px);
+                    overflow-y: auto;
+                    scrollbar-width: none;
                     border-radius: 20px;
+                }
+                .wl-sidebar::-webkit-scrollbar { display: none; }
+
+                .wl-stat { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
+                .wl-stat:hover { background: rgba(255,255,255,0.05); }
+                .wl-stat.active {
+                    background: #E0C36A33;
+                    border: 3px solid #E0C36A;
+                    border-radius: 30px;
+                    padding: 9px 16px;
+                }
+
+                .wl-grid-area { flex: 1; overflow-y: auto; }
+                .wl-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(284px, 1fr));
+                    gap: 25px;
+                }
+
+                .wl-card {
+                    background: #000;
+                    border-radius: 32px;
+                    overflow: hidden;
+                    border: 1px solid #FFFFFF33;
                     display: flex;
                     flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-                    border: none;
+                    transition: all 0.25s;
+                    padding: 26px;
                 }
-                .tab-card.active {
-                    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(251, 191, 36, 0.05) 100%);
-                    border: 1px solid rgba(251, 191, 36, 0.4);
-                    box-shadow: 0 20px 40px rgba(251, 191, 36, 0.15);
-                    transform: translateY(-4px);
+                .wl-card:hover { box-shadow: 0 20px 50px rgba(0,0,0,0.75); border-color: rgba(255,255,255,0.2); transform: translateY(-5px); }
+
+                .wl-seen-btn {
+                    width: 100%; padding: 10px 0; border-radius: 999px; border: 1px solid #FFFFFF33;
+                    background: #008633; color: #fff; font-weight: 600; font-size: 16px;
+                    cursor: pointer; transition: all 0.2s;
                 }
-                .tab-card.inactive {
-                    background: rgba(0, 0, 0, 0.3);
-                    border: 1px solid rgba(255, 255, 255, 0.05);
+                .wl-seen-btn:hover { background: #16a34a; }
+                .wl-seen-btn.watched { background: #E0C36A; color: #2D2715; border-color: transparent; }
+
+                .wl-remove-btn {
+                    width: 100%; padding: 10px 0; border-radius: 999px; border: none;
+                    background: #B1060F33; color: #fff; font-weight: 700;
+                    font-size: 16px; cursor: pointer; transition: all 0.2s;
+                    border: 1px solid #FFFFFF33;
                 }
-                .list-item-card {
-                    display: flex;
-                    gap: 20px;
-                    padding: 16px;
-                    background: rgba(255, 255, 255, 0.02);
-                    border: 1px solid rgba(255, 255, 255, 0.05);
-                    border-radius: 16px;
-                    overflow: hidden;
-                    cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    position: relative;
-                }
-                .action-btn-green {
-                    background: rgba(74, 222, 128, 0.15);
-                    color: #4ade80;
-                    border: 1px solid rgba(74, 222, 128, 0.3);
-                }
+                .wl-remove-btn:hover { background: rgba(239,68,68,0.22); color: #ef4444; }
+
+                .wl-toggle { width: 40px; height: 22px; border-radius: 11px; position: relative; cursor: pointer; transition: background 0.3s; flex-shrink: 0; }
+                .wl-toggle-knob { width: 30px; height: 30px; border-radius: 50%; background: #E0C36A; position: absolute; top: -4px; transition: left 0.3s; box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+
+                .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             `}} />
 
-            <div style={{ position: 'relative', zIndex: 1, paddingBottom: 100, paddingTop: 24 }} className="fade-in">
+            <div className="wl-root fade-in" style={{ paddingTop: '20px' }}>
 
-                {/* Top Section */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2.5fr) 1fr', gap: 40, marginBottom: 48, alignItems: 'start' }}>
-
-                    <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                            <span style={{ fontSize: 28 }}>👥</span>
-                            <h1 style={{ fontSize: 32, fontWeight: 900, margin: 0, letterSpacing: -1, color: '#fff' }}>
-                                Your Friends
-                            </h1>
+                {/* ══ SIDEBAR ══ */}
+                <aside className="wl-sidebar">
+                    {/* Visibility toggle */}
+                    <div style={{
+                        background: '#000',
+                        border: '1px solid #FFFFFF33',
+                        borderRadius: 20, padding: '20px 30px',
+                        marginBottom: 18,
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    }}>
+                        <div>
+                            <div style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>List visible to friends.</div>
+                            <div style={{ fontSize: 16, color: '#A09E9F' }}>Friends can see your picks.</div>
                         </div>
+                        <div
+                            className="wl-toggle"
+                            style={{ background: isListVisible ? '#fbbf24' : '#fff' }}
+                            onClick={() => setIsListVisible(v => !v)}
+                        >
+                            <div className="wl-toggle-knob" style={{ left: isListVisible ? 21 : -10 }} />
+                        </div>
+                    </div>
 
-                        <div style={{ display: 'flex', gap: 24, overflowX: 'auto', paddingBottom: 16 }} className="no-scrollbar">
-                            {friends.map(f => (
+                    {/* Stats */}
+                    <div style={{ marginBottom: 26, display: 'flex', flexDirection: 'column', gap: 20, background: '#000', border: ' 1px solid #FFFFFF33', borderRadius: 20, padding: 20 }}>
+                        {[
+                            { key: 'to_watch', count: 12, label: 'To Watch' },
+                            { key: 'watched', count: 6, label: 'Watched' },
+                            { key: 'all', count: 18, label: 'All' },
+                        ].map(({ key, count, label }) => (
+                            <div
+                                key={key}
+                                className={`wl-stat${activeTabSub === key ? ' active' : ''}`}
+                                onClick={() => setActiveTabSub(key)}
+                            >
+                                <span style={{ fontSize: 20, color: activeTabSub === key ? '#fbbf24' : '#fff', fontWeight: activeTabSub === key ? '700' : '400' }}>
+                                    {String(count).padStart(2, '0')}
+                                </span>
+                                <span style={{ fontSize: 20, color: activeTabSub === key ? '#fbbf24' : '#fff', fontWeight: activeTabSub === key ? '700' : '400' }}>
+                                    {label}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Filters Section */}
+                    <div style={{ marginBottom: 22, display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'start', gap: 10, padding: '20px 0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '12px 25px' }}>
+                            <FaFilter size={24} color="#E0C36A" />
+                            <span style={{ fontSize: 16, fontWeight: 700, color: '#E0C36A' }}>Filters:</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                            {SORTS.map(s => (
+                                <Pill key={s} label={s} active={activeSort === s} onClick={() => setActiveSort(s)} />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Genre Section */}
+                    <div style={{ marginBottom: 2, display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'start', gap: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '12px 25px' }}>
+                            <MdMovieCreation size={24} color="#E0C36A" />
+                            <span style={{ fontSize: 16, fontWeight: 700, color: '#E0C36A' }}>Genre:</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                            {GENRES.map(g => (
+                                <Pill key={g} label={g} active={activeGenre === g} onClick={() => setActiveGenre(g)} />
+                            ))}
+                        </div>
+                    </div>
+                </aside>
+
+                {/* ══ MAIN AREA ══ */}
+                <div className="wl-grid-area">
+                    {/* Header: Friends Scroller + Invite banner */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, background: '#000', border: ' 1px solid ##FFFFFF33', borderRadius: 20, padding: '20px 40px' }}>
+                        <div style={{ display: 'flex', gap: 22, overflowX: 'auto' }} className="no-scrollbar">
+                            <div className="friend-avatar" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => props.onToast('Sync your contacts!')}>
+                                <div style={{ width: 70, height: 70, borderRadius: '50%', border: '1px solid #E0C36A', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                                    <FiPlus size={30} color="#E0C36A" />
+                                </div>
+                                <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>Add New</div>
+                            </div>
+                            {MOCK_FRIENDS.map(f => (
                                 <FriendAvatar
                                     key={f.username}
-                                    friend={{ name: f.display_name || f.username, avatar: `https://i.pravatar.cc/100?u=${f.username}`, picks: 0 }}
+                                    friend={{ name: f.display_name || f.username, avatar: f.avatar }}
                                     active={selectedFriend === f.username}
                                     onClick={() => setSelectedFriend(f.username)}
                                 />
                             ))}
-                            <div className="friend-avatar" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', opacity: 0.6, minWidth: 80 }} onClick={() => props.onToast('Sync your contacts to find more friends!')}>
-                                <div style={{ width: 72, height: 72, borderRadius: '50%', border: '2px dashed rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                                    <FaPlus size={20} color="rgba(255,255,255,0.4)" />
-                                </div>
-                                <div style={{ fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.4)' }}>Add More</div>
-                            </div>
                         </div>
-                    </div>
 
-                    <div className="glass-card invite-card-bg" style={{ padding: '32px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', boxSizing: 'border-box' }}>
-                        <h3 style={{ fontSize: 20, fontWeight: 900, color: '#fff', marginBottom: 8, letterSpacing: -0.5 }}>Invite Friends</h3>
-                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 24, lineHeight: 1.4 }}>
-                            Friends appear here when they join and share their cinematic journey.
-                        </p>
-                        <button style={{
-                            background: 'rgba(37,211,102,0.15)', color: '#4ade80', border: '1px solid rgba(37, 211, 102, 0.4)',
-                            padding: '16px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10
+                        <div style={{
+                            border: '1px solid #16A34A',
+                            borderRadius: 20,
+                            padding: '20px 30px',
+                            display: 'flex', alignItems: 'center', gap: 40,
+                            cursor: 'pointer'
                         }}>
-                            <FaWhatsapp size={20} /> Invite via WhatsApp
-                        </button>
-                    </div>
-                </div>
-
-                {/* Main Area */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2.5fr) 1fr', gap: 40, alignItems: 'start' }}>
-
-                    <div>
-                        {/* Tabs Section */}
-                        <div style={{ display: 'flex', gap: 20, marginBottom: 40 }}>
-                            <TabCard title="To Watch" count={friendList.filter(f => !f.watched).length} active={activeTabSub === 'to_watch'} onClick={() => setActiveTabSub('to_watch')} />
-                            <TabCard title="Watched" count={friendList.filter(f => f.watched).length} active={activeTabSub === 'watched'} onClick={() => setActiveTabSub('watched')} />
-                            <TabCard title="All" count={friendList.length} active={activeTabSub === 'all'} onClick={() => setActiveTabSub('all')} />
-                        </div>
-
-                        {loadingList ? (
-                            <div style={{ textAlign: 'center', padding: 100, color: 'var(--muted)' }}>Loading...</div>
-                        ) : (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-                                {displayFilms.map(film => (
-                                    <div key={film.id} className="list-item-card" onClick={() => onOpenFilm(film)}>
-                                        <div style={{ width: 80, height: 120, borderRadius: 10, overflow: 'hidden', flexShrink: 0, boxShadow: '0 8px 20px rgba(0,0,0,0.5)' }}>
-                                            <img src={film.poster_url} alt={film.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        </div>
-                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                            <h3 style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 4px' }}>{film.title}</h3>
-                                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: '0 0 12px' }}>{film.year}</p>
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'center', paddingLeft: 8 }}>
-                                            <button
-                                                className={addedIds.includes(film.id) ? 'action-btn-green' : 'action-btn-sec'}
-                                                onClick={(e) => { e.stopPropagation(); onAddToList(film); }}
-                                                style={{ width: 100, height: 40, borderRadius: 10, cursor: 'pointer', fontSize: 11, fontWeight: 800 }}
-                                            >
-                                                {addedIds.includes(film.id) ? 'Added' : 'Add'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
+                            <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FaWhatsapp size={42} color="#12CE5A" />
                             </div>
-                        )}
+                            <div>
+                                <div style={{ fontSize: 20, fontWeight: 600, color: '#fff' }}>Invite friends to join Reel</div>
+                                <div style={{ fontSize: 14, color: '#A09E9F', fontWeight: 400 }}>Invite friends via WhatsApp.</div>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Sidebar */}
-                    <div style={{ position: 'sticky', top: 32 }}>
-                        {friendRequests.length > 0 && (
-                            <div className="glass-card" style={{ padding: 28, marginBottom: 24, border: '1px solid var(--gold)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-                                    <FaBell color="var(--gold)" />
-                                    <h4 style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: 0 }}>Friend Requests</h4>
+                    {/* Grid Area */}
+                    {loadingList ? (
+                        <div style={{ textAlign: 'center', padding: '100px 0', color: 'rgba(255,255,255,0.3)' }}>
+                            <div className="loading-spinner"></div>
+                            <p style={{ marginTop: 20, fontSize: 18 }}>Loading friends' picks...</p>
+                        </div>
+                    ) : (
+                        <div className="wl-grid">
+                            {displayFilms.length > 0 ? (
+                                displayFilms.map(film => (
+                                    <FriendFilmCard
+                                        key={film.id}
+                                        film={film}
+                                        isAdded={addedIds.includes(film.id)}
+                                        onAdd={onAddToList}
+                                        onClick={() => onOpenFilm(film)}
+                                    />
+                                ))
+                            ) : (
+                                <div style={{ gridColumn: '1 / -1', padding: '100px 0', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
+                                    <h3 style={{ fontSize: 24, fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>No films found</h3>
+                                    <p style={{ fontSize: 16 }}>Try selecting another friend or category.</p>
                                 </div>
-                                {friendRequests.map(req => (
-                                    <div key={req.username} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-                                        <div style={{ fontSize: 14, fontWeight: 700 }}>{req.display_name || req.username}</div>
-                                        <button
-                                            onClick={() => handleAcceptRequest(req.username)}
-                                            style={{ background: 'var(--gold)', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: 'pointer' }}
-                                        >Accept</button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        <div className="glass-card" style={{ padding: 28 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-                                <span>🔥</span>
-                                <h4 style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: 0 }}>Activity</h4>
-                            </div>
-                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>No recent activity to show.</div>
+                            )}
                         </div>
-                    </div>
-
+                    )}
                 </div>
+
             </div>
         </DashboardLayout>
     );

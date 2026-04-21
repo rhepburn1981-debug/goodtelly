@@ -21,7 +21,7 @@ const NavItem = ({ label, icon: Icon, active, onClick }) => (
             gap: '12px'
         }}
     >
-        {Icon && <Icon size={24} style={{ color: active && label === 'Home' ? '#E5B800' : 'inherit' }} />}
+        {Icon && <Icon size={24} style={{ color: active ? '#E5B800' : 'inherit' }} />}
         {label}
     </div>
 );
@@ -74,9 +74,9 @@ const Header = ({ searchQuery, onSearchChange, activeTab, onTabChange }) => (
 
 const BlurredBackground = () => (
     <div style={{
-        position: 'fixed', inset: 0, zIndex: 0, opacity: 0.3,
+        position: 'fixed', inset: 0, zIndex: 0, opacity: 0.5,
         display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 8,
-        pointerEvents: 'none', filter: 'blur(20px)'
+        pointerEvents: 'none', filter: 'blur(6px)'
     }}>
         {Array(60).fill(0).map((_, i) => (
             <img key={i} src={`/branding/poster${(i % 5) + 1}.png`} style={{ width: '100%', opacity: 0.5 }} alt="" />
@@ -129,7 +129,7 @@ export default function DashboardLayout({ children, searchQuery, onSearchChange 
                 />
                 <div className="dashboard-content-wrapper" style={{ marginTop: '114px', display: 'block' }}>
                     <div className="dashboard-main-area">
-                        <main className="dashboard-main-content" style={{ padding: '0 40px 40px' }}>
+                        <main className="dashboard-main-content" style={{ padding: '0 40px 20px' }}>
                             {children}
                         </main>
                     </div>
