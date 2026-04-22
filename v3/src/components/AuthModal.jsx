@@ -175,7 +175,7 @@ export default function AuthModal({ mode: initialMode = 'login', onLogin, onClos
           textAlign: isMobile ? 'left' : 'center',
           letterSpacing: isMobile ? 'normal' : '-1px',
         }}>
-          {mode === 'register' ? 'Join Reel' : 'Welcome back'}
+          {mode === 'register' ? 'Join WatchMates' : 'Welcome back'}
         </h2>
 
         <p style={{

@@ -324,7 +324,7 @@ export default function HomeTab(props) {
         </div>
       )}
 
-      {/* RECENT / Trending with Reel Users */}
+      {/* RECENT / Trending with WatchMates Users */}
       <div style={{ paddingBottom: '24px' }}>
         <div className="section-header">
           <div className="section-title">
@@ -332,7 +332,7 @@ export default function HomeTab(props) {
               <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
               <polyline points="17 6 23 6 23 12"></polyline>
             </svg>
-            Trending with Reel Users
+            Trending with WatchMates Users
           </div>
         </div>
 

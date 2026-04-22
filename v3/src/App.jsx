@@ -41,6 +41,7 @@ export default function App() {
 
   const [currentUser, setCurrentUser] = useState(null)
   const [authToken, setAuthToken] = useState(() => getToken())
+  const [authLoading, setAuthLoading] = useState(!!getToken())
   const [showAuth, setShowAuth] = useState(false)
   const [authMode, setAuthMode] = useState('login')
   const [shareInvite, setShareInvite] = useState(null)
@@ -115,10 +116,14 @@ export default function App() {
   // --- Auth init ---
   useEffect(() => {
     const token = getToken()
-    if (!token) return
+    if (!token) {
+      setAuthLoading(false)
+      return
+    }
     getMe()
       .then((user) => { setCurrentUser(user); setAuthToken(token) })
       .catch(() => { clearToken(); setAuthToken(null) })
+      .finally(() => setAuthLoading(false))
   }, [])
 
   // --- Fetch user data when logged in ---
@@ -300,6 +305,24 @@ export default function App() {
     onTabChange,
   }
 
+  if (authLoading) {
+    return (
+      <div style={{
+        height: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: '#09090d', color: '#fff'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+          <img src="/branding/logo.png" style={{ height: '60px', opacity: 0.8 }} alt="Loading..." />
+          <div className="loading-spinner" style={{
+            width: '24px', height: '24px', border: '2px solid rgba(255,255,255,0.1)',
+            borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite'
+          }} />
+        </div>
+        <style dangerouslySetInnerHTML={{ __html: '@keyframes spin { to { transform: rotate(360deg); } }' }} />
+      </div>
+    )
+  }
+
   return (
     <>
       {search.trim() && (
@@ -339,13 +362,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '2px' }}>
-                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
-                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
-                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
-                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
-                      </svg>
-                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: '1.1' }}>Reel</div>
+                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
                     </div>
                     <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: '1.2' }}>TV recommended by friends</div>
                   </div>
@@ -402,13 +419,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
-                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
-                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
-                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
-                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
-                      </svg>
-                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
                     </div>
                     <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
                   </div>
@@ -464,13 +475,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
-                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
-                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
-                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
-                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
-                      </svg>
-                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
                     </div>
                     <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
                   </div>
@@ -526,13 +531,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
-                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
-                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
-                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
-                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
-                      </svg>
-                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
                     </div>
                     <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
                   </div>
@@ -588,13 +587,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <svg viewBox="0 0 28 24" width="35" height="29" fill="none" style={{ flexShrink: 0, marginBottom: '1px' }}>
-                        <path d="M13.9 19.2a2.25 2.25 0 1 1 0 4.5a2.25 2.25 0 0 1 0-4.5z" fill="#4a9eff"></path>
-                        <path d="M8.7 14.1a7.6 7.6 0 0 1 10.4 0" stroke="#4a9eff" strokeWidth="2.4" strokeLinecap="round" fill="none"></path>
-                        <path d="M4.6 9.1a13.1 13.1 0 0 1 18.7 0" stroke="#4a9eff" strokeWidth="2.55" strokeLinecap="round" strokeOpacity="0.8" fill="none"></path>
-                        <path d="M1.6 4.5a17.8 17.8 0 0 1 24.8 0" stroke="#4a9eff" strokeWidth="2.7" strokeLinecap="round" strokeOpacity="0.5" fill="none"></path>
-                      </svg>
-                      <div style={{ fontFamily: 'var(--ff-body)', fontSize: '31px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-1.2px', lineHeight: 1 }}>Reel</div>
+                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
                     </div>
                     <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>Your profile & activity</div>
                   </div>

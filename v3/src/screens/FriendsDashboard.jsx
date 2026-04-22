@@ -323,7 +323,7 @@ export default function FriendsDashboard(props) {
                                 <FaWhatsapp size={42} color="#12CE5A" />
                             </div>
                             <div>
-                                <div style={{ fontSize: 20, fontWeight: 600, color: '#fff' }}>Invite friends to join Reel</div>
+                                <div style={{ fontSize: 20, fontWeight: 600, color: '#fff' }}>Invite friends to join WatchMates</div>
                                 <div style={{ fontSize: 14, color: '#A09E9F', fontWeight: 400 }}>Invite friends via WhatsApp.</div>
                             </div>
                         </div>

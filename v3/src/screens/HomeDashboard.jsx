@@ -440,7 +440,8 @@ export default function HomeDashboard(props) {
                             boxShadow: '0 20px 40px rgba(0,0,0,0.3)', position: 'relative', overflow: 'hidden'
                         }}>
                             {/* <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', background: 'radial-gradient(ellipse at top, rgba(255,255,255,0.03), transparent 70%)', pointerEvents: 'none' }} /> */}
-                            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '10px', position: 'relative', padding: '10px' }}>What's NEW</div>
+                            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '10px', position: 'relative', padding: '10px' }}>Whats New
+                            </div>
                             <HorizontalScroller>
                                 {trendingNow.slice(0, 8).map((show, idx) => {
                                     const platforms = ['netflix', null, 'apple', 'hbo', null, null, null, null];
@@ -464,14 +465,15 @@ export default function HomeDashboard(props) {
                         </div>
                     )}
 
-                    {/* What Reel users are watching right now */}
+                    {/* What WatchMates users are watching right now */}
                     {(watchlistRecent.length > 0) && (
                         <div style={{
                             background: '#000000', borderRadius: '20px', padding: '25px',
                             border: '1px solid #FFFFFF33',
                             boxShadow: '0 20px 40px rgba(0,0,0,0.3)', position: 'relative', overflow: 'hidden'
                         }}>
-                            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '10px', padding: '10px' }}>What Reel users are watching right now</div>
+                            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '10px', padding: '10px' }}>Trending with WatchMates Users
+                            </div>
                             <HorizontalScroller>
                                 {watchlistRecent.map((show, idx) => {
                                     const platforms = [null, 'netflix', 'apple', 'hbo', null, null, null, null];
@@ -501,7 +503,7 @@ export default function HomeDashboard(props) {
                             border: '1px solid #FFFFFF33',
                             boxShadow: '0 20px 40px rgba(0,0,0,0.3)', position: 'relative', overflow: 'hidden'
                         }}>
-                            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '10px', padding: '10px' }}>On TV this week</div>
+                            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '10px', padding: '10px' }}>Whats on this week</div>
                             <HorizontalScroller>
                                 {upcomingShows.slice(0, 3).map((show, idx) => {
                                     const designData = [

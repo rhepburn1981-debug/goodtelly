@@ -56,7 +56,7 @@ export default function DiscoverTab({ allFilms, addedIds, onOpenFilm, onAddToLis
 
       <div className="no-scrollbar" style={{ height: '100%', overflowY: 'auto' }}>
         {/* Header */}
-        <div style={{ padding: '14px 16px 2px', fontSize: '13px', fontWeight: '800', color: 'rgb(255, 255, 255)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>🔥 What's trending with Reel users</div>
+        <div style={{ padding: '14px 16px 2px', fontSize: '13px', fontWeight: '800', color: 'rgb(255, 255, 255)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>🔥 What's trending with WatchMates users</div>
 
         {/* Genre Pills */}
         <div className="no-scrollbar" style={{ display: 'flex', gap: '8px', overflowX: 'auto', padding: '12px 16px 10px' }}>

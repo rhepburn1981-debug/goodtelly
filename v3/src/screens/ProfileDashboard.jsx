@@ -133,8 +133,8 @@ export default function ProfileDashboard(props) {
         onLogout();
     }
 
-    const nameToDisplay = currentUser?.display_name || currentUser?.username || 'Reel User';
-    const usernameToDisplay = currentUser?.username || 'reeluser';
+    const nameToDisplay = currentUser?.display_name || currentUser?.username || 'WatchMates User';
+    const usernameToDisplay = currentUser?.username || 'watchmatesuser';
 
     return (
         <DashboardLayout

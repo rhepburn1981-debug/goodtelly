@@ -26,7 +26,7 @@ const MobileSplash = ({ onShowLogin, onShowRegister }) => {
         lineHeight: 1,
         marginBottom: 8,
       }}>
-        reel.
+        watchmates.
       </div>
 
       <div style={{
@@ -53,7 +53,7 @@ const MobileSplash = ({ onShowLogin, onShowRegister }) => {
             fontFamily: 'var(--ff-body)',
           }}
         >
-          Join Reel
+          Join WatchMates
         </button>
 
         <button
@@ -349,8 +349,6 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
         WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
       }}>
         <div className="header-logo">
-          {/* <FaWifi className="header-logo-icon" />
-          <span className="header-logo-text">Reel</span> */}
           <img src='/branding/logo.png' />
         </div>
         <button
@@ -390,7 +388,7 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
             onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.97)'}
             onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
-            Join Reel — It&rsquo;s Free
+            Join WatchMates — It&rsquo;s Free
           </button>
           <button
             onClick={onShowLogin}
@@ -421,7 +419,7 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'center' }}>
             <div className="title-line" style={{ flex: 1, maxWidth: 160, height: 2, background: 'rgba(255,255,255,0.25)' }} />
             <h2 className="section-title-h2">
-              How Reel works
+              How WatchMates works
             </h2>
             <div className="title-line" style={{ flex: 1, maxWidth: 160, height: 1, background: 'rgba(255,255,255,0.25)' }} />
           </div>
@@ -471,7 +469,7 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'center', marginBottom: 32 }}>
             <div className="title-line" style={{ flex: 1, maxWidth: 160, height: 2, background: 'rgba(255,255,255,0.25)' }} />
             <h2 className="section-title-h2">
-              🔥 Trending with Reel users
+              🔥 Trending with WatchMates users
             </h2>
             <div className="title-line" style={{ flex: 1, maxWidth: 160, height: 2, background: 'rgba(255,255,255,0.25)' }} />
           </div>
@@ -564,7 +562,7 @@ export default function LandingPage({ onShowLogin, onShowRegister }) {
           {/* Tagline + CTA */}
           <div style={{ textAlign: 'center', marginTop: 16 }}>
             <p className="cta-text">
-              Fed up with scrolling for hours and finding nothing? We built Reel to fix it.
+              Fed up with scrolling for hours and finding nothing? We built WatchMates to fix it.
             </p>
             <button
               onClick={onShowRegister}

@@ -44,7 +44,7 @@ export default function FriendsTab({
       })
   }, [friendFilms, genreFilter, watchFilter, addedIds])
 
-  const inviteLink = `https://reel.app/invite?from=${currentUser?.username || 'user'}`
+  const inviteLink = `https://watchmates.app/invite?from=${currentUser?.username || 'user'}`
 
   return (
     <div style={{
@@ -89,12 +89,12 @@ export default function FriendsTab({
         {/* Row 1b: Full-Width Slim Invite Block */}
         <div style={{ padding: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%)' }}>
           <div style={{ marginBottom: '14px', paddingLeft: '2px' }}>
-            <div style={{ fontSize: '15px', fontWeight: '800', color: '#fff', marginBottom: '2px' }}>Invite Friends to Join Reel</div>
+            <div style={{ fontSize: '15px', fontWeight: '800', color: '#fff', marginBottom: '2px' }}>Invite Friends to Join WatchMates</div>
             <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.45)', lineHeight: 1.4 }}>Send them a link — friends appear here when they join</div>
           </div>
 
           <button
-            onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent("Join me on Reel to find the best TV & films! " + inviteLink)}`, '_blank')}
+            onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent("Join me on WatchMates to find the best TV & films! " + inviteLink)}`, '_blank')}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               background: 'rgba(37, 211, 102, 0.08)', border: '1px solid rgba(37, 211, 102, 0.25)',
