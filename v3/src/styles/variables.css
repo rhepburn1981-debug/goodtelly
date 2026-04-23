@@ -1,0 +1,21 @@
+:root {
+  --gold: #c9a84c;
+  --gold-bright: #e8c96a;
+  --gold-glow: rgba(201, 168, 76, 0.18);
+  --ink: #070709;
+  --surface: #0e0e14;
+  --surface2: #13131c;
+  --surface3: #1a1a26;
+  --text: #eae6dc;
+  --text2: #9a96aa;
+  --muted: #5a566a;
+  --border: rgba(255, 255, 255, 0.065);
+  --border2: rgba(255, 255, 255, 0.12);
+  --green: #2ecc8a;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --ff-display: "Cormorant Garamond", serif;
+  --ff-body: "DM Sans", system-ui, sans-serif;
+  --ff-mono: "DM Mono", monospace;
+}
