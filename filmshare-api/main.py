@@ -42,8 +42,12 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "709452989437-vooq081nkmhb03n12h8p0tee0e327ui1.apps.googleusercontent.com")
 
-DB_PATH = os.environ.get("DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "filmshare.db"))
-os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+DB_PATH = os.environ.get("DB_PATH", "/data/filmshare.db")
+try:
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+except OSError:
+    # Local development fallback when /data is unavailable.
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "filmshare.db")
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
@@ -247,22 +251,24 @@ def _migrate():
 _migrate()
 
 
-_DIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "v3", "dist")
-HTML_FILE = os.path.join(_DIST_DIR, "index.html")
+PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+V3_DIST_DIR = os.path.join(PROJECT_ROOT, "v3", "dist")
+V3_INDEX_FILE = os.path.join(V3_DIST_DIR, "index.html")
+LEGACY_HTML_FILE = os.path.join(PROJECT_ROOT, "filmshare-app.html")
 SHARE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "reel-share-landing.html")
 
-# Mount Vite build output directories as static files
-_assets_dir = os.path.join(_DIST_DIR, "assets")
-_branding_dir = os.path.join(_DIST_DIR, "branding")
-if os.path.isdir(_assets_dir):
-    app.mount("/assets", StaticFiles(directory=_assets_dir), name="assets")
-if os.path.isdir(_branding_dir):
-    app.mount("/branding", StaticFiles(directory=_branding_dir), name="branding")
+if os.path.isdir(os.path.join(V3_DIST_DIR, "assets")):
+    app.mount("/assets", StaticFiles(directory=os.path.join(V3_DIST_DIR, "assets")), name="v3-assets")
+if os.path.isdir(os.path.join(V3_DIST_DIR, "branding")):
+    app.mount("/branding", StaticFiles(directory=os.path.join(V3_DIST_DIR, "branding")), name="v3-branding")
 
 
 @app.get("/", include_in_schema=False)
 def serve_app():
-    return FileResponse(HTML_FILE)
+    # Prefer the built V3 React app when present; keep legacy HTML as fallback.
+    if os.path.exists(V3_INDEX_FILE):
+        return FileResponse(V3_INDEX_FILE)
+    return FileResponse(LEGACY_HTML_FILE)
 
 
 def _render_share_page(title="", year="", rating="", genre="", sender="A friend",
@@ -2448,11 +2454,3 @@ def assign_avatars(token: str = ""):
         for row in rows:
             conn.execute("UPDATE users SET avatar=? WHERE id=?", (random.choice(avatars), row["id"]))
     return {"updated": len(rows), "users": [r["username"] for r in rows]}
-
-
-# ─── SPA catch-all (must be last) ─────────────────────────────────────────────
-# Returns index.html for any path not matched by API or static mounts,
-# so React Router can handle client-side navigation.
-@app.get("/{full_path:path}", include_in_schema=False)
-def serve_spa(full_path: str):
-    return FileResponse(HTML_FILE)
