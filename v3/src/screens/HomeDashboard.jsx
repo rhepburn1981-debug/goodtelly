@@ -52,6 +52,8 @@ const FeatureCard = ({ rec, onAddToList, onWatchTrailer, onDismiss }) => {
         genre: 'Sci-Fi/Action'
     };
 
+    const trailerUrl = displayRec.trailer_url || displayRec.trailerUrl || 'https://www.youtube.com/watch?v=k64P4l2Wmeg';
+
     return (
         <div style={{
             position: 'relative',
@@ -67,7 +69,7 @@ const FeatureCard = ({ rec, onAddToList, onWatchTrailer, onDismiss }) => {
             boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
             // display: 'flex''
             padding: '25px',
-        }} onClick={() => onWatchTrailer && onWatchTrailer('https://www.youtube.com/watch?v=k64P4l2Wmeg')}>
+        }} onClick={() => onWatchTrailer && onWatchTrailer(trailerUrl)}>
             <div style={{
                 position: 'absolute', inset: 0,
                 background: `linear-gradient(0deg, rgba(0, 0, 0, 0.74), rgba(0, 0, 0, 0.74)), url("${displayRec.backdrop_url || displayRec.poster_url}")`,
@@ -99,7 +101,7 @@ const FeatureCard = ({ rec, onAddToList, onWatchTrailer, onDismiss }) => {
 
                     {/* <div style={{ display: 'flex', gap: '12px' }}>
                         <button
-                            onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer('https://www.youtube.com/watch?v=k64P4l2Wmeg'); }}
+                            onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer(trailerUrl); }}
                             style={{
                                 padding: '0 24px', height: '44px', borderRadius: '22px', background: '#2979ff',
                                 color: '#fff', border: 'none', fontWeight: '700', fontSize: '14px', cursor: 'pointer',
@@ -132,7 +134,7 @@ const FeatureCard = ({ rec, onAddToList, onWatchTrailer, onDismiss }) => {
             </div>
             <div style={{ display: 'flex', gap: '10px', position: 'relative', marginTop: '10px' }}>
                 <button
-                    onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer('https://www.youtube.com/watch?v=k64P4l2Wmeg'); }}
+                    onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer(trailerUrl); }}
                     style={{
                         padding: '0 24px', height: '44px', borderRadius: '22px', background: '#3C81C8',
                         color: '#D9D9D9', border: 'none', fontWeight: '600', fontSize: '15px', cursor: 'pointer', border: ' 1px solid #727272',
