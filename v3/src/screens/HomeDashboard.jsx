@@ -447,16 +447,12 @@ export default function HomeDashboard(props) {
                             <HorizontalScroller>
                                 {trendingNow.slice(0, 8).map((show, idx) => {
                                     const platforms = ['netflix', null, 'apple', 'hbo', null, null, null, null];
-                                    const designTitles = [
-                                        'Beyond Pradise', 'Invincible', 'Punisher', 'Jujutsu Kaizen',
-                                        'Thrash', 'Mercy', 'Mario Galaxy', 'Avatar: Fire and Ash'
-                                    ];
                                     return (
                                         <RankedPoster
                                             key={show.id}
                                             num={idx + 1}
                                             img={show.poster_url}
-                                            title={designTitles[idx] || (show.title || show.name)}
+                                            title={show.title || show.name}
                                             year={show.year || (show.first_air_date ? show.first_air_date.split('-')[0] : '2025')}
                                             platform={platforms[idx]}
                                             onClick={() => onOpenFilm(show)}
@@ -479,15 +475,11 @@ export default function HomeDashboard(props) {
                             <HorizontalScroller>
                                 {watchlistRecent.map((show, idx) => {
                                     const platforms = [null, 'netflix', 'apple', 'hbo', null, null, null, null];
-                                    const designTitles = [
-                                        'Thrash', 'Beyond Pradise', 'Punisher', 'Jujutsu Kaizen',
-                                        'Mercy', 'Mario Galaxy', 'Avatar: Fire and Ash', 'Jujutsu Kaizen'
-                                    ];
                                     return (
                                         <StandardCard
                                             key={show.id}
                                             img={show.poster_url}
-                                            label={designTitles[idx] || show.title}
+                                            label={show.title || show.name}
                                             year={show.year || '2024'}
                                             platform={platforms[idx]}
                                             onClick={() => onOpenFilm(show)}
