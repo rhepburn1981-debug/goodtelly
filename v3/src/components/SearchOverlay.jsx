@@ -42,7 +42,7 @@ export default function SearchOverlay({ results, loading, addedIds, onOpenFilm, 
         }
       }}
       style={{
-        position: 'fixed', top: 80, left: 0, right: 0, bottom: 0, zIndex: 90,
+        position: 'fixed', top: 114, left: 0, right: 0, bottom: 0, zIndex: 90,
         background: 'rgba(4, 4, 6, 0.85)', backdropFilter: 'blur(40px)',
         paddingTop: 20, paddingBottom: 60, overflowY: 'auto',
         cursor: 'default'

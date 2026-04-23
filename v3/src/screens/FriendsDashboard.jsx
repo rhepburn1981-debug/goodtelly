@@ -14,14 +14,24 @@ const MOCK_FRIENDS = [
 ];
 
 const MOCK_FILMS = [
-    { id: 1, title: 'Thrash', year: '2026', poster_url: '/branding/poster1.png', watched: false },
-    { id: 2, title: 'Mercy', year: '2026', poster_url: '/branding/poster2.png', watched: true },
-    { id: 3, title: 'Jujutsu Kaizen', year: '2022', poster_url: '/branding/poster3.png', watched: false },
-    { id: 4, title: 'Beyond Paradise', year: '2017', poster_url: '/branding/poster4.png', watched: true }
+    { id: 1, title: 'Thrash', year: '2026', poster_url: '/branding/poster1.png', watched: false, genre: 'Action', services: ['Netflix', 'Prime'] },
+    { id: 2, title: 'Mercy', year: '2026', poster_url: '/branding/poster2.png', watched: true, genre: 'Drama', services: ['Disney+'] },
+    { id: 3, title: 'Jujutsu Kaizen', year: '2022', poster_url: '/branding/poster3.png', watched: false, genre: 'Fantasy', services: ['NOW'] },
+    { id: 4, title: 'Beyond Paradise', year: '2017', poster_url: '/branding/poster4.png', watched: true, genre: 'Adventure', services: ['Apple TV+'] }
 ];
 
 const GENRES = ['All', 'Action', 'Adventure', 'Fantasy', 'Comedy', 'Crime', 'Thriller', 'Drama'];
 const SORTS = ['All', 'Recently Added', 'Friends Rolling', 'A-Z'];
+const SERVICES = [
+    { name: 'All', color: '#fff' },
+    { name: 'Netflix', logo: '/branding/netflix.png' },
+    { name: 'Prime', logo: '/branding/prime.png' },
+    { name: 'Disney+', logo: '/branding/disney.png' },
+    { name: 'NOW', logo: '/branding/now_logo.png' },
+    { name: 'Apple TV+', logo: '/branding/I-tv.png' },
+    { name: 'Paramount+', logo: '/branding/paramountplus.png' },
+    { name: 'Discovery+', logo: '/branding/discovery.png' }
+];
 
 // Helper components
 const Pill = ({ label, active, onClick }) => (
@@ -38,6 +48,30 @@ const Pill = ({ label, active, onClick }) => (
         transition: 'all 0.2s',
         lineHeight: 1.4,
     }}>
+        {label}
+    </button>
+);
+
+const ServicePill = ({ label, logo, active, onClick }) => (
+    <button onClick={onClick} style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '12px 25px',
+        borderRadius: 100,
+        background: active ? '#E0C36A33' : '#000',
+        border: '1px solid #FFFFFF33',
+        color: active ? '#fff' : '#A09E9F',
+        fontSize: 16,
+        fontWeight: 600,
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+        transition: 'all 0.2s',
+        lineHeight: 1.4,
+    }}>
+        {logo ? (
+            <img src={logo} alt={label} style={{ height: '15px', width: 'auto', objectFit: 'contain' }} />
+        ) : null}
         {label}
     </button>
 );
@@ -118,6 +152,7 @@ export default function FriendsDashboard(props) {
     const [activeTabSub, setActiveTabSub] = useState('all');
     const [activeGenre, setActiveGenre] = useState('All');
     const [activeSort, setActiveSort] = useState('All');
+    const [activeService, setActiveService] = useState('All');
     const [isListVisible, setIsListVisible] = useState(true);
 
     // Static design: no dynamic fetching needed for this specific view
@@ -129,6 +164,7 @@ export default function FriendsDashboard(props) {
         if (activeTabSub === 'watched' && !f.watched) return false;
         if (activeTabSub === 'to_watch' && f.watched) return false;
         if (activeGenre !== 'All' && !(f.genre || '').includes(activeGenre)) return false;
+        if (activeService !== 'All' && !(f.services || []).includes(activeService)) return false;
         return true;
     });
 
@@ -286,6 +322,25 @@ export default function FriendsDashboard(props) {
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                             {GENRES.map(g => (
                                 <Pill key={g} label={g} active={activeGenre === g} onClick={() => setActiveGenre(g)} />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Services Section */}
+                    <div style={{ marginTop: '30px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 15, paddingLeft: '10px' }}>
+                            <MdMovieCreation size={24} color="#E0C36A" />
+                            <span style={{ fontSize: '20px', fontWeight: 600, color: '#E0C36A' }}>Services:</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                            {SERVICES.map(s => (
+                                <ServicePill
+                                    key={s.name}
+                                    label={s.name}
+                                    logo={s.logo}
+                                    active={activeService === s.name}
+                                    onClick={() => setActiveService(s.name)}
+                                />
                             ))}
                         </div>
                     </div>

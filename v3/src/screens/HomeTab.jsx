@@ -31,107 +31,95 @@ const RecommendationCard = ({ rec, onOpenFilm, onDismiss, onAddToList, onWatchTr
   };
 
   return (
-    <div style={{ margin: '15px 16px 20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0px 4px 10px' }}>
+    <div style={{ margin: '2px 16px 10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0px 2px 6px' }}>
         <div style={{
-          width: '28px', height: '28px', borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+          width: '26px', height: '26px', borderRadius: '50%',
+          background: 'linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08))',
+          border: '1px solid rgba(255, 255, 255, 0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
         }}>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="rgba(255,255,255,0.7)">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+            <circle cx="12" cy="8.2" r="3.2" fill="rgba(255,255,255,0.78)"></circle>
+            <path d="M5.5 18.5C6.7 15.7 9.1 14.2 12 14.2C14.9 14.2 17.3 15.7 18.5 18.5" stroke="rgba(255,255,255,0.78)" strokeWidth="1.8" strokeLinecap="round"></path>
           </svg>
         </div>
-        <span style={{ fontSize: '14.5px', color: '#c5a36e', fontWeight: '600', letterSpacing: '0.2px' }}>
-          {displayRec._fromFriend || 'Kate'} thinks you'll like...
-        </span>
+        <div style={{ fontSize: '13px', color: 'var(--gold-bright)', fontWeight: '500' }}>
+          {displayRec._fromFriend || 'Bhavinsen'} thinks you&rsquo;ll like&hellip;
+        </div>
       </div>
 
       <div style={{
-        position: 'relative',
-        background: '#0a0a0c',
-        borderRadius: '20px',
-        overflow: 'hidden',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
-        cursor: 'pointer'
+        background: 'linear-gradient(rgba(24, 24, 31, 0.94), rgba(10, 10, 15, 0.94))',
+        borderRadius: '16px', overflow: 'hidden',
+        border: '1px solid rgba(255, 255, 255, 0.09)',
+        boxShadow: 'rgba(0, 0, 0, 0.26) 0px 12px 28px, rgba(255, 255, 255, 0.04) 0px 1px 0px inset',
+        cursor: 'pointer', position: 'relative'
       }} onClick={() => onOpenFilm(displayRec)}>
+        <button
+          style={{
+            position: 'absolute', top: '8px', right: '8px', zIndex: 1,
+            width: '24px', height: '24px', borderRadius: '50%',
+            background: '#111', border: '1px solid #2e2e2e',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '13px', fontWeight: '900', color: '#fff', lineHeight: 1, padding: 0
+          }}
+          onClick={(e) => { e.stopPropagation(); onDismiss && onDismiss(displayRec.id); }}
+        >
+          &times;
+        </button>
 
-        {/* Backdrop Background */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: `url("${displayRec.backdrop_url}")`,
           backgroundSize: 'cover', backgroundPosition: 'center',
-          opacity: 0.8
+          opacity: 0.45
         }} />
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(90deg, rgba(10, 10, 12, 1) 0%, rgba(10, 10, 12, 0.85) 30%, rgba(10, 10, 12, 0.4) 100%)'
-        }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.52))' }} />
 
-        <div style={{ position: 'relative', padding: '12px', display: 'flex', gap: '16px', paddingRight: '40px' }}>
-          {/* Close Button */}
-          <div
-            onClick={(e) => { e.stopPropagation(); onDismiss && onDismiss(displayRec.id); }}
-            style={{
-              position: 'absolute', top: '10px', right: '12px', zIndex: 10,
-              width: '24px', height: '24px', borderRadius: '50%',
-              background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer'
-            }}
-          >
-            <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', fontWeight: '800', lineHeight: 1 }}>✕</span>
-          </div>
-
-          <div style={{
-            width: '88px', height: '108px', borderRadius: '10px',
-            background: 'rgba(255, 255, 255, 0.05)', overflow: 'hidden',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            boxShadow: '0 8px 16px rgba(0,0,0,0.5)'
-          }}>
-            <img
-              src={displayRec.poster_url}
-              alt={displayRec.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
-          <div style={{ flex: 1, paddingTop: '6px' }}>
-            <h3 style={{ fontSize: '22px', fontWeight: '800', color: '#fff', marginBottom: '4px', letterSpacing: '-0.3px' }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '10px 10px 7px' }}>
+          <img
+            src={displayRec.poster_url}
+            alt={displayRec.title}
+            style={{ width: '46px', height: '72px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, boxShadow: 'rgba(0, 0, 0, 0.45) 0px 6px 16px' }}
+          />
+          <div style={{ flex: '1 1 0%', minWidth: 0, paddingTop: '2px', textShadow: 'rgba(0, 0, 0, 0.55) 0px 2px 8px' }}>
+            <div style={{ fontSize: '16px', fontWeight: '900', color: 'var(--text)', lineHeight: 1.1, marginBottom: '1px' }}>
               {displayRec.title}
-            </h3>
-            <div style={{ fontSize: '15px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: '600', marginBottom: '16px' }}>
+            </div>
+            <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.86)', marginBottom: '3px' }}>
               {displayRec.year}
             </div>
-
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', display: 'flex', gap: '8px', marginTop: '10px' }}>
               <button
-                onClick={(e) => { e.stopPropagation(); onWatchTrailer('https://www.youtube.com/watch?v=zSWdZVtXT7E'); }}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.05)', borderRadius: '30px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                  padding: '8px 12px', border: '1px solid rgba(255, 255, 255, 0.14)', cursor: 'pointer',
-                  color: '#fff', fontSize: '12px', fontWeight: '700'
+                  padding: '5px 11px', borderRadius: '16px',
+                  background: 'linear-gradient(rgba(28, 28, 34, 0.84), rgba(14, 14, 19, 0.84))',
+                  border: '1px solid rgba(255, 255, 255, 0.16)', color: 'var(--text)',
+                  fontSize: '10px', fontWeight: '600', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  boxShadow: 'rgba(255, 255, 255, 0.06) 0px 1px 0px inset'
                 }}
+                onClick={(e) => { e.stopPropagation(); onWatchTrailer(displayRec.trailer_url || 'https://www.youtube.com/watch?v=zSWdZVtXT7E'); }}
               >
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="white">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-                Watch Trailer
+                <span style={{ fontSize: '9px' }}>▶</span><span> Watch Trailer</span>
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); onAddToList(displayRec); }}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.05)', borderRadius: '30px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                  padding: '8px 12px', border: '1px solid rgba(255, 255, 255, 0.14)', cursor: 'pointer',
-                  color: '#c5a36e', fontSize: '12px', fontWeight: '700'
+                  padding: '5px 11px', borderRadius: '16px',
+                  background: 'linear-gradient(rgba(80, 61, 33, 0.52), rgba(39, 28, 14, 0.52))',
+                  border: '1px solid rgba(232, 201, 106, 0.3)', color: 'var(--text)',
+                  fontSize: '10px', fontWeight: '600', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  boxShadow: 'rgba(255, 255, 255, 0.06) 0px 1px 0px inset'
                 }}
+                onClick={(e) => { e.stopPropagation(); onAddToList(displayRec); }}
               >
-                <span style={{ fontSize: '16px', fontWeight: '400' }}>+</span>
-                Watchlist
+                <span style={{ fontSize: '14px', fontWeight: '400' }}>+</span> <span>Watchlist</span>
               </button>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
@@ -197,7 +185,7 @@ export default function HomeTab(props) {
         .hover-scale { transition: transform 0.2s ease; cursor: pointer; }
         .hover-scale:active { transform: scale(0.96); }
         .section-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 10px; }
-        .section-title { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.4px; display: flex; align-items: center; gap: 8px; }
+        .section-title { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: -0.4px; display: flex; align-items: center; gap: 8px; }
       `}</style>
 
       {/* Watchlist Quick Links */}
@@ -280,8 +268,7 @@ export default function HomeTab(props) {
             <div className="section-title" style={{ color: '#c5a36e' }}>
               <div style={{
                 position: 'relative', width: '20px', height: '20px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginRight: '8px'
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" style={{ filter: 'drop-shadow(0 0 6px #3b82f6)' }}>
                   <path d="M12 2c-.1.7-.2 1.4-.4 2.1-.2.8-.5 1.5-.9 2.2-.4.6-.9 1.2-1.5 1.7-.6.5-1.2.9-1.9 1.3-.7.3-1.4.6-2.1.8-.7.2-1.4.3-2.1.4 0 0 .1.1.2.2.8.1 1.5.2 2.2.4.7.2 1.4.5 2.1.8.6.4 1.2.8 1.7 1.3.5.6.9 1.2 1.3 1.9.3.7.6 1.4.8 2.1.2.7.3 1.4.4 2.1 0 0 .1-.1.2-.2.1-.7.2-1.4.4-2.1.2-.7.5-1.4.9-2.1.4-.6.9-1.2 1.5-1.7.6-.5 1.2-.9 1.9-1.3.7-.3 1.4-.6 2.1-.8.7-.2 1.4-.3 2.1-.4 0 0-.1-.1-.2-.2-.8-.1-1.5-.2-2.2-.4-.7-.2-1.4-.5-2.1-.8-.6-.4-1.2-.8-1.7-1.3-.5-.6-.9-1.2-1.3-1.9-.3-.7-.6-1.4-.8-2.1-.2-.7-.3-1.4-.4-2.1z" fill="#3b82f6" />
@@ -290,40 +277,80 @@ export default function HomeTab(props) {
               What’s NEW
             </div>
           </div>
-          <div className="no-scrollbar" style={{ display: 'flex', gap: '14px', overflowX: 'auto', padding: '0px 16px 16px' }}>
+          <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '0px 16px 12px', scrollbarWidth: 'none' }}>
             {trendingNow.map(film => (
-              <div
+              <button
                 key={film.id}
                 onClick={() => onOpenFilm(film)}
-                className="hover-scale"
-                style={{
-                  flexShrink: 0, width: '110px', height: '160px',
-                  position: 'relative', borderRadius: '16px', overflow: 'hidden',
-                  background: 'rgba(255,255,255,0.05)',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
-                  cursor: 'pointer', border: '1px solid rgba(255, 255, 255, 0.08)'
-                }}
+                style={{ flexShrink: 0, width: '82px', background: 'none', border: 'none', cursor: 'pointer', padding: '0px', textAlign: 'left' }}
               >
                 <img
                   src={film.poster_url}
-                  alt={film.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  alt={film.title || film.name}
+                  style={{ width: '82px', height: '118px', objectFit: 'cover', borderRadius: '7px', display: 'block', boxShadow: 'rgba(0, 0, 0, 0.28) 0px 10px 20px' }}
                 />
-                <div style={{
-                  position: 'absolute', bottom: 0, left: 0, right: 0,
-                  background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.95) 100%)',
-                  padding: '28px 10px 10px', display: 'flex', flexDirection: 'column', gap: '2px'
-                }}>
-                  <div style={{ fontSize: '14px', textAlign: 'center', fontWeight: '600', color: 'rgba(255, 255, 255, 1)' }}>
-                    {(Math.random() * 20 + 20).toFixed(1)}K
-                  </div>
+                <div style={{ fontSize: '11px', fontWeight: '700', color: '#fff', marginTop: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {film.title || film.name}
                 </div>
-              </div>
+                <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.58)', marginTop: '1px', fontWeight: '500' }}>
+                  {film.year || (film.release_date ? film.release_date.split('-')[0] : film.first_air_date ? film.first_air_date.split('-')[0] : '')}
+                </div>
+              </button>
             ))}
           </div>
         </div>
       )}
+      {/* NEW SECTION: What Reel users are watching right now */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px 8px' }}>
+          <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text)', letterSpacing: '-0.2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" style={{ flexShrink: 0 }}>
+              <path d="M3 17L9 11L13 15L21 7" stroke="url(#arrowG)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"></path>
+              <path d="M15 7h6v6" stroke="url(#arrowG)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"></path>
+              <defs>
+                <linearGradient id="arrowG" x1="3" y1="12" x2="21" y2="12" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#c084fc"></stop>
+                  <stop offset="1" stopColor="#818cf8"></stop>
+                </linearGradient>
+              </defs>
+            </svg>
+            What Reel users are watching right now
+          </div>
+        </div>
 
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '0px 16px 12px', scrollbarWidth: 'none' }} className="no-scrollbar">
+          {[
+            { img: "https://static.tvmaze.com/uploads/images/original_untouched/615/1537572.jpg", title: "The Lady", year: "2026" },
+            { img: "https://image.tmdb.org/t/p/w500/vUwyhNWBKkSwK8ELvEeBRwV724h.jpg", title: "I Swear", year: "2025" },
+            { img: "https://image.tmdb.org/t/p/w500/s7IbZFANLHKNglQ9IfjDdrHCVNZ.jpg", title: "Saipan", year: "2025" },
+            { img: "https://image.tmdb.org/t/p/w500/lbBWwxBht4JFP5PsuJ5onpMqugW.jpg", title: "One Battle After Another", year: "2025" },
+            { img: "https://static.tvmaze.com/uploads/images/original_untouched/579/1449350.jpg", title: "Operation Dark Phone: Murder by Text", year: "2025" },
+            { img: "https://image.tmdb.org/t/p/w500/lbBWwxBht4JFP5PsuJ5onpMqugW.jpg", title: "One Battle After Another", year: "2025" },
+            { img: "https://image.tmdb.org/t/p/w342/zvkcHCJUPqv7R9ukaiDNkm75jy.jpg", title: "Scarpetta", year: "2026" },
+            { img: "https://image.tmdb.org/t/p/w500/pyok1kZJCfyuFapYXzHcy7BLlQa.jpg", title: "Mercy", year: "2026" },
+            { img: "https://static.tvmaze.com/uploads/images/original_untouched/613/1533076.jpg", title: "How to Get to Heaven From Belfast", year: "2026" },
+            { img: "https://image.tmdb.org/t/p/w500/qvktm0BHcnmDpul4Hz01GIazWPr.jpg", title: "The Terminator", year: "1984" }
+          ].map((film, idx) => (
+            <button
+              key={idx}
+              onClick={() => onOpenFilm({ ...film, poster_url: film.img })}
+              style={{ flexShrink: 0, width: '82px', background: 'none', border: 'none', cursor: 'pointer', padding: '0px', textAlign: 'left' }}
+            >
+              <img
+                src={film.img}
+                alt={film.title}
+                style={{ width: '82px', height: '118px', objectFit: 'cover', borderRadius: '7px', display: 'block', boxShadow: 'rgba(0, 0, 0, 0.34) 0px 10px 22px' }}
+              />
+              <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text)', marginTop: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {film.title}
+              </div>
+              <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.58)', marginTop: '1px', fontWeight: '500' }}>
+                {film.year}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
       {/* RECENT / Trending with WatchMates Users */}
       <div style={{ paddingBottom: '24px' }}>
         <div className="section-header">

@@ -357,7 +357,7 @@ export default function App() {
             <>
               <header style={{
                 background: 'radial-gradient(circle at 28% 18%, rgba(63, 118, 255, 0.08), transparent 18%), radial-gradient(circle at 72% 44%, rgba(146, 101, 39, 0.18), transparent 26%), radial-gradient(circle at 86% 20%, rgba(198, 154, 82, 0.09), transparent 17%), linear-gradient(rgb(12, 11, 16) 0%, rgb(9, 9, 13) 100%)',
-                flexShrink: 0, position: 'sticky', top: 0, zIndex: 1
+                flexShrink: 0, position: 'sticky', top: 0, zIndex: 2
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
