@@ -19,6 +19,7 @@ from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from jose import JWTError, jwt
 import bcrypt as _bcrypt
@@ -41,7 +42,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "709452989437-vooq081nkmhb03n12h8p0tee0e327ui1.apps.googleusercontent.com")
 
-DB_PATH = os.environ.get("DB_PATH", "/data/filmshare.db")
+DB_PATH = os.environ.get("DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "filmshare.db"))
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 
@@ -246,8 +247,17 @@ def _migrate():
 _migrate()
 
 
-HTML_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "filmshare-app.html")
+_DIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "v3", "dist")
+HTML_FILE = os.path.join(_DIST_DIR, "index.html")
 SHARE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "reel-share-landing.html")
+
+# Mount Vite build output directories as static files
+_assets_dir = os.path.join(_DIST_DIR, "assets")
+_branding_dir = os.path.join(_DIST_DIR, "branding")
+if os.path.isdir(_assets_dir):
+    app.mount("/assets", StaticFiles(directory=_assets_dir), name="assets")
+if os.path.isdir(_branding_dir):
+    app.mount("/branding", StaticFiles(directory=_branding_dir), name="branding")
 
 
 @app.get("/", include_in_schema=False)
@@ -2438,3 +2448,11 @@ def assign_avatars(token: str = ""):
         for row in rows:
             conn.execute("UPDATE users SET avatar=? WHERE id=?", (random.choice(avatars), row["id"]))
     return {"updated": len(rows), "users": [r["username"] for r in rows]}
+
+
+# ─── SPA catch-all (must be last) ─────────────────────────────────────────────
+# Returns index.html for any path not matched by API or static mounts,
+# so React Router can handle client-side navigation.
+@app.get("/{full_path:path}", include_in_schema=False)
+def serve_spa(full_path: str):
+    return FileResponse(HTML_FILE)
