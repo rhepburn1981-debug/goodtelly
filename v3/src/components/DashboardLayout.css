@@ -1,0 +1,78 @@
+/* src/components/DashboardLayout.css */
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    height: 100px;
+}
+
+.dashboard-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.dashboard-search {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    height: 44px;
+    gap: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.dashboard-search:focus-within {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.dashboard-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin-top: 100px;
+}
+
+.dashboard-main-area {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.dashboard-main-content {
+    flex: 1;
+    padding: 20px 40px 40px;
+}
+
+/* Remove old sidebar styles */
+.dashboard-sidebar, .sidebar-item, .sidebar-label, .hamburger-menu {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        padding: 0 20px;
+        height: 80px;
+    }
+    .dashboard-content-wrapper {
+        margin-top: 80px;
+    }
+    .dashboard-main-content {
+        padding: 16px 20px 40px;
+    }
+}

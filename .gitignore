@@ -1,0 +1,20 @@
+# Secrets
+filmshare-api/.env
+
+# Database (Railway will have its own)
+filmshare-api/*.db
+
+# Backups
+*.backup*.html
+*.backup*.py
+filmshare-api/*.backup*.py
+filmshare-api/*.backup*.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+filmshare-api/__pycache__/
+
+# Temp scripts
+apply_whatsapp_changes.py
