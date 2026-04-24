@@ -137,7 +137,7 @@ const FeatureCard = ({ rec, onAddToList, onWatchTrailer, onDismiss }) => {
                     onClick={(e) => { e.stopPropagation(); onWatchTrailer && onWatchTrailer(trailerUrl); }}
                     style={{
                         padding: '0 24px', height: '44px', borderRadius: '22px', background: '#3C81C8',
-                        color: '#D9D9D9', border: 'none', fontWeight: '600', fontSize: '15px', cursor: 'pointer', border: ' 1px solid #727272',
+                        color: '#D9D9D9', fontWeight: '600', fontSize: '15px', cursor: 'pointer', border: '1px solid #727272',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', maxWidth: '275px', width: '100%'
                     }}
                 >

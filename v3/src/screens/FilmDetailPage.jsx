@@ -15,7 +15,6 @@ export default function FilmDetailPage({
   onSaveRating,
   currentUser,
 }) {
-  const [showTrailer, setShowTrailer] = useState(false)
   const [activeStill, setActiveStill] = useState(0)
   const [showRatingModal, setShowRatingModal] = useState(false)
   const [hoverRating, setHoverRating] = useState(0)
@@ -26,16 +25,10 @@ export default function FilmDetailPage({
   const hasTrailer = !!film.trailer_url
 
   function playTrailer() {
-    if (hasTrailer) {
-      setShowTrailer(true)
-    } else {
+    if (film.trailer_url) {
       onWatchTrailer && onWatchTrailer(film.trailer_url)
     }
   }
-
-  const trailerSrc = film.trailer_url
-    ? (film.trailer_url.split('?')[0] + '?rel=0&modestbranding=1&autoplay=1&playsinline=1')
-    : ''
 
   // Format rating to show stars
   const renderStars = (rating) => {
@@ -281,9 +274,9 @@ export default function FilmDetailPage({
 
         <div className="glass-card" style={{ marginTop: '40px' }}>
           <div className="desktop-poster-wrapper">
-            <div style={{ position: 'relative' }}>
-              <img src={film.poster_url} alt={film.title} className="desktop-poster" />
-              <button onClick={playTrailer} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.2)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '24px', opacity: 0, transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '1'} onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}>
+            <div style={{ position: 'relative', cursor: 'pointer' }} onClick={playTrailer}>
+              <img src={film.poster_url} alt={film.title} className="desktop-poster" style={{ cursor: 'pointer' }} />
+              <button style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.2)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '24px', opacity: 0, transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '1'} onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}>
                 <div style={{ width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.4)' }}>
                   <div style={{ width: 0, height: 0, borderTop: '12px solid transparent', borderBottom: '12px solid transparent', borderLeft: '20px solid #111', marginLeft: '6px' }} />
                 </div>
@@ -354,31 +347,7 @@ export default function FilmDetailPage({
         </div>
       </div>
 
-      {/* Trailer Overlay */}
-      {showTrailer && trailerSrc && (
-        <div className="fade-in" style={{
-          position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.95)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
-        }}>
-          <button
-            onClick={() => setShowTrailer(false)}
-            style={{
-              position: 'absolute', top: '20px', right: '20px', background: 'transparent', border: 'none',
-              color: '#fff', fontSize: '32px', cursor: 'pointer', zIndex: 1001
-            }}
-          >
-            ×
-          </button>
-          <div style={{ width: '100%', maxWidth: '1000px', aspectRatio: '16/9', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.8)' }}>
-            <iframe
-              src={trailerSrc}
-              style={{ width: '100%', height: '100%', border: 'none' }}
-              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; autoplay"
-              allowFullScreen
-            />
-          </div>
-        </div>
-      )}
+      {/* Trailer Overlay removed in favor of global onWatchTrailer */}
 
       {/* Rating Modal */}
       {showRatingModal && (

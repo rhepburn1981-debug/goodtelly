@@ -1,24 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
+import { getFriendFilms, logFriendView } from '../api/friends';
 import { FaPlus, FaWhatsapp, FaCheck, FaStar, FaShareAlt, FaBell, FaFilter } from 'react-icons/fa';
 import { MdMovieCreation } from "react-icons/md";
 import { TiStarFullOutline } from "react-icons/ti";
 import { FiPlus } from 'react-icons/fi';
 
-const MOCK_FRIENDS = [
-    { username: 'Richard', display_name: 'Richard', picks: 18 },
-    { username: 'Ashley', display_name: 'Ashley', picks: 12 },
-    { username: 'Sara', display_name: 'Sara', picks: 8 },
-    { username: 'Peter', display_name: 'Peter', picks: 42 },
-    { username: 'Gerard', display_name: 'Gerard', picks: 15 }
-];
+// Mock fallback removed in favor of props.friends
 
-const MOCK_FILMS = [
-    { id: 1, title: 'Thrash', year: '2026', poster_url: '/branding/poster1.png', watched: false, genre: 'Action', services: ['Netflix', 'Prime'] },
-    { id: 2, title: 'Mercy', year: '2026', poster_url: '/branding/poster2.png', watched: true, genre: 'Drama', services: ['Disney+'] },
-    { id: 3, title: 'Jujutsu Kaizen', year: '2022', poster_url: '/branding/poster3.png', watched: false, genre: 'Fantasy', services: ['NOW'] },
-    { id: 4, title: 'Beyond Paradise', year: '2017', poster_url: '/branding/poster4.png', watched: true, genre: 'Adventure', services: ['Apple TV+'] }
-];
+// Mock films removed in favor of dynamic fetching
 
 const GENRES = ['All', 'Action', 'Adventure', 'Fantasy', 'Comedy', 'Crime', 'Thriller', 'Drama'];
 const SORTS = ['All', 'Recently Added', 'Friends Rolling', 'A-Z'];
@@ -122,11 +112,18 @@ const FriendAvatar = ({ friend, active, onClick }) => (
             transition: 'all 0.3s ease',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 40, fontWeight: 700, color: active ? '#fff' : '#A09E9F',
-            border: active ? '2px solid #E0C36A' : '2px solid #FFFFFF33'
+            border: active ? '2px solid #E0C36A' : '2px solid #FFFFFF33',
+            overflow: 'hidden'
         }}>
             {friend.avatar ? (
-                <img src={friend.avatar} alt={friend.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-            ) : friend.name.charAt(0)}
+                (friend.avatar.startsWith('http') || friend.avatar.startsWith('/')) ? (
+                    <img src={friend.avatar} alt={friend.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                    <span style={{ fontSize: '30px' }}>{friend.avatar}</span>
+                )
+            ) : (
+                friend.name.charAt(0)
+            )}
         </div>
         <div style={{ fontSize: 14, fontWeight: 600, color: '#A09E9F' }}>{friend.name}</div>
     </div>
@@ -146,8 +143,8 @@ export default function FriendsDashboard(props) {
         onSearchChange
     } = props;
 
-    const [selectedFriend, setSelectedFriend] = useState('Richard');
-    const [friendList, setFriendList] = useState(MOCK_FILMS);
+    const [selectedFriend, setSelectedFriend] = useState(friends[0]?.username || null);
+    const [friendList, setFriendList] = useState([]);
     const [loadingList, setLoadingList] = useState(false);
     const [activeTabSub, setActiveTabSub] = useState('all');
     const [activeGenre, setActiveGenre] = useState('All');
@@ -155,14 +152,48 @@ export default function FriendsDashboard(props) {
     const [activeService, setActiveService] = useState('All');
     const [isListVisible, setIsListVisible] = useState(true);
 
-    // Static design: no dynamic fetching needed for this specific view
+    // Dynamic Genre list based on friend's films
+    const dynamicGenres = useMemo(() => {
+        const set = new Set(['All']);
+        friendList.forEach(f => { if (f.genre) set.add(f.genre); });
+        return Array.from(set);
+    }, [friendList]);
+
+    // Derived counts
+    const toWatchCount = useMemo(() => friendList.filter(f => !addedIds?.includes(f.id)).length, [friendList, addedIds]);
+    const watchedCount = useMemo(() => friendList.filter(f => addedIds?.includes(f.id)).length, [friendList, addedIds]);
+    const allCount = friendList.length;
+
+    // Fetch friend's films and log view
     useEffect(() => {
-        // Keeping it empty or set to mock
+        if (!selectedFriend) return;
+        
+        async function fetchFriendData() {
+            setLoadingList(true);
+            try {
+                logFriendView(selectedFriend);
+                const films = await getFriendFilms(selectedFriend);
+                setFriendList(films || []);
+            } catch (err) {
+                console.error("Failed to fetch friend films:", err);
+                setFriendList([]);
+            } finally {
+                setLoadingList(false);
+            }
+        }
+        fetchFriendData();
     }, [selectedFriend]);
 
+    // Handle initial selection if friends load later
+    useEffect(() => {
+        if (!selectedFriend && friends.length > 0) {
+            setSelectedFriend(friends[0].username);
+        }
+    }, [friends, selectedFriend]);
+
     const displayFilms = friendList.filter(f => {
-        if (activeTabSub === 'watched' && !f.watched) return false;
-        if (activeTabSub === 'to_watch' && f.watched) return false;
+        if (activeTabSub === 'watched' && !addedIds?.includes(f.id)) return false;
+        if (activeTabSub === 'to_watch' && addedIds?.includes(f.id)) return false;
         if (activeGenre !== 'All' && !(f.genre || '').includes(activeGenre)) return false;
         if (activeService !== 'All' && !(f.services || []).includes(activeService)) return false;
         return true;
@@ -281,9 +312,9 @@ export default function FriendsDashboard(props) {
                     {/* Stats */}
                     <div style={{ marginBottom: 26, display: 'flex', flexDirection: 'column', gap: 20, background: '#000', border: ' 1px solid #FFFFFF33', borderRadius: 20, padding: 20 }}>
                         {[
-                            { key: 'to_watch', count: 12, label: 'To Watch' },
-                            { key: 'watched', count: 6, label: 'Watched' },
-                            { key: 'all', count: 18, label: 'All' },
+                            { key: 'to_watch', count: toWatchCount, label: 'To Watch' },
+                            { key: 'watched', count: watchedCount, label: 'Watched' },
+                            { key: 'all', count: allCount, label: 'All' },
                         ].map(({ key, count, label }) => (
                             <div
                                 key={key}
@@ -320,7 +351,7 @@ export default function FriendsDashboard(props) {
                             <span style={{ fontSize: 16, fontWeight: 700, color: '#E0C36A' }}>Genre:</span>
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            {GENRES.map(g => (
+                            {dynamicGenres.map(g => (
                                 <Pill key={g} label={g} active={activeGenre === g} onClick={() => setActiveGenre(g)} />
                             ))}
                         </div>
@@ -357,7 +388,7 @@ export default function FriendsDashboard(props) {
                                 </div>
                                 <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>Add New</div>
                             </div>
-                            {MOCK_FRIENDS.map(f => (
+                            {friends.map(f => (
                                 <FriendAvatar
                                     key={f.username}
                                     friend={{ name: f.display_name || f.username, avatar: f.avatar }}

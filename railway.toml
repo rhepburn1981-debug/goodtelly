@@ -1,6 +1,7 @@
 [build]
 builder = "nixpacks"
-installCommand = "pip install -r filmshare-api/requirements.txt"
+installCommand = "pip install -r filmshare-api/requirements.txt && cd v3 && npm install"
+buildCommand = "cd v3 && npm run build"
 
 [deploy]
 startCommand = "cd filmshare-api && uvicorn main:app --host 0.0.0.0 --port $PORT"

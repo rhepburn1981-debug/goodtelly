@@ -18,3 +18,7 @@ filmshare-api/__pycache__/
 
 # Temp scripts
 apply_whatsapp_changes.py
+
+# Frontend artifacts
+v3/dist/
+v3/node_modules/

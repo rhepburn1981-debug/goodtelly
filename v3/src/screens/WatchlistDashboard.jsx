@@ -3,20 +3,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import { FaFilter } from 'react-icons/fa';
 import { MdMovieCreation } from "react-icons/md";
 
-const STATIC_FILMS = [
-    { id: 1, title: 'Thrash', year: 2026, genre: 'Action', poster: '/branding/poster1.png' },
-    { id: 2, title: 'Mercy', year: 2026, genre: 'Action', poster: '/branding/poster2.png' },
-    { id: 3, title: 'Jujutsu Kaizen', year: 2022, genre: 'Fantasy', poster: '/branding/poster3.png' },
-    { id: 4, title: 'Beyond Paradise', year: 2017, genre: 'Adventure', poster: '/branding/poster4.png' },
-    { id: 5, title: 'Punisher', year: 2026, genre: 'Action', poster: '/branding/terminator_poster.png' },
-    { id: 6, title: 'Mario: Galaxy Movie', year: 2024, genre: 'Comedy', poster: '/branding/trend2.png' },
-    { id: 7, title: 'One Piece', year: 2023, genre: 'Adventure', poster: '/branding/one_piece_poster.png' },
-    { id: 8, title: 'Mobland', year: 2025, genre: 'Crime', poster: '/branding/mobland_poster.png' },
-    { id: 9, title: 'Avatar', year: 2022, genre: 'Fantasy', poster: '/branding/avatar_poster.png' },
-    { id: 10, title: 'Burldg', year: 2024, genre: 'Adventure', poster: '/branding/burldg_poster.png' },
-    { id: 11, title: 'Safe Sock', year: 2023, genre: 'Comedy', poster: '/branding/safesock_poster.png' },
-    { id: 12, title: 'Terminator', year: 2024, genre: 'Action', poster: '/branding/trend3.png' },
-];
+// Mock films removed in favor of props.myList
 
 const GENRES = ['All', 'Action', 'Adventure', 'Fantasy', 'Comedy', 'Crime'];
 const SORTS = ['All', 'Recently Added', 'Friends Rolling', 'A-Z'];
@@ -74,30 +61,55 @@ const ServicePill = ({ label, logo, active, onClick }) => (
 );
 
 export default function WatchlistDashboard(props) {
-    const { onTabChange, activeTab, searchQuery, onSearchChange } = props;
+    const {
+        onTabChange,
+        activeTab,
+        searchQuery,
+        onSearchChange,
+        myList = [],
+        watchedIds = [],
+        onMarkWatched,
+        onUnmarkWatched,
+        onRemoveFromList,
+        onOpenFilm
+    } = props;
 
-    const [films, setFilms] = useState(STATIC_FILMS);
     const [isListVisible, setIsListVisible] = useState(true);
     const [activeStat, setActiveStat] = useState('to_watch');
     const [activeSort, setActiveSort] = useState('All');
     const [activeGenre, setActiveGenre] = useState('All');
     const [activeService, setActiveService] = useState('All');
 
-    const toWatchList = films.filter(f => !f.watched);
-    const watchedList = films.filter(f => f.watched);
+    const toWatchList = myList.filter(f => !watchedIds.includes(f.film_id || f.id));
+    const watchedList = myList.filter(f => watchedIds.includes(f.film_id || f.id));
 
-    const handleToggleWatched = (id) =>
-        setFilms(prev => prev.map(f => f.id === id ? { ...f, watched: !f.watched } : f));
-    const handleRemove = (id) =>
-        setFilms(prev => prev.filter(f => f.id !== id));
+    // Dynamic Genre labels based on myList
+    const dynamicGenres = React.useMemo(() => {
+        const set = new Set(['All']);
+        myList.forEach(item => {
+            const film = item.film || item;
+            if (film.genre) set.add(film.genre);
+        });
+        return Array.from(set);
+    }, [myList]);
 
     const baseList =
         activeStat === 'watched' ? watchedList :
-            activeStat === 'to_watch' ? toWatchList : films;
+            activeStat === 'to_watch' ? toWatchList : myList;
 
     const displayFilms = baseList
-        .filter(f => activeGenre === 'All' || f.genre === activeGenre)
-        .sort((a, b) => activeSort === 'A-Z' ? a.title.localeCompare(b.title) : 0);
+        .filter(item => {
+            const film = item.film || item;
+            if (activeGenre !== 'All' && !(film.genre === activeGenre)) return false;
+            // Additional search filter consistency
+            if (searchQuery && !film.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+            return true;
+        })
+        .sort((a, b) => {
+            const fa = a.film || a;
+            const fb = b.film || b;
+            return activeSort === 'A-Z' ? fa.title.localeCompare(fb.title) : 0;
+        });
 
     return (
         <DashboardLayout
@@ -218,7 +230,7 @@ export default function WatchlistDashboard(props) {
                         {[
                             { key: 'to_watch', count: toWatchList.length, label: 'To Watch' },
                             { key: 'watched', count: watchedList.length, label: 'Watched' },
-                            { key: 'all', count: films.length, label: 'All' },
+                            { key: 'all', count: myList.length, label: 'All' },
                         ].map(({ key, count, label }) => (
                             <div
                                 key={key}
@@ -269,7 +281,7 @@ export default function WatchlistDashboard(props) {
                             <span style={{ fontSize: 16, fontWeight: 700, color: '#E0C36A' }}>Genre:</span>
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            {GENRES.map(g => (
+                            {dynamicGenres.map(g => (
                                 <Pill key={g} label={g} active={activeGenre === g} onClick={() => setActiveGenre(g)} />
                             ))}
                         </div>
@@ -299,32 +311,43 @@ export default function WatchlistDashboard(props) {
                 <div className="wl-grid-area">
                     {displayFilms.length > 0 ? (
                         <div className="wl-grid">
-                            {displayFilms.map(film => (
-                                <div key={film.id} className="wl-card">
-                                    <img
-                                        src={film.poster}
-                                        alt={film.title}
-                                        style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', display: 'block', borderRadius: 20, border: '1px solid #FFFFFF33' }}
-                                    />
-                                    <div style={{ padding: '10px 11px 0' }}>
-                                        <div style={{ fontWeight: 800, fontSize: 16, color: '#fff', marginTop: '5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {film.title}
+                            {displayFilms.map(item => {
+                                const film = item.film || item;
+                                const filmId = film.id || item.film_id;
+                                const isWatched = watchedIds.includes(filmId);
+                                return (
+                                    <div key={filmId} className="wl-card" onClick={() => onOpenFilm(film)} style={{ cursor: 'pointer' }}>
+                                        <img
+                                            src={film.poster_url}
+                                            alt={film.title}
+                                            style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', display: 'block', borderRadius: 20, border: '1px solid #FFFFFF33' }}
+                                        />
+                                        <div style={{ padding: '10px 11px 0' }}>
+                                            <div style={{ fontWeight: 800, fontSize: 16, color: '#fff', marginTop: '5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {film.title}
+                                            </div>
+                                            <div style={{ fontSize: 16, color: '#727272', marginBottom: 15 }}>
+                                                {film.year}
+                                            </div>
+                                            <button
+                                                className={`wl-seen-btn${isWatched ? ' watched' : ''}`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    isWatched ? onUnmarkWatched(film) : onMarkWatched(film);
+                                                }}
+                                            >
+                                                {isWatched ? '✓ Watched' : '"Tap" if you\'ve seen it'}
+                                            </button>
+                                            <button className="wl-remove-btn" onClick={(e) => {
+                                                e.stopPropagation();
+                                                onRemoveFromList(film);
+                                            }}>
+                                                Remove
+                                            </button>
                                         </div>
-                                        <div style={{ fontSize: 16, color: '#727272', marginBottom: 15 }}>
-                                            {film.year}
-                                        </div>
-                                        <button
-                                            className={`wl-seen-btn${film.watched ? ' watched' : ''}`}
-                                            onClick={() => handleToggleWatched(film.id)}
-                                        >
-                                            {film.watched ? '✓ Watched' : '"Tap" if you\'ve seen it'}
-                                        </button>
-                                        <button className="wl-remove-btn" onClick={() => handleRemove(film.id)}>
-                                            Remove
-                                        </button>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     ) : (
                         <div style={{ padding: '80px 0', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>

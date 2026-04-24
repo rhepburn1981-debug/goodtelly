@@ -272,7 +272,6 @@ const SliderButton = ({ direction, onClick }) => (
       zIndex: 10,
       background: 'rgba(0,0,0,0.5)',
       color: '#fff',
-      border: 'none',
       borderRadius: '50%',
       width: 44,
       height: 44,
