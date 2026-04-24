@@ -1,8 +1,40 @@
 import { useState, useEffect } from 'react'
 
+function buildEmbedSrc(rawUrl) {
+  if (!rawUrl) return ''
+
+  let embedUrl = rawUrl
+  try {
+    const parsed = new URL(rawUrl)
+    const host = parsed.hostname.toLowerCase()
+
+    // Convert watch/share links into iframe-safe embed URLs.
+    if (host.includes('youtu.be')) {
+      const id = parsed.pathname.replace('/', '').trim()
+      if (id) embedUrl = `https://www.youtube.com/embed/${id}`
+    } else if (host.includes('youtube.com')) {
+      if (parsed.pathname === '/watch') {
+        const id = parsed.searchParams.get('v')
+        if (id) embedUrl = `https://www.youtube.com/embed/${id}`
+      } else if (parsed.pathname.startsWith('/embed/')) {
+        embedUrl = `https://www.youtube.com${parsed.pathname}`
+      }
+    }
+
+    const embedParsed = new URL(embedUrl)
+    embedParsed.searchParams.set('autoplay', '1')
+    embedParsed.searchParams.set('rel', '0')
+    return embedParsed.toString()
+  } catch {
+    const joiner = rawUrl.includes('?') ? '&' : '?'
+    return `${rawUrl}${joiner}autoplay=1&rel=0`
+  }
+}
+
 export default function TrailerModal({ url, onClose }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-
+  const iframeSrc = buildEmbedSrc(url)
+  
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', handleResize)
@@ -53,7 +85,7 @@ export default function TrailerModal({ url, onClose }) {
           border: '1px solid rgba(255,255,255,0.1)'
         }}>
           <iframe
-            src={url + '?autoplay=1&rel=0'}
+            src={iframeSrc}
             style={{
               position: 'absolute',
               top: 0, left: 0,
