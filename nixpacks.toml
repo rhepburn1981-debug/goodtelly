@@ -1,9 +1,9 @@
 [phases.setup]
-nixPkgs = ["python311", "nodejs"]
+nixPkgs = ["python3", "python3Packages.pip", "nodejs"]
 
 [phases.install]
 dependsOn = ["setup"]
-cmds = ["pip install -r filmshare-api/requirements.txt", "cd v3 && npm install"]
+cmds = ["python3 -m pip install -r filmshare-api/requirements.txt", "cd v3 && npm install"]
 
 [phases.build]
 dependsOn = ["install"]
