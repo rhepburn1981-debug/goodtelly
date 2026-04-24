@@ -44,7 +44,7 @@ export default function FriendsTab({
       })
   }, [friendFilms, genreFilter, watchFilter, addedIds])
 
-  const inviteLink = `https://watchmates.app/invite?from=${currentUser?.username || 'user'}`
+  const inviteLink = `https://reel.app/invite?from=${currentUser?.username || 'user'}`
 
   return (
     <div style={{

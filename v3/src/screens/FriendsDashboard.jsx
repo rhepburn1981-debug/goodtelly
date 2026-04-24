@@ -140,7 +140,9 @@ export default function FriendsDashboard(props) {
         onTabChange,
         activeTab,
         searchQuery,
-        onSearchChange
+        onSearchChange,
+        onToast,
+        currentUser
     } = props;
 
     const [selectedFriend, setSelectedFriend] = useState(friends[0]?.username || null);
@@ -398,13 +400,20 @@ export default function FriendsDashboard(props) {
                             ))}
                         </div>
 
-                        <div style={{
-                            border: '1px solid #16A34A',
-                            borderRadius: 20,
-                            padding: '20px 30px',
-                            display: 'flex', alignItems: 'center', gap: 40,
-                            cursor: 'pointer'
-                        }}>
+                        <div 
+                            onClick={() => {
+                                const inviteLink = `https://reel.app/invite?from=${currentUser?.username || 'user'}`;
+                                const text = encodeURIComponent("Join me on WatchMates to find the best TV & films! " + inviteLink);
+                                window.open(`https://wa.me/?text=${text}`, '_blank');
+                            }}
+                            style={{
+                                border: '1px solid #16A34A',
+                                borderRadius: 20,
+                                padding: '20px 30px',
+                                display: 'flex', alignItems: 'center', gap: 40,
+                                cursor: 'pointer'
+                            }}
+                        >
                             <div style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <FaWhatsapp size={42} color="#12CE5A" />
                             </div>
