@@ -1,18 +1,14 @@
 [phases.setup]
-nixPkgs = ["python311", "nodejs_20"]
+nixPkgs = ["python39", "nodejs_20"]
 
 [phases.install]
 cmds = [
-  "python3 -m pip install --upgrade pip",
-  "python3 -m pip install -r filmshare-api/requirements.txt",
-  "cd v3 && npm install"
+  "python -m venv --copies /opt/venv",
+  ". /opt/venv/bin/activate && pip install -r requirements.txt",
+  "cd v3 && npm ci"
 ]
 
 [phases.build]
-dependsOn = ["install"]
 cmds = [
   "cd v3 && npm run build"
 ]
-
-[start]
-cmd = "cd filmshare-api && python3 -m uvicorn main:app --host 0.0.0.0 --port $PORT"
