@@ -2454,3 +2454,18 @@ def assign_avatars(token: str = ""):
         for row in rows:
             conn.execute("UPDATE users SET avatar=? WHERE id=?", (random.choice(avatars), row["id"]))
     return {"updated": len(rows), "users": [r["username"] for r in rows]}
+
+@app.get("/{full_path:path}", include_in_schema=False)
+def serve_spa_routes(full_path: str):
+    """
+    SPA history fallback:
+    - Refreshing a React route (for example /dashboard/home) should serve index.html.
+    - Keep non-SPA prefixes returning regular 404 behavior.
+    """
+    blocked_prefixes = ("api/", "assets/", "branding/", "share/")
+    if full_path in {"api", "assets", "branding", "share"} or full_path.startswith(blocked_prefixes):
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    if os.path.exists(V3_INDEX_FILE):
+        return FileResponse(V3_INDEX_FILE)
+    return FileResponse(LEGACY_HTML_FILE)
