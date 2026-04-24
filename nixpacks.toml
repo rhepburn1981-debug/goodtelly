@@ -3,15 +3,16 @@ nixPkgs = ["python311", "nodejs_20"]
 
 [phases.install]
 cmds = [
-  "python -m pip install --upgrade pip",
-  "python -m pip install -r filmshare-api/requirements.txt",
+  "python3 -m pip install --upgrade pip",
+  "python3 -m pip install -r filmshare-api/requirements.txt",
   "cd v3 && npm install"
 ]
 
 [phases.build]
+dependsOn = ["install"]
 cmds = [
   "cd v3 && npm run build"
 ]
 
 [start]
-cmd = "cd filmshare-api && uvicorn main:app --host 0.0.0.0 --port $PORT"
+cmd = "cd filmshare-api && python3 -m uvicorn main:app --host 0.0.0.0 --port $PORT"
