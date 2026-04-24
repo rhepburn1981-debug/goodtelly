@@ -100,7 +100,7 @@ export default function WatchlistDashboard(props) {
     const displayFilms = baseList
         .filter(item => {
             const film = item.film || item;
-            if (activeGenre !== 'All' && !(film.genre === activeGenre)) return false;
+            if (activeGenre !== 'All' && !(film.genre || '').toLowerCase().includes(activeGenre.toLowerCase())) return false;
             // Additional search filter consistency
             if (searchQuery && !film.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
             return true;

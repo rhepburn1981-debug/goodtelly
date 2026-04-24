@@ -190,7 +190,7 @@ export default function HomeTab(props) {
 
       {/* Watchlist Quick Links */}
       <div
-        onClick={() => handleTabChange('list')}
+        onClick={() => onTabChange('list')}
         className="hover-scale"
         style={{
           margin: '0px 16px 8px',
@@ -223,7 +223,7 @@ export default function HomeTab(props) {
       </div>
 
       <div
-        onClick={() => handleTabChange('friends')}
+        onClick={() => onTabChange('friends')}
         className="hover-scale"
         style={{
           margin: '8px 16px 16px',

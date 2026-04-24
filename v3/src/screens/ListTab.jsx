@@ -16,7 +16,7 @@ export default function ListTab({ myList, watchedIds, onOpenFilm, onRemoveFromLi
     else films = myList
 
     return films
-      .filter((f) => genreFilter === 'All' || f.genre === genreFilter)
+      .filter((f) => genreFilter === 'All' || (f.genre || '').toLowerCase().includes(genreFilter.toLowerCase()))
       .sort((a, b) => {
         if (sort === 'rating') return (b.my_rating || 0) - (a.my_rating || 0)
         if (sort === 'title') return (a.title || '').localeCompare(b.title || '')

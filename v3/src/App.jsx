@@ -132,7 +132,7 @@ export default function App() {
     getWatchlist().then((list) => {
       setMyList(list)
       setAddedIds(list.map((f) => f.id))
-      setWatchedIds(list.filter((f) => f.watched).map((f) => f.id))
+      setWatchedIds(list.filter((f) => f.watched || f.isWatched).map((f) => f.id))
     }).catch(() => { })
     getFriends().then(setFriends).catch(() => { })
     getFriendRequests().then((reqs) => {
