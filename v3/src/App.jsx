@@ -196,14 +196,23 @@ export default function App() {
 
   // --- Watchlist actions ---
   async function handleAddToList(film) {
-    const id = film.id
-    if (addedIds.includes(id)) {
-      showToast('"' + film.title + '" is already in your list')
-      return
+    const id = film.id;
+    const tmdbId = film.tmdb_id || film.tmdbId;
+
+    // Check if already in internal list by ID or TMDB ID
+    const existing = allFilms.find(f => 
+      f.id === id || (tmdbId && f.tmdb_id === tmdbId)
+    );
+
+    if (addedIds.includes(id) || (existing && addedIds.includes(existing.id))) {
+      showToast('"' + film.title + '" is already in your list');
+      return;
     }
-    setAddedIds((prev) => [...prev, id])
-    setMyList((prev) => prev.find((f) => f.id === id) ? prev : [...prev, film])
-    showToast('"' + film.title + '" added to list')
+
+    // Pessimistically add to UI first for responsiveness
+    setAddedIds((prev) => [...prev, id]);
+    setMyList((prev) => prev.find((f) => f.id === id) ? prev : [...prev, film]);
+    showToast('"' + film.title + '" added to list');
     try {
       if (film._fromTmdb && !allFilms.find((f) => f.id === id)) {
         const saved = await addFilm({ title: film.title, year: film.year ? parseInt(film.year) : null, tmdbId: film.tmdb_id, autoEnrich: true })

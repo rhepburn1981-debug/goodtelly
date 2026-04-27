@@ -66,17 +66,11 @@ def get_film_details(tmdb_id: int) -> dict:
     return data
 
 
-def enrich_film(title: str, year: Optional[int] = None) -> dict:
-    """Search TMDB for title and return enriched fields for the films table.
-    Returns empty dict if TMDB is unavailable or no match found."""
+def enrich_film_by_id(tmdb_id: int) -> dict:
+    """Enrich movie details using TMDB ID directly."""
     if not os.environ.get("TMDB_API_KEY", "") and not os.environ.get("TMDB_READ_TOKEN", ""):
         return {}
 
-    match = search_film(title, year)
-    if not match:
-        return {}
-
-    tmdb_id = match["id"]
     details = get_film_details(tmdb_id)
     if not details:
         return {}
@@ -122,3 +116,16 @@ def enrich_film(title: str, year: Optional[int] = None) -> dict:
         "rating": round(details.get("vote_average", 0) / 2.0, 2) if details.get("vote_average") else None,
         "stills": stills,
     }
+
+
+def enrich_film(title: str, year: Optional[int] = None) -> dict:
+    """Search TMDB for title and return enriched fields for the films table.
+    Returns empty dict if TMDB is unavailable or no match found."""
+    if not os.environ.get("TMDB_API_KEY", "") and not os.environ.get("TMDB_READ_TOKEN", ""):
+        return {}
+
+    match = search_film(title, year)
+    if not match:
+        return {}
+
+    return enrich_film_by_id(match["id"])

@@ -89,8 +89,13 @@ const DiscoverCard = ({ film, isAdded, onAdd, onClick }) => (
 
             <button
                 className={`wl-seen-btn ${isAdded ? 'watched' : ''}`}
-                onClick={(e) => { e.stopPropagation(); onAdd(film); }}
-                style={{ background: isAdded ? '#E0C36A' : '#2D2715', color: isAdded ? '#2D2715' : '#D9D9D9' }}
+                onClick={(e) => { e.stopPropagation(); if (!isAdded) onAdd(film); }}
+                disabled={isAdded}
+                style={{ 
+                    background: isAdded ? '#E0C36A' : '#2D2715', 
+                    color: isAdded ? '#2D2715' : '#D9D9D9',
+                    cursor: isAdded ? 'default' : 'pointer'
+                }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                     {isAdded ? <FaCheck size={24} /> : <FiPlus size={24} />}

@@ -1147,6 +1147,8 @@ def create_film(film: FilmCreate, current_user=Depends(get_current_user)):
                 "stills": ["https://image.tmdb.org/t/p/w780" + b["file_path"] for b in backdrops[:6] if b.get("file_path")],
                 "tmdb_id": film.tmdbTvId,
             }
+    elif film.tmdbId:
+        enriched = _tmdb.enrich_film_by_id(film.tmdbId)
     elif film.autoEnrich:
         enriched = _tmdb.enrich_film(film.title, film.year)
 

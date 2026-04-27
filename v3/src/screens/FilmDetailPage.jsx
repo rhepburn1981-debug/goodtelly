@@ -217,9 +217,28 @@ export default function FilmDetailPage({
           </div>
 
           <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-            <button onClick={() => isAdded ? onRemoveFromList(film) : onAddToList(film)} style={{ flex: '1 1 0%', padding: '11px 6px', background: 'rgba(201, 168, 76, 0.12)', border: '1px solid rgba(201, 168, 76, 0.3)', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: '800', color: 'var(--gold-bright)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}>
+            <button 
+              onClick={() => !isAdded && onAddToList(film)} 
+              disabled={isAdded}
+              style={{ 
+                flex: '1 1 0%', 
+                padding: '11px 6px', 
+                background: isAdded ? 'rgba(255, 255, 255, 0.05)' : 'rgba(201, 168, 76, 0.12)', 
+                border: isAdded ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(201, 168, 76, 0.3)', 
+                borderRadius: '12px', 
+                cursor: isAdded ? 'default' : 'pointer', 
+                fontSize: '12px', 
+                fontWeight: '800', 
+                color: isAdded ? 'rgba(255, 255, 255, 0.4)' : 'var(--gold-bright)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: '7px',
+                opacity: isAdded ? 0.8 : 1
+              }}
+            >
               {isAdded ? <FaCheck size={12} /> : <FaPlus size={12} />}
-              {isAdded ? 'Watchlisted' : 'Watchlist'}
+              {isAdded ? 'Added' : 'Watchlist'}
             </button>
             <button onClick={() => onRecommend(film)} style={{ flex: '1 1 0%', padding: '11px 6px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', cursor: 'pointer', fontWeight: '700', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', fontSize: '12px' }}>
               <FaPaperPlane size={12} />
@@ -286,16 +305,39 @@ export default function FilmDetailPage({
             </div>
 
             <div style={{ marginTop: '10px' }}>
-              <button onClick={() => isWatched ? onUnmarkWatched(film) : setShowRatingModal(true)} style={{ width: '100%', padding: '16px', background: isWatched ? 'rgba(255, 255, 255, 0.05)' : 'linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(39, 174, 96, 0.2))', border: isWatched ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(46, 204, 138, 0.4)', borderRadius: '16px', cursor: 'pointer', fontSize: '15px', fontWeight: '800', color: isWatched ? 'rgba(255, 255, 255, 0.5)' : '#2ecc71', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.2s' }}>
+              <button onClick={(e) => { e.stopPropagation(); isWatched ? onUnmarkWatched(film) : setShowRatingModal(true); }} style={{ width: '100%', padding: '16px', background: isWatched ? 'rgba(255, 255, 255, 0.05)' : 'linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(39, 174, 96, 0.2))', border: isWatched ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(46, 204, 138, 0.4)', borderRadius: '16px', cursor: 'pointer', fontSize: '15px', fontWeight: '800', color: isWatched ? 'rgba(255, 255, 255, 0.5)' : '#2ecc71', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.2s' }}>
                 {isWatched ? <FaCheck size={16} /> : <FaFilm size={16} />}
                 {isWatched ? 'Watched' : 'Seen it?'}
               </button>
 
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => isAdded ? onRemoveFromList(film) : onAddToList(film)} style={{ flex: 1, padding: '14px', background: 'rgba(201, 168, 76, 0.1)', border: '1px solid rgba(201, 168, 76, 0.3)', borderRadius: '16px', cursor: 'pointer', fontSize: '13px', fontWeight: '800', color: 'var(--gold-bright)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  {isAdded ? <FaCheck /> : <FaPlus />} Watchlist
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation();
+                    if (!isAdded) onAddToList(film);
+                  }} 
+                  disabled={isAdded}
+                  style={{ 
+                    flex: 1, 
+                    padding: '14px', 
+                    background: isAdded ? 'rgba(255, 255, 255, 0.05)' : 'rgba(201, 168, 76, 0.1)', 
+                    border: isAdded ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(201, 168, 76, 0.3)', 
+                    borderRadius: '16px', 
+                    cursor: isAdded ? 'default' : 'pointer', 
+                    fontSize: '13px', 
+                    fontWeight: '800', 
+                    color: isAdded ? 'rgba(255, 255, 255, 0.3)' : 'var(--gold-bright)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '8px',
+                    transition: 'all 0.2s',
+                    opacity: isAdded ? 0.7 : 1
+                  }}
+                >
+                  {isAdded ? <FaCheck /> : <FaPlus />} {isAdded ? 'Added' : 'Watchlist'}
                 </button>
-                <button onClick={() => onRecommend(film)} style={{ flex: 1, padding: '14px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', cursor: 'pointer', fontWeight: '700', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px' }}>
+                <button onClick={(e) => { e.stopPropagation(); onRecommend(film); }} style={{ flex: 1, padding: '14px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', cursor: 'pointer', fontWeight: '700', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px' }}>
                   <FaPaperPlane /> Share
                 </button>
               </div>
