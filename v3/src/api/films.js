@@ -27,6 +27,10 @@ export function searchTmdb(query) {
     .then((results) => (results || []).map((r) => ({ ...r, _fromTmdb: true })));
 }
 
+export function getTmdbDetails(tmdbId) {
+  return api.get("/api/tmdb/details/" + tmdbId);
+}
+
 export function getTrending() {
   return api
     .get("/api/trending/all")

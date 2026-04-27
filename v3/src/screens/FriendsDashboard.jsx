@@ -66,36 +66,66 @@ const ServicePill = ({ label, logo, active, onClick }) => (
     </button>
 );
 
-const FriendFilmCard = ({ film, isAdded, onAdd, onClick }) => (
-    <div className="wl-card">
-        <img
-            src={film.poster_url || film.img || '/branding/poster1.png'}
-            alt={film.title}
-            style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', display: 'block', borderRadius: 20, border: '1px solid #FFFFFF33' }}
-            onClick={onClick}
-        />
-        <div style={{ padding: '10px 11px 0' }}>
-            <div style={{ fontWeight: 800, fontSize: 16, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingTop: '5px' }}>
-                {film.title}
+const FriendFilmCard = ({ film, isAdded, onAdd, onClick }) => {
+    const providers = film.providers || [];
+    const mainProvider = providers.find(p => p.provider_name.toLowerCase().includes('netflix')) ||
+                         providers.find(p => p.provider_name.toLowerCase().includes('amazon')) ||
+                         providers.find(p => p.provider_name.toLowerCase().includes('apple')) ||
+                         providers.find(p => p.provider_name.toLowerCase().includes('disney')) ||
+                         providers[0];
+
+    const getProviderLogo = (name) => {
+        const norm = name?.toLowerCase() || '';
+        if (norm.includes('netflix')) return '/branding/netflix.png';
+        if (norm.includes('amazon') || norm.includes('prime')) return '/branding/prime.png';
+        if (norm.includes('apple')) return '/branding/I-tv.png';
+        if (norm.includes('disney')) return '/branding/disney.png';
+        if (norm.includes('now')) return '/branding/now_logo.png';
+        if (norm.includes('hbo')) return '/branding/hbo.png';
+        return null;
+    };
+
+    return (
+        <div className="wl-card">
+            <div style={{ position: 'relative', cursor: 'pointer', margin: '-1px', borderRadius: '20px 20px 0 0', overflow: 'hidden' }} onClick={onClick}>
+                <img
+                    src={film.poster_url || film.img || '/branding/poster1.png'}
+                    alt={film.title}
+                    style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover', display: 'block' }}
+                />
+                {mainProvider && getProviderLogo(mainProvider.provider_name) && (
+                    <div style={{
+                        position: 'absolute', bottom: 10, right: 10,
+                        background: 'rgba(0,0,0,0.8)', padding: '4px 8px', borderRadius: '8px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 2
+                    }}>
+                        <img src={getProviderLogo(mainProvider.provider_name)} alt="" style={{ height: '14px', width: 'auto', objectFit: 'contain' }} />
+                    </div>
+                )}
             </div>
-            <div style={{ fontSize: 16, color: '#727272', marginBottom: '15px' }}>
-                {film.year}
-            </div>
-            <button
-                className="wl-seen-btn static-seen"
-                onClick={(e) => { e.stopPropagation(); onAdd(film); }}
-                style={{ background: '#16A34A', color: '#fff' }}
-            >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-                    <span>"Tap" if you've seen it</span>
+            <div style={{ padding: '14px 16px 16px' }}>
+                <div style={{ fontWeight: 800, fontSize: 16, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '4px' }}>
+                    {film.title}
                 </div>
-            </button>
-            <button className="wl-remove-btn" style={{ marginTop: 10, background: '#1A0505', color: '#fff', borderColor: '#FFFFFF33' }}>
-                Remove
-            </button>
+                <div style={{ fontSize: 14, color: '#727272', marginBottom: '14px' }}>
+                    {film.year}{film.genre ? ` · ${film.genre}` : ''}
+                </div>
+                <button
+                    className="wl-seen-btn static-seen"
+                    onClick={(e) => { e.stopPropagation(); if (!isAdded) onAdd(film); }}
+                    style={{ background: isAdded ? 'rgba(255,255,255,0.1)' : '#16A34A', color: '#fff', cursor: isAdded ? 'default' : 'pointer', border: isAdded ? '1px solid rgba(255,255,255,0.1)' : 'none' }}
+                    disabled={isAdded}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                        {isAdded ? <FaCheck /> : null}
+                        <span>{isAdded ? 'In Watchlist' : '"Tap" if you\'ve seen it'}</span>
+                    </div>
+                </button>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const FriendAvatar = ({ friend, active, onClick }) => (
     <div
@@ -112,15 +142,15 @@ const FriendAvatar = ({ friend, active, onClick }) => (
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 24, border: active ? '2px solid #fff' : 'none',
             transition: '0.2s', boxShadow: active ? '0 0 15px rgba(241, 196, 15, 0.4)' : 'none',
-            overflow: 'hidden', fontWeight: 'bold'
+            overflow: 'hidden', fontWeight: 'bold', color: '#fff'
         }}>
             {friend.avatar ? (
                 <img src={friend.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
-                friend.name.charAt(0)
+                (friend.name || '?').charAt(0).toUpperCase()
             )}
         </div>
-        <div style={{ fontSize: 14, fontWeight: 600, color: '#A09E9F' }}>{friend.name}</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#A09E9F', maxWidth: 74, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>{friend.name || '?'}</div>
     </div>
 );
 
@@ -170,7 +200,7 @@ export default function FriendsDashboard(props) {
     // Fetch friend's films and log view
     useEffect(() => {
         if (!selectedFriend) return;
-        
+
         async function fetchFriendData() {
             setLoadingList(true);
             try {
@@ -254,13 +284,12 @@ export default function FriendsDashboard(props) {
 
                 .wl-card {
                     background: #000;
-                    border-radius: 32px;
+                    border-radius: 20px;
                     overflow: hidden;
                     border: 1px solid #FFFFFF33;
                     display: flex;
                     flex-direction: column;
                     transition: all 0.25s;
-                    padding: 26px;
                 }
                 .wl-card:hover { box-shadow: 0 20px 50px rgba(0,0,0,0.75); border-color: rgba(255,255,255,0.2); transform: translateY(-5px); }
 
@@ -401,9 +430,9 @@ export default function FriendsDashboard(props) {
                             ))}
                         </div>
 
-                        <div 
+                        <div
                             onClick={() => {
-                                const inviteLink = `https://reel.app/invite?from=${currentUser?.username || 'user'}`;
+                                const inviteLink = `https://goodtelly-production.up.railway.app/invite?from=${currentUser?.username || 'user'}`;
                                 const text = encodeURIComponent("Join me on WatchMates to find the best TV & films! " + inviteLink);
                                 window.open(`https://wa.me/?text=${text}`, '_blank');
                             }}

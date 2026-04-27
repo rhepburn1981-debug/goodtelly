@@ -217,22 +217,22 @@ export default function FilmDetailPage({
           </div>
 
           <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-            <button 
-              onClick={() => !isAdded && onAddToList(film)} 
+            <button
+              onClick={() => !isAdded && onAddToList(film)}
               disabled={isAdded}
-              style={{ 
-                flex: '1 1 0%', 
-                padding: '11px 6px', 
-                background: isAdded ? 'rgba(255, 255, 255, 0.05)' : 'rgba(201, 168, 76, 0.12)', 
-                border: isAdded ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(201, 168, 76, 0.3)', 
-                borderRadius: '12px', 
-                cursor: isAdded ? 'default' : 'pointer', 
-                fontSize: '12px', 
-                fontWeight: '800', 
-                color: isAdded ? 'rgba(255, 255, 255, 0.4)' : 'var(--gold-bright)', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+              style={{
+                flex: '1 1 0%',
+                padding: '11px 6px',
+                background: isAdded ? 'rgba(255, 255, 255, 0.05)' : 'rgba(201, 168, 76, 0.12)',
+                border: isAdded ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(201, 168, 76, 0.3)',
+                borderRadius: '12px',
+                cursor: isAdded ? 'default' : 'pointer',
+                fontSize: '12px',
+                fontWeight: '800',
+                color: isAdded ? 'rgba(255, 255, 255, 0.4)' : 'var(--gold-bright)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 gap: '7px',
                 opacity: isAdded ? 0.8 : 1
               }}
@@ -311,25 +311,25 @@ export default function FilmDetailPage({
               </button>
 
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button 
-                  onClick={(e) => { 
+                <button
+                  onClick={(e) => {
                     e.stopPropagation();
                     if (!isAdded) onAddToList(film);
-                  }} 
+                  }}
                   disabled={isAdded}
-                  style={{ 
-                    flex: 1, 
-                    padding: '14px', 
-                    background: isAdded ? 'rgba(255, 255, 255, 0.05)' : 'rgba(201, 168, 76, 0.1)', 
-                    border: isAdded ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(201, 168, 76, 0.3)', 
-                    borderRadius: '16px', 
-                    cursor: isAdded ? 'default' : 'pointer', 
-                    fontSize: '13px', 
-                    fontWeight: '800', 
-                    color: isAdded ? 'rgba(255, 255, 255, 0.3)' : 'var(--gold-bright)', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
+                  style={{
+                    flex: 1,
+                    padding: '14px',
+                    background: isAdded ? 'rgba(255, 255, 255, 0.05)' : 'rgba(201, 168, 76, 0.1)',
+                    border: isAdded ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(201, 168, 76, 0.3)',
+                    borderRadius: '16px',
+                    cursor: isAdded ? 'default' : 'pointer',
+                    fontSize: '13px',
+                    fontWeight: '800',
+                    color: isAdded ? 'rgba(255, 255, 255, 0.3)' : 'var(--gold-bright)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '8px',
                     transition: 'all 0.2s',
                     opacity: isAdded ? 0.7 : 1

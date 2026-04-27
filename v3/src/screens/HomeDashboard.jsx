@@ -400,7 +400,7 @@ export default function HomeDashboard(props) {
                         ))}
                     </div>
                 )}
-                <div style={{ marginBottom: 25, display: 'flex', gap: 24}}>
+                <div style={{ marginBottom: 25, display: 'flex', gap: 24 }}>
                     <NavShortcut
                         icon={IoMdStar}
                         title="My Watchlist"

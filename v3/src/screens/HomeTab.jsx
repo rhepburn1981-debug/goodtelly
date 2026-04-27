@@ -312,7 +312,7 @@ export default function HomeTab(props) {
                 </linearGradient>
               </defs>
             </svg>
-            What Reel users are watching right now
+            Trending with WatchMates Users
           </div>
         </div>
 
@@ -349,45 +349,58 @@ export default function HomeTab(props) {
           ))}
         </div>
       </div>
-      {/* RECENT / Trending with WatchMates Users */}
+      {/* UPCOMING / What's on this week */}
       <div style={{ paddingBottom: '24px' }}>
         <div className="section-header">
           <div className="section-title">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-              <polyline points="17 6 23 6 23 12"></polyline>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#e2b644" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+              <polyline points="17 2 12 7 7 2"></polyline>
             </svg>
-            Trending with WatchMates Users
+            What’s on this week
           </div>
         </div>
 
         <div style={{ margin: '0px 16px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.05)', overflow: 'hidden' }}>
-          {(recentWatchlist.length > 0 ? recentWatchlist.slice(0, 5) : FALLBACK_RECENT).map((item, idx) => (
+          {(upcomingShows.length > 0 ? upcomingShows.slice(0, 6) : []).map((item, idx) => (
             <div
               key={item.id || idx}
-              onClick={() => onOpenFilm(item)}
+              onClick={() => onOpenFilm({ ...item, title: item.name, poster_url: item.image, _isExternal: true })}
               className="hover-scale"
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px',
-                borderBottom: idx === 4 ? 'none' : '1px solid rgba(255, 255, 255, 0.04)'
+                borderBottom: idx === (upcomingShows.length - 1 || 5) ? 'none' : '1px solid rgba(255, 255, 255, 0.04)'
               }}
             >
               <div style={{ width: '36px', height: '36px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, background: 'rgba(255,255,255,0.05)' }}>
-                <img src={item.poster_url || item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={item.image || '/branding/poster1.png'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {item.title || item.name}
+                  {item.name}
                 </div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
-                  {item.channel || 'TV Series'} • {formatDate(item.airdate)}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                  <div style={{
+                    fontSize: '9px', fontWeight: '800', padding: '1px 4px', borderRadius: '4px',
+                    ...getChannelStyles(item.network?.name || 'TV')
+                  }}>
+                    {item.network?.name || 'TV'}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+                    • {formatDate(item.airdate)}
+                  </div>
                 </div>
               </div>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: '500' }}>
-                {formatDate(item.airdate)}
+                {item.airtime || '21:00'}
               </div>
             </div>
           ))}
+          {upcomingShows.length === 0 && (
+            <div style={{ padding: '20px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '13px' }}>
+              No upcoming shows found for this week.
+            </div>
+          )}
         </div>
       </div>
 

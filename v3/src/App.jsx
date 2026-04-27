@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { getToken, setToken, clearToken } from './api/client'
 import { getMe } from './api/auth'
-import { getFilms, getFilm, getFilmBySlug, getProviders, searchTmdb, addFilm, logTab, getTrending, getUpcomingTv } from './api/films'
+import { getFilms, getFilm, getFilmBySlug, getProviders, searchTmdb, addFilm, logTab, getTrending, getUpcomingTv, getTmdbDetails } from './api/films'
 import { getFriends, getFriendRequests } from './api/friends'
 import { getWatchlist, getRecommendations, addToWatchlist, removeFromWatchlist, markWatched, unmarkWatched } from './api/watchlist'
 import { normalizeFilm } from './utils/normalize'
@@ -265,13 +265,46 @@ export default function App() {
 
   function showToast(msg) { setToast(msg) }
 
+  async function handleWatchTrailer(film) {
+    if (!film) return;
+    if (film.trailer_url) {
+      setTrailerUrl(film.trailer_url);
+      return;
+    }
+    const tmdbId = film.tmdb_id || film.id;
+    if (tmdbId) {
+      showToast('Fetching trailer...');
+      try {
+        const details = await getTmdbDetails(tmdbId);
+        if (details && details.trailer_url) {
+          setTrailerUrl(details.trailer_url);
+          setSelectedFilm(prev => (prev && (prev.id === film.id || prev.tmdb_id === tmdbId)) ? { ...prev, ...details } : prev);
+        } else {
+          showToast('No trailer found for this film');
+        }
+      } catch (e) {
+        showToast('Error fetching trailer');
+      }
+    }
+  }
+
   function openFilm(film) {
     const normalized = normalizeFilm(film)
     setSelectedFilm(normalized)
+    
     if (film.id > 0 && !film._isExternal) {
       getFilm(film.id).then((full) => {
         if (full) setSelectedFilm((prev) => prev?.id === film.id ? { ...prev, ...full } : prev)
       }).catch(() => { })
+    } else if (film._fromTmdb || film._isExternal) {
+      const tmdbId = film.tmdb_id || film.id;
+      if (tmdbId) {
+        getTmdbDetails(tmdbId).then((details) => {
+          if (details) {
+            setSelectedFilm((prev) => (prev && (prev.id === film.id || prev.tmdb_id === tmdbId)) ? { ...prev, ...details } : prev);
+          }
+        }).catch(() => { });
+      }
     }
   }
 

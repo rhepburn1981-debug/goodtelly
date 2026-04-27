@@ -44,7 +44,7 @@ export default function FriendsTab({
       })
   }, [friendFilms, genreFilter, watchFilter, addedIds])
 
-  const inviteLink = `https://reel.app/invite?from=${currentUser?.username || 'user'}`
+  const inviteLink = `https://goodtelly-production.up.railway.app/invite?from=${currentUser?.username || 'user'}`
 
   return (
     <div style={{
@@ -74,13 +74,17 @@ export default function FriendsTab({
               }}>
                 <div style={{
                   width: '42px', height: '42px', borderRadius: '50%',
-                  background: activeFriend?.id === f.id ? 'var(--gold)' : 'rgba(255, 255, 255, 0.1)',
+                  background: activeFriend?.username === f.username ? 'var(--gold)' : 'rgba(255, 255, 255, 0.1)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '18px', fontWeight: 'bold', color: '#fff',
-                  border: activeFriend?.id === f.id ? '2px solid #fff' : 'none',
-                  flexShrink: 0
+                  border: activeFriend?.username === f.username ? '2px solid #fff' : 'none',
+                  flexShrink: 0, overflow: 'hidden'
                 }}>
-                  {f.avatar || (f.display_name || f.username || '?').charAt(0).toUpperCase()}
+                  {f.avatar ? (
+                    <img src={f.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    (f.display_name || f.username || '?').charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div style={{ fontSize: '11px', fontWeight: activeFriend?.username === f.username ? '800' : '500', color: activeFriend?.username === f.username ? '#e2b644' : 'rgba(255,255,255,0.5)', width: '54px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.username}</div>
               </button>
@@ -190,6 +194,17 @@ export default function FriendsTab({
               <div style={{ display: 'flex', flexDirection: 'column', marginTop: '4px' }}>
                 {displayFilms.map((film) => {
                   const isAdded = addedIds?.includes(film.id);
+                  const providers = film.providers || [];
+                  const mainProvider = providers[0];
+                  const getProviderLogo = (name) => {
+                    const norm = name?.toLowerCase() || '';
+                    if (norm.includes('netflix')) return '/branding/netflix.png';
+                    if (norm.includes('amazon') || norm.includes('prime')) return '/branding/prime.png';
+                    if (norm.includes('apple')) return '/branding/I-tv.png';
+                    if (norm.includes('disney')) return '/branding/disney.png';
+                    return null;
+                  };
+
                   return (
                     <div
                       key={film.id}
@@ -197,27 +212,35 @@ export default function FriendsTab({
                       style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', cursor: 'pointer' }}
                     >
                       <div style={{ flexShrink: 0, width: '54px', height: '76px', borderRadius: '8px', overflow: 'hidden', background: 'var(--surface3)', position: 'relative' }}>
-                        <img src={film.poster_url} alt={film.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={film.poster_url || '/branding/poster1.png'} alt={film.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(0, 0, 0, 0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: '9px solid rgba(255, 255, 255, 0.8)', marginLeft: '2px' }}></div>
                           </div>
                         </div>
                       </div>
-                      <div style={{ flex: '1 1 0%', minWidth: 0 }}>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{film.title}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>{[film.genre, film.year].filter(Boolean).join(' · ')}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '15px', fontWeight: '800', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{film.title}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                          {mainProvider && getProviderLogo(mainProvider.provider_name) && (
+                            <img src={getProviderLogo(mainProvider.provider_name)} alt="" style={{ height: '10px', width: 'auto', objectFit: 'contain', opacity: 0.8 }} />
+                          )}
+                          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>{film.year} • {film.genre}</div>
+                        </div>
                       </div>
                       <div style={{ flexShrink: 0 }}>
-                        {!isAdded ? (
+                        {isAdded ? (
+                          <div style={{ color: 'var(--gold-bright)', fontSize: '18px' }}><FaCheck /></div>
+                        ) : (
                           <button
-                            onClick={(e) => { e.stopPropagation(); onAddToList(film) }}
-                            style={{ padding: '7px 12px', borderRadius: '20px', border: 'none', background: 'var(--gold)', color: '#000', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                            onClick={(e) => { e.stopPropagation(); onAddToList(film); }}
+                            style={{
+                              background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)',
+                              borderRadius: '8px', padding: '6px 12px', color: '#fff', fontSize: '11px', fontWeight: '700'
+                            }}
                           >
                             Add
                           </button>
-                        ) : (
-                          <span style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: 700 }}>✓ On List</span>
                         )}
                       </div>
                     </div>
