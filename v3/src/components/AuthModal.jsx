@@ -161,8 +161,11 @@ export default function AuthModal({ mode: initialMode = 'login', onLogin, onClos
             fontSize: 13,
             color: 'var(--gold-bright)',
           }}>
-            <strong>{shareInvite.from}</strong> invited you to watch{' '}
-            <strong>{shareInvite.title}</strong>
+            {shareInvite.title ? (
+              <><strong>{shareInvite.from}</strong> invited you to watch <strong>{shareInvite.title}</strong></>
+            ) : (
+              <><strong>{shareInvite.from}</strong> invited you to join <strong>WatchMates</strong></>
+            )}
           </div>
         )}
 

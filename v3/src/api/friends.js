@@ -1,4 +1,5 @@
 import { api } from './client'
+import { normalizeFilm } from '../utils/normalize'
 
 export function getFriends() {
   return api.get('/api/friends')
@@ -27,6 +28,7 @@ export function connectFriend(username) {
 
 export function getFriendFilms(username) {
   return api.get('/api/friends/' + username + '/films')
+    .then(films => (films || []).map(normalizeFilm))
 }
 
 export function getFriendsRatings() {

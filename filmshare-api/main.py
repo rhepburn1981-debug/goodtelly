@@ -459,7 +459,7 @@ def register(req: RegisterRequest):
                 "display_name": display, "color": req.color, "avatar": req.avatar}
         # Auto-create accepted friendship + recommendation if user arrived via a share link invite
         if req.invite_from_user:
-            inviter = conn.execute("SELECT id FROM users WHERE username = ?", (req.invite_from_user,)).fetchone()
+            inviter = conn.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", (req.invite_from_user,)).fetchone()
             if inviter and inviter["id"] != user_id:
                 conn.execute(
                     "INSERT INTO user_friends (requester_id, addressee_id, status) VALUES (?,?,'accepted')",
@@ -542,7 +542,7 @@ def google_auth(body: dict):
             conn.execute("UPDATE users SET last_login_at=datetime('now') WHERE id=?", (user["id"],))
         # Auto-create friendship + recommendation for new sign-ups via share link
         if is_new_user and invite_from_user:
-            inviter = conn.execute("SELECT id FROM users WHERE username=?", (invite_from_user,)).fetchone()
+            inviter = conn.execute("SELECT id FROM users WHERE LOWER(username)=LOWER(?)", (invite_from_user,)).fetchone()
             if inviter and inviter["id"] != user["id"]:
                 conn.execute(
                     "INSERT INTO user_friends (requester_id, addressee_id, status) VALUES (?,?,'accepted')",
@@ -641,7 +641,7 @@ def list_friends(current_user=Depends(require_user)):
 @app.post("/api/friends/{username}", status_code=201)
 def send_friend_request(username: str, current_user=Depends(require_user)):
     with get_db() as conn:
-        target = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+        target = conn.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", (username,)).fetchone()
         if not target:
             raise HTTPException(status_code=404, detail="User not found")
         if target["id"] == current_user["id"]:
@@ -663,7 +663,7 @@ def send_friend_request(username: str, current_user=Depends(require_user)):
 @app.put("/api/friends/{username}/accept")
 def accept_friend_request(username: str, current_user=Depends(require_user)):
     with get_db() as conn:
-        requester = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+        requester = conn.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", (username,)).fetchone()
         if not requester:
             raise HTTPException(status_code=404, detail="User not found")
         result = conn.execute(
@@ -680,7 +680,7 @@ def accept_friend_request(username: str, current_user=Depends(require_user)):
 def auto_connect_friend(username: str, current_user=Depends(require_user)):
     """Immediately create an accepted friendship (used after share-link sign-up)."""
     with get_db() as conn:
-        target = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+        target = conn.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", (username,)).fetchone()
         if not target or target["id"] == current_user["id"]:
             return {"ok": True}
         existing = conn.execute(
@@ -746,7 +746,7 @@ def admin_create_recommendation(body: dict, token: str = ""):
 @app.delete("/api/friends/{username}")
 def remove_friend(username: str, current_user=Depends(require_user)):
     with get_db() as conn:
-        target = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+        target = conn.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", (username,)).fetchone()
         if not target:
             raise HTTPException(status_code=404, detail="User not found")
         conn.execute(

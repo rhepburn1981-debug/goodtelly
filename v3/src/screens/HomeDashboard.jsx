@@ -309,14 +309,24 @@ const ContinueCard = ({ img, title, timeLeft, progress, onClick }) => (
     </div>
 );
 
-const FriendAvatar = ({ name, movie, active, onClick }) => (
-    <div onClick={onClick} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', width: 64, flexShrink: 0 }} title={`${name} is watching ${movie}`}>
+const FriendAvatar = ({ name, avatar, active, onClick }) => (
+    <div onClick={onClick} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', width: 64, flexShrink: 0 }}>
         <div style={{
             position: 'relative', width: 56, height: 56, borderRadius: '50%', padding: 2,
             background: active ? 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' : 'rgba(255,255,255,0.1)'
         }}>
-            <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', border: '2px solid #0f0f12' }}>
-                <img src={`https://i.pravatar.cc/100?u=${name.replace(/ /g, '')}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{
+                width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', border: '2px solid #0f0f12',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)',
+                fontSize: '20px', fontWeight: 'bold', color: '#fff'
+            }}>
+                {avatar && (avatar.startsWith('http') || avatar.startsWith('/')) ? (
+                    <img src={avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : avatar ? (
+                    avatar
+                ) : (
+                    (name || '?').charAt(0).toUpperCase()
+                )}
             </div>
         </div>
         <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.8)', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>

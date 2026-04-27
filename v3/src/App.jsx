@@ -98,7 +98,24 @@ export default function App() {
     getUpcomingTv().then(setUpcomingTv).catch(() => { })
 
     const invite = readInviteFromUrl()
-    if (invite) setShareInvite(invite)
+    if (invite) {
+      import('./utils/invite').then(({ writeInvite }) => writeInvite(invite))
+      const token = getToken()
+      if (token) {
+        // Logged-in user: auto-connect
+        import('./api/friends').then(({ connectFriend, getFriends }) => {
+          connectFriend(invite.from).then(() => {
+            getFriends().then(setFriends).catch(() => {})
+            showToast(`Connected with ${invite.from}!`)
+          }).catch(() => {})
+        })
+      } else {
+        // Guest user: show registration
+        setShareInvite(invite)
+        setAuthMode('register')
+        setShowAuth(true)
+      }
+    }
 
     const params = new URLSearchParams(window.location.search)
     if (params.get('register') === '1') {
@@ -672,6 +689,20 @@ export default function App() {
             </>
           ) : (
             <ProfileDashboard {...dashboardNavProps} currentUser={currentUser} myList={myList} watchedIds={watchedIds} friends={friends} onLogout={onLogout} onToast={showToast} />
+          )
+        } />
+
+        <Route path="/invite" element={
+          !currentUser ? (
+            <>
+              <LandingPage
+                onLogin={onLogin}
+                onToast={showToast}
+                allFilms={allFilms}
+              />
+            </>
+          ) : (
+            <Navigate to="/dashboard/home" replace />
           )
         } />
 

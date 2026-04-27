@@ -175,11 +175,13 @@ export default function ProfileDashboard(props) {
                         {/* Avatar Column */}
                         <div style={{ position: 'relative', flexShrink: 0 }}>
                             <div style={{ position: 'absolute', inset: -15, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%)', filter: 'blur(20px)', zIndex: 0 }} />
-                            <div style={{ width: 180, height: 180, borderRadius: '50%', border: '4px solid rgba(255,255,255,0.1)', overflow: 'hidden', position: 'relative', zIndex: 1, background: 'rgba(255,255,255,0.05)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }}>
-                                {currentUser?.avatar_url ? (
-                                    <img src={currentUser.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ width: 180, height: 180, borderRadius: '50%', border: '4px solid rgba(255,255,255,0.1)', overflow: 'hidden', position: 'relative', zIndex: 1, background: 'rgba(255,255,255,0.05)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {currentUser?.avatar && (currentUser.avatar.startsWith('http') || currentUser.avatar.startsWith('/')) ? (
+                                    <img src={currentUser.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : currentUser?.avatar ? (
+                                    <div style={{ fontSize: 72 }}>{currentUser.avatar}</div>
                                 ) : (
-                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 72, opacity: 0.5 }}>👤</div>
+                                    <div style={{ fontSize: 72, opacity: 0.5 }}>👤</div>
                                 )}
                             </div>
                         </div>

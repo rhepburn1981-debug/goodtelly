@@ -69,10 +69,10 @@ const ServicePill = ({ label, logo, active, onClick }) => (
 const FriendFilmCard = ({ film, isAdded, onAdd, onClick }) => {
     const providers = film.providers || [];
     const mainProvider = providers.find(p => p.provider_name.toLowerCase().includes('netflix')) ||
-                         providers.find(p => p.provider_name.toLowerCase().includes('amazon')) ||
-                         providers.find(p => p.provider_name.toLowerCase().includes('apple')) ||
-                         providers.find(p => p.provider_name.toLowerCase().includes('disney')) ||
-                         providers[0];
+        providers.find(p => p.provider_name.toLowerCase().includes('amazon')) ||
+        providers.find(p => p.provider_name.toLowerCase().includes('apple')) ||
+        providers.find(p => p.provider_name.toLowerCase().includes('disney')) ||
+        providers[0];
 
     const getProviderLogo = (name) => {
         const norm = name?.toLowerCase() || '';
@@ -137,15 +137,17 @@ const FriendAvatar = ({ friend, active, onClick }) => (
         }}
     >
         <div style={{
-            width: 58, height: 58, borderRadius: '50%',
+            width: 70, height: 70, borderRadius: '50%',
             background: active ? 'var(--gold)' : 'rgba(255,255,255,0.05)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 24, border: active ? '2px solid #fff' : 'none',
             transition: '0.2s', boxShadow: active ? '0 0 15px rgba(241, 196, 15, 0.4)' : 'none',
             overflow: 'hidden', fontWeight: 'bold', color: '#fff'
         }}>
-            {friend.avatar ? (
+            {friend.avatar && (friend.avatar.startsWith('http') || friend.avatar.startsWith('/')) ? (
                 <img src={friend.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : friend.avatar ? (
+                friend.avatar
             ) : (
                 (friend.name || '?').charAt(0).toUpperCase()
             )}
@@ -224,13 +226,31 @@ export default function FriendsDashboard(props) {
         }
     }, [friends, selectedFriend]);
 
-    const displayFilms = friendList.filter(f => {
-        if (activeTabSub === 'watched' && !addedIds?.includes(f.id)) return false;
-        if (activeTabSub === 'to_watch' && addedIds?.includes(f.id)) return false;
-        if (activeGenre !== 'All' && !(f.genre || '').includes(activeGenre)) return false;
-        if (activeService !== 'All' && !(f.services || []).includes(activeService)) return false;
-        return true;
-    });
+    const displayFilms = useMemo(() => {
+        let filtered = (friendList || []).filter(f => {
+            if (activeTabSub === 'watched' && !addedIds?.includes(f.id)) return false;
+            if (activeTabSub === 'to_watch' && addedIds?.includes(f.id)) return false;
+            if (activeGenre !== 'All' && !(f.genre || '').includes(activeGenre)) return false;
+
+            if (activeService !== 'All') {
+                const streamers = f.streamers || [];
+                const target = activeService.toLowerCase().replace('+', '');
+                if (!streamers.some(s => s.toLowerCase().includes(target))) return false;
+            }
+            return true;
+        });
+
+        // Apply Sorting
+        if (activeSort === 'A-Z') {
+            filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+        } else if (activeSort === 'Recently Added') {
+            filtered.sort((a, b) => b.id - a.id);
+        } else if (activeSort === 'Friends Rolling') {
+            filtered.sort(() => Math.random() - 0.5);
+        }
+
+        return filtered;
+    }, [friendList, activeTabSub, addedIds, activeGenre, activeService, activeSort]);
 
     const handleAcceptRequest = async (username) => {
         const { acceptFriendRequest } = await import('../api/friends');
@@ -377,7 +397,7 @@ export default function FriendsDashboard(props) {
                     </div>
 
                     {/* Genre Section */}
-                    <div style={{ marginBottom: 2, display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'start', gap: 10 }}>
+                    <div style={{ marginBottom: 2, display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'start', gap: 10, flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '12px 25px' }}>
                             <MdMovieCreation size={24} color="#E0C36A" />
                             <span style={{ fontSize: 16, fontWeight: 700, color: '#E0C36A' }}>Genre:</span>
@@ -410,11 +430,48 @@ export default function FriendsDashboard(props) {
                 </aside>
 
                 {/* ══ MAIN AREA ══ */}
-                <div className="wl-grid-area">
+                <div className="wl-grid-area" >
                     {/* Header: Friends Scroller + Invite banner */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, background: '#000', border: ' 1px solid ##FFFFFF33', borderRadius: 20, padding: '20px 40px' }}>
-                        <div style={{ display: 'flex', gap: 22, overflowX: 'auto' }} className="no-scrollbar">
-                            <div className="friend-avatar" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => props.onToast('Sync your contacts!')}>
+                        <div style={{ display: 'flex', gap: 22, overflowX: 'auto', alignItems: 'center' }} className="no-scrollbar">
+                            {/* Pending Requests */}
+                            {friendRequests.length > 0 && (
+                                <div style={{ display: 'flex', gap: 20, paddingRight: 20, borderRight: '1px solid rgba(255,255,255,0.1)', alignItems: 'center' }}>
+                                    {friendRequests.map(req => (
+                                        <div key={req.username} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                                            <div style={{ position: 'relative' }}>
+                                                <FriendAvatar
+                                                    friend={{ name: req.display_name || req.username, avatar: req.avatar }}
+                                                    onClick={() => { }}
+                                                />
+                                                <button
+                                                    onClick={() => handleAcceptRequest(req.username)}
+                                                    style={{
+                                                        position: 'absolute', bottom: -5, right: -5,
+                                                        background: '#16a34a', border: 'none', borderRadius: '50%',
+                                                        width: 24, height: 24, display: 'flex', alignItems: 'center',
+                                                        justifyContent: 'center', cursor: 'pointer', color: '#fff'
+                                                    }}
+                                                >
+                                                    <FaCheck size={12} />
+                                                </button>
+                                            </div>
+                                            <div style={{ fontSize: 11, color: '#E0C36A', fontWeight: 700 }}>Request</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="friend-avatar" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => {
+                                const username = prompt("Enter friend's username:");
+                                if (username) {
+                                    import('../api/friends').then(({ sendFriendRequest }) => {
+                                        sendFriendRequest(username).then(() => {
+                                            onToast(`Request sent to ${username}!`);
+                                        }).catch(err => onToast(err.message));
+                                    });
+                                }
+                            }}>
                                 <div style={{ width: 70, height: 70, borderRadius: '50%', border: '1px solid #E0C36A', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
                                     <FiPlus size={30} color="#E0C36A" />
                                 </div>
@@ -432,15 +489,15 @@ export default function FriendsDashboard(props) {
 
                         <div
                             onClick={() => {
-                                const inviteLink = `https://goodtelly-production.up.railway.app/invite?from=${currentUser?.username || 'user'}`;
+                                const inviteLink = `${window.location.origin}/invite?invite_from=${currentUser?.username || 'user'}`;
                                 const text = encodeURIComponent("Join me on WatchMates to find the best TV & films! " + inviteLink);
                                 window.open(`https://wa.me/?text=${text}`, '_blank');
                             }}
                             style={{
                                 border: '1px solid #16A34A',
                                 borderRadius: 20,
-                                padding: '20px 30px',
-                                display: 'flex', alignItems: 'center', gap: 40,
+                                padding: '20px',
+                                display: 'flex', alignItems: 'center', gap: 14,
                                 cursor: 'pointer'
                             }}
                         >
@@ -456,28 +513,27 @@ export default function FriendsDashboard(props) {
 
                     {/* Grid Area */}
                     {loadingList ? (
-                        <div style={{ textAlign: 'center', padding: '100px 0', color: 'rgba(255,255,255,0.3)' }}>
-                            <div className="loading-spinner"></div>
-                            <p style={{ marginTop: 20, fontSize: 18 }}>Loading friends' picks...</p>
+                        <div style={{ textAlign: 'center', padding: '100px 0', color: 'rgba(255,255,255,0.4)' }}>
+                            <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
+                            <h3>Loading films...</h3>
+                        </div>
+                    ) : displayFilms.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '100px 0', color: 'rgba(255,255,255,0.4)' }}>
+                            <MdMovieCreation size={48} style={{ marginBottom: 16 }} />
+                            <h3>No results found</h3>
+                            <p>Try adjusting your filters to find more great content.</p>
                         </div>
                     ) : (
                         <div className="wl-grid">
-                            {displayFilms.length > 0 ? (
-                                displayFilms.map(film => (
-                                    <FriendFilmCard
-                                        key={film.id}
-                                        film={film}
-                                        isAdded={addedIds.includes(film.id)}
-                                        onAdd={onAddToList}
-                                        onClick={() => onOpenFilm(film)}
-                                    />
-                                ))
-                            ) : (
-                                <div style={{ gridColumn: '1 / -1', padding: '100px 0', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>
-                                    <h3 style={{ fontSize: 24, fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>No films found</h3>
-                                    <p style={{ fontSize: 16 }}>Try selecting another friend or category.</p>
-                                </div>
-                            )}
+                            {displayFilms.map(film => (
+                                <FriendFilmCard
+                                    key={film.id}
+                                    film={film}
+                                    isAdded={addedIds.includes(film.id)}
+                                    onAdd={onAddToList}
+                                    onClick={() => onOpenFilm(film)}
+                                />
+                            ))}
                         </div>
                     )}
                 </div>

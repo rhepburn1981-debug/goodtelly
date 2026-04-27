@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react'
 import { getFriendFilms, logFriendView } from '../api/friends'
 import PosterCard from '../components/PosterCard'
+import { FaCheck } from 'react-icons/fa'
 
 export default function FriendsTab({
   friends,
   onOpenFilm,
+  onAddToList,
   addedIds,
   currentUser
 }) {
@@ -13,6 +15,7 @@ export default function FriendsTab({
   const [loadingFilms, setLoadingFilms] = useState(false)
   const [genreFilter, setGenreFilter] = useState('All')
   const [watchFilter, setWatchFilter] = useState('all')
+  const [activeSort, setActiveSort] = useState('Recently Added')
 
   const selectFriend = async (friend) => {
     setActiveFriend(friend)
@@ -35,16 +38,26 @@ export default function FriendsTab({
   const allCount = friendFilms.length
 
   const displayFilms = useMemo(() => {
-    return (friendFilms || [])
+    let filtered = (friendFilms || [])
       .filter((f) => genreFilter === 'All' || f.genre === genreFilter)
       .filter((f) => {
         if (watchFilter === 'unwatched') return !addedIds?.includes(f.id)
         if (watchFilter === 'watched') return addedIds?.includes(f.id)
         return true
       })
-  }, [friendFilms, genreFilter, watchFilter, addedIds])
 
-  const inviteLink = `https://goodtelly-production.up.railway.app/invite?from=${currentUser?.username || 'user'}`
+    if (activeSort === 'A–Z') {
+      filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''))
+    } else if (activeSort === 'Recently Added') {
+      filtered.sort((a, b) => b.id - a.id)
+    } else if (activeSort === '🎬 Friends’ Rating') {
+      filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0))
+    }
+
+    return filtered
+  }, [friendFilms, genreFilter, watchFilter, addedIds, activeSort])
+
+  const inviteLink = `${window.location.origin}/invite?invite_from=${currentUser?.username || 'user'}`
 
   return (
     <div style={{
@@ -80,8 +93,10 @@ export default function FriendsTab({
                   border: activeFriend?.username === f.username ? '2px solid #fff' : 'none',
                   flexShrink: 0, overflow: 'hidden'
                 }}>
-                  {f.avatar ? (
+                  {f.avatar && (f.avatar.startsWith('http') || f.avatar.startsWith('/')) ? (
                     <img src={f.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : f.avatar ? (
+                    f.avatar
                   ) : (
                     (f.display_name || f.username || '?').charAt(0).toUpperCase()
                   )}
@@ -179,9 +194,36 @@ export default function FriendsTab({
             ))}
           </div>
           <div style={{ display: 'flex', gap: '8px', marginTop: '8px', overflowX: 'auto' }} className="no-scrollbar">
-            <button style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)', background: 'transparent', color: 'var(--text2)', fontSize: '11px', fontWeight: '500', cursor: 'pointer' }}>Recently Added</button>
-            <button style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)', background: 'transparent', color: 'var(--text2)', fontSize: '11px', fontWeight: '500', cursor: 'pointer' }}>🎬 Friends’ Rating</button>
-            <button style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)', background: 'transparent', color: 'var(--text2)', fontSize: '11px', fontWeight: '500', cursor: 'pointer' }}>A–Z</button>
+            <button
+              onClick={() => setActiveSort('Recently Added')}
+              style={{
+                flexShrink: 0, padding: '6px 12px', borderRadius: '20px',
+                border: activeSort === 'Recently Added' ? '1px solid var(--gold)' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: activeSort === 'Recently Added' ? 'rgba(201, 168, 76, 0.12)' : 'transparent',
+                color: activeSort === 'Recently Added' ? 'var(--gold-bright)' : 'var(--text2)',
+                fontSize: '11px', fontWeight: '500', cursor: 'pointer'
+              }}
+            >Recently Added</button>
+            <button
+              onClick={() => setActiveSort('🎬 Friends’ Rating')}
+              style={{
+                flexShrink: 0, padding: '6px 12px', borderRadius: '20px',
+                border: activeSort === '🎬 Friends’ Rating' ? '1px solid var(--gold)' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: activeSort === '🎬 Friends’ Rating' ? 'rgba(201, 168, 76, 0.12)' : 'transparent',
+                color: activeSort === '🎬 Friends’ Rating' ? 'var(--gold-bright)' : 'var(--text2)',
+                fontSize: '11px', fontWeight: '500', cursor: 'pointer'
+              }}
+            >🎬 Friends’ Rating</button>
+            <button
+              onClick={() => setActiveSort('A–Z')}
+              style={{
+                flexShrink: 0, padding: '6px 12px', borderRadius: '20px',
+                border: activeSort === 'A–Z' ? '1px solid var(--gold)' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: activeSort === 'A–Z' ? 'rgba(201, 168, 76, 0.12)' : 'transparent',
+                color: activeSort === 'A–Z' ? 'var(--gold-bright)' : 'var(--text2)',
+                fontSize: '11px', fontWeight: '500', cursor: 'pointer'
+              }}
+            >A–Z</button>
           </div>
         </div>
 
