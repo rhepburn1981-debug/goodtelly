@@ -28,7 +28,7 @@ const NavItem = ({ label, icon: Icon, active, onClick }) => (
 
 const Header = ({ searchQuery, onSearchChange, activeTab, onTabChange }) => (
     <header className="dashboard-header" style={{ background: 'linear-gradient(180deg, #000000 0%, rgba(0, 0, 0, 0) 100%)', height: '114px', display: 'flex', alignItems: 'center', padding: '0 25px', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }}>
-        <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginRight: '24px' }}>
+        <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginRight: '24px', cursor: 'pointer' }} onClick={() => onTabChange('home')}>
             <img src='/branding/logo.png' style={{ height: '60px' }} />
         </div>
 
@@ -65,9 +65,18 @@ const Header = ({ searchQuery, onSearchChange, activeTab, onTabChange }) => (
                 <img src={Search} alt='search' />
             </div>
 
-            {/* <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}> */}
-            <FaUser size={24} color="#fff" />
-            {/* </div> */}
+            <div 
+                onClick={() => onTabChange('profile')}
+                style={{ 
+                    width: '40px', height: '40px', borderRadius: '50%', 
+                    background: activeTab === 'profile' ? '#FFFFFF1A' : 'rgba(255, 255, 255, 0.1)', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                    cursor: 'pointer', transition: '0.2s',
+                    border: activeTab === 'profile' ? '1px solid #E5B800' : 'none'
+                }}
+            >
+                <FaUser size={24} color={activeTab === 'profile' ? '#E5B800' : "#fff"} />
+            </div>
         </div>
     </header>
 );

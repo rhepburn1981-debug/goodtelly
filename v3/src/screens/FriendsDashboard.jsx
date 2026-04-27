@@ -107,20 +107,15 @@ const FriendAvatar = ({ friend, active, onClick }) => (
         }}
     >
         <div style={{
-            width: 70, height: 70, borderRadius: '50%', padding: 4,
-            background: active ? '#775A00' : '#000000',
-            transition: 'all 0.3s ease',
+            width: 58, height: 58, borderRadius: '50%',
+            background: active ? 'var(--gold)' : 'rgba(255,255,255,0.05)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 40, fontWeight: 700, color: active ? '#fff' : '#A09E9F',
-            border: active ? '2px solid #E0C36A' : '2px solid #FFFFFF33',
-            overflow: 'hidden'
+            fontSize: 24, border: active ? '2px solid #fff' : 'none',
+            transition: '0.2s', boxShadow: active ? '0 0 15px rgba(241, 196, 15, 0.4)' : 'none',
+            overflow: 'hidden', fontWeight: 'bold'
         }}>
             {friend.avatar ? (
-                (friend.avatar.startsWith('http') || friend.avatar.startsWith('/')) ? (
-                    <img src={friend.avatar} alt={friend.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                ) : (
-                    <span style={{ fontSize: '30px' }}>{friend.avatar}</span>
-                )
+                <img src={friend.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
                 friend.name.charAt(0)
             )}
@@ -145,11 +140,17 @@ export default function FriendsDashboard(props) {
         currentUser
     } = props;
 
-    const [selectedFriend, setSelectedFriend] = useState(friends[0]?.username || null);
+    const [selectedFriend, setSelectedFriend] = useState(null);
     const [friendList, setFriendList] = useState([]);
     const [loadingList, setLoadingList] = useState(false);
     const [activeTabSub, setActiveTabSub] = useState('all');
     const [activeGenre, setActiveGenre] = useState('All');
+
+    useEffect(() => {
+        if (!selectedFriend && friends?.length > 0) {
+            setSelectedFriend(friends[0].username);
+        }
+    }, [friends, selectedFriend]);
     const [activeSort, setActiveSort] = useState('All');
     const [activeService, setActiveService] = useState('All');
     const [isListVisible, setIsListVisible] = useState(true);

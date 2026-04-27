@@ -263,12 +263,7 @@ if os.path.isdir(os.path.join(V3_DIST_DIR, "branding")):
     app.mount("/branding", StaticFiles(directory=os.path.join(V3_DIST_DIR, "branding")), name="v3-branding")
 
 
-@app.get("/", include_in_schema=False)
-def serve_app():
-    # Prefer the built V3 React app when present; keep legacy HTML as fallback.
-    if os.path.exists(V3_INDEX_FILE):
-        return FileResponse(V3_INDEX_FILE)
-    return FileResponse(LEGACY_HTML_FILE)
+# SPA Routing will be handled by the catch-all at the end of this file.
 
 
 def _render_share_page(title="", year="", rating="", genre="", sender="A friend",

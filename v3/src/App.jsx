@@ -362,7 +362,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
+                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain', cursor: 'pointer' }} onClick={() => onTabChange('home')} />
                     </div>
                     <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: '1.2' }}>TV recommended by friends</div>
                   </div>
@@ -419,7 +419,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
+                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain', cursor: 'pointer' }} onClick={() => onTabChange('home')} />
                     </div>
                     <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
                   </div>
@@ -475,7 +475,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
+                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain', cursor: 'pointer' }} onClick={() => onTabChange('home')} />
                     </div>
                     <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
                   </div>
@@ -531,7 +531,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
+                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain', cursor: 'pointer' }} onClick={() => onTabChange('home')} />
                     </div>
                     <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>TV recommended by friends</div>
                   </div>
@@ -587,7 +587,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 14px 4px', boxShadow: 'rgba(255, 255, 255, 0.02) 0px -1px 0px inset' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
+                      <img src="/branding/logo.png" alt="WatchMates Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain', cursor: 'pointer' }} onClick={() => onTabChange('home')} />
                     </div>
                     <div style={{ fontSize: '9.5px', color: 'rgba(255, 255, 255, 0.84)', letterSpacing: '0px', paddingLeft: '1px', fontWeight: 500, lineHeight: 1.1 }}>Your profile & activity</div>
                   </div>

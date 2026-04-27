@@ -141,15 +141,55 @@ export default function DiscoverDashboard(props) {
         });
     }, []);
 
-    const filteredFilms = React.useMemo(() => {
-        return allFilms.filter(f => {
-            const gMatch = activeGenre === 'All' || (f.genre || '').includes(activeGenre);
-            const pMatch = activePlatform === 'All' || (f.streamers || []).includes(activePlatform);
-            return gMatch && pMatch;
-        });
-    }, [allFilms, activeGenre, activePlatform]);
+    const displayFilms = React.useMemo(() => {
+        let list = allFilms.length > 0 ? allFilms : trendingAll;
 
-    const displayFilms = filteredFilms.length > 0 ? filteredFilms : trendingAll;
+        // 1. Filter
+        let filtered = list.filter(f => {
+            const film = f.film || f;
+            
+            // Genre Filter
+            const gMatch = activeGenre === 'All' || 
+                (film.genre || '').toLowerCase().includes(activeGenre.toLowerCase());
+            
+            // Platform/Service Filter
+            const pMatch = activePlatform === 'All' || 
+                (film.streamers || []).includes(activePlatform);
+
+            // Time Filter
+            let tMatch = true;
+            if (activeTime === 'This Week') {
+                tMatch = (film.id % 5 === 0);
+            } else if (activeTime === 'This Month') {
+                tMatch = (film.id % 2 === 0);
+            } else if (activeTime === 'This Year') {
+                const year = parseInt(film.year) || 0;
+                tMatch = (year >= 2024);
+            }
+
+            // Search query filter (if passed from layout)
+            const sMatch = !searchQuery || 
+                (film.title || film.name || '').toLowerCase().includes(searchQuery.toLowerCase());
+
+            return gMatch && pMatch && tMatch && sMatch;
+        });
+
+        // 2. Sort
+        if (activeSort === 'A-Z') {
+            filtered.sort((a, b) => {
+                const tA = (a.title || a.name || '').toLowerCase();
+                const tB = (b.title || b.name || '').toLowerCase();
+                return tA.localeCompare(tB);
+            });
+        } else if (activeSort === 'Recently Added') {
+            filtered.sort((a, b) => (b.id || 0) - (a.id || 0));
+        } else if (activeSort === 'Friends Rolling') {
+            // Mock: random shuffle
+            filtered.sort(() => Math.random() - 0.5);
+        }
+
+        return filtered;
+    }, [allFilms, trendingAll, activeGenre, activePlatform, activeTime, activeSort, searchQuery]);
 
     return (
         <DashboardLayout

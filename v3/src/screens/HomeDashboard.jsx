@@ -387,27 +387,19 @@ export default function HomeDashboard(props) {
                     </h1>
                 </div>
                 {/* FEATURED: Real Friend Recommendation pair style */}
-                <div style={{ display: 'flex', gap: '24px', marginBottom: '25px' }}>
-                    <FeatureCard
-                        rec={recommendations && recommendations[0]}
-                        onAddToList={onAddToList}
-                        onWatchTrailer={onWatchTrailer}
-                        onDismiss={() => onDismissRec && onDismissRec(recommendations[0]?.id)}
-                    />
-                    <FeatureCard
-                        rec={recommendations && recommendations[1] ? recommendations[1] : {
-                            id: 'crime101-rec',
-                            title: 'Crime 101',
-                            year: 1984,
-                            poster_url: '/branding/poster2.png',
-                            backdrop_url: '/branding/image3.png',
-                            genre: 'Sci-Fi/Action'
-                        }}
-                        onAddToList={onAddToList}
-                        onWatchTrailer={onWatchTrailer}
-                        onDismiss={() => { }}
-                    />
-                </div>
+                {recommendations && recommendations.length > 0 && (
+                    <div style={{ display: 'flex', gap: '24px', marginBottom: '25px', overflowX: 'auto', paddingBottom: '10px' }} className="no-scrollbar">
+                        {recommendations.slice(0, 2).map((rec, idx) => (
+                            <FeatureCard
+                                key={rec.id || idx}
+                                rec={rec}
+                                onAddToList={onAddToList}
+                                onWatchTrailer={onWatchTrailer}
+                                onDismiss={() => onDismissRec && onDismissRec(rec.id)}
+                            />
+                        ))}
+                    </div>
+                )}
                 <div style={{ marginBottom: 25, display: 'flex', gap: 24, padding: '0 80px' }}>
                     <NavShortcut
                         icon={IoMdStar}
@@ -536,7 +528,7 @@ export default function HomeDashboard(props) {
                                     <FriendAvatar
                                         key={friend.username}
                                         name={friend.display_name || friend.username}
-                                        movie=""
+                                        avatar={friend.avatar}
                                         active={false}
                                         onClick={() => onTabChange && onTabChange('friends')}
                                     />

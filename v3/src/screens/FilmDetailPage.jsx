@@ -178,8 +178,8 @@ export default function FilmDetailPage({
           <img src={backdrop} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(rgba(0, 0, 0, 0.25) 0%, rgb(13, 13, 19) 100%)' }} />
 
-          {/* Play Button Overlay (Always show if backdrop exists) */}
-          {backdrop && (
+          {/* Play Button Overlay (Only show if trailer exists) */}
+          {film.trailer_url && (
             <button onClick={playTrailer} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', boxShadow: 'rgba(0, 0, 0, 0.6) 0px 4px 28px' }}>
                 <div style={{ width: 0, height: 0, borderTop: '11px solid transparent', borderBottom: '11px solid transparent', borderLeft: '18px solid rgb(17, 17, 17)', marginLeft: '4px' }} />
@@ -274,13 +274,15 @@ export default function FilmDetailPage({
 
         <div className="glass-card" style={{ marginTop: '40px' }}>
           <div className="desktop-poster-wrapper">
-            <div style={{ position: 'relative', cursor: 'pointer' }} onClick={playTrailer}>
-              <img src={film.poster_url} alt={film.title} className="desktop-poster" style={{ cursor: 'pointer' }} />
-              <button style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.2)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '24px', opacity: 0, transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '1'} onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}>
-                <div style={{ width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.4)' }}>
-                  <div style={{ width: 0, height: 0, borderTop: '12px solid transparent', borderBottom: '12px solid transparent', borderLeft: '20px solid #111', marginLeft: '6px' }} />
-                </div>
-              </button>
+            <div style={{ position: 'relative', cursor: film.trailer_url ? 'pointer' : 'default' }} onClick={playTrailer}>
+              <img src={film.poster_url} alt={film.title} className="desktop-poster" />
+              {film.trailer_url && (
+                <button style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.2)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '24px', opacity: 0, transition: 'opacity 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '1'} onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}>
+                  <div style={{ width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.4)' }}>
+                    <div style={{ width: 0, height: 0, borderTop: '12px solid transparent', borderBottom: '12px solid transparent', borderLeft: '20px solid #111', marginLeft: '6px' }} />
+                  </div>
+                </button>
+              )}
             </div>
 
             <div style={{ marginTop: '10px' }}>
@@ -334,7 +336,7 @@ export default function FilmDetailPage({
             {stills.length > 0 && (
               <div>
                 <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '15px', fontWeight: '700' }}>Stills</div>
-                <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '10px' }} className="no-scrollbar">
+                <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '10px', flexWrap: 'wrap' }} className="no-scrollbar">
                   {stills.map((url, idx) => (
                     <button key={idx} onClick={() => setActiveStill(idx)} style={{ flex: '0 0 160px', height: '100px', borderRadius: '12px', overflow: 'hidden', border: activeStill === idx ? '3px solid var(--gold-bright)' : '3px solid rgba(255,255,255,0.05)', padding: '0px', cursor: 'pointer', transition: 'all 0.2s', filter: activeStill === idx ? 'none' : 'grayscale(0.5)' }}>
                       <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

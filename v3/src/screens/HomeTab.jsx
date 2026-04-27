@@ -21,14 +21,8 @@ const FALLBACK_RECENT = [
 ]
 
 const RecommendationCard = ({ rec, onOpenFilm, onDismiss, onAddToList, onWatchTrailer }) => {
-  const displayRec = rec || {
-    id: 'mobland-rec',
-    title: 'MobLand - 2025',
-    year: 2025,
-    poster_url: '/branding/mobland_poster.png',
-    backdrop_url: '/branding/mobland_bg.png',
-    _fromFriend: 'Kate'
-  };
+  if (!rec) return null;
+  const displayRec = rec;
 
   return (
     <div style={{ margin: '2px 16px 10px' }}>
@@ -90,19 +84,19 @@ const RecommendationCard = ({ rec, onOpenFilm, onDismiss, onAddToList, onWatchTr
               {displayRec.year}
             </div>
             <div style={{ position: 'relative', display: 'flex', gap: '8px', marginTop: '10px' }}>
-              <button
-                style={{
-                  padding: '5px 11px', borderRadius: '16px',
-                  background: 'linear-gradient(rgba(28, 28, 34, 0.84), rgba(14, 14, 19, 0.84))',
-                  border: '1px solid rgba(255, 255, 255, 0.16)', color: 'var(--text)',
-                  fontSize: '10px', fontWeight: '600', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                  boxShadow: 'rgba(255, 255, 255, 0.06) 0px 1px 0px inset'
-                }}
-                onClick={(e) => { e.stopPropagation(); onWatchTrailer(displayRec.trailer_url || 'https://www.youtube.com/watch?v=zSWdZVtXT7E'); }}
-              >
-                <span style={{ fontSize: '9px' }}>▶</span><span> Watch Trailer</span>
-              </button>
+              {displayRec.trailer_url && (
+                <button
+                  style={{
+                    padding: '5px 11px', borderRadius: '16px',
+                    border: 'none', background: 'var(--blue)', color: '#fff', fontSize: '11px', fontWeight: '700',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    boxShadow: 'rgba(255, 255, 255, 0.06) 0px 1px 0px inset'
+                  }}
+                  onClick={(e) => { e.stopPropagation(); onWatchTrailer(displayRec.trailer_url); }}
+                >
+                  <span style={{ fontSize: '9px' }}>▶</span><span> Watch Trailer</span>
+                </button>
+              )}
               <button
                 style={{
                   padding: '5px 11px', borderRadius: '16px',
@@ -253,13 +247,17 @@ export default function HomeTab(props) {
         <div style={{ fontSize: '20px', color: 'rgba(255, 255, 255, 0.3)', fontWeight: 300 }}>›</div>
       </div>
 
-      <RecommendationCard
-        rec={recommendations && recommendations[0]}
-        onOpenFilm={onOpenFilm}
-        onDismiss={onDismissRec}
-        onAddToList={onAddToList}
-        onWatchTrailer={onWatchTrailer}
-      />
+      {/* Recommendations Stack */}
+      {recommendations && recommendations.length > 0 && recommendations.map(rec => (
+        <RecommendationCard
+          key={rec.id}
+          rec={rec}
+          onOpenFilm={onOpenFilm}
+          onDismiss={onDismissRec}
+          onAddToList={onAddToList}
+          onWatchTrailer={onWatchTrailer}
+        />
+      ))}
 
       {/* TRENDING / What's NEW */}
       {trendingNow.length > 0 && (
@@ -364,7 +362,7 @@ export default function HomeTab(props) {
         </div>
 
         <div style={{ margin: '0px 16px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.05)', overflow: 'hidden' }}>
-          {(upcomingShows.length > 0 ? upcomingShows.slice(0, 5) : FALLBACK_RECENT).map((item, idx) => (
+          {(recentWatchlist.length > 0 ? recentWatchlist.slice(0, 5) : FALLBACK_RECENT).map((item, idx) => (
             <div
               key={item.id || idx}
               onClick={() => onOpenFilm(item)}

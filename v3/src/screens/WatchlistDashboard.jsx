@@ -275,7 +275,7 @@ export default function WatchlistDashboard(props) {
                     {/* <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 20 }} /> */}
 
                     {/* Genre */}
-                    <div style={{ marginBottom: 2, display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'start', gap: 12 }}>
+                    <div style={{ marginBottom: 2, flexDirection: 'row', justifyContent: 'start', alignItems: 'start', gap: 12 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '12px 25px' }}>
                             <MdMovieCreation size={24} color="#E0C36A" />
                             <span style={{ fontSize: 16, fontWeight: 700, color: '#E0C36A' }}>Genre:</span>

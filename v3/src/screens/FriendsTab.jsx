@@ -73,12 +73,15 @@ export default function FriendsTab({
                 flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: 'none', border: 'none', cursor: 'pointer', padding: 0
               }}>
                 <div style={{
-                  width: '46px', height: '46px', borderRadius: '50%', background: activeFriend?.username === f.username ? '#e2b644' : 'rgba(255,255,255,0.05)',
-                  border: activeFriend?.username === f.username ? '2px solid #fff' : '1px solid rgba(255,255,255,0.1)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px',
-                  boxShadow: activeFriend?.username === f.username ? '0 0 15px rgba(226, 182, 68, 0.4)' : 'none',
-                  transition: '0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}>{f.avatar}</div>
+                  width: '42px', height: '42px', borderRadius: '50%',
+                  background: activeFriend?.id === f.id ? 'var(--gold)' : 'rgba(255, 255, 255, 0.1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '18px', fontWeight: 'bold', color: '#fff',
+                  border: activeFriend?.id === f.id ? '2px solid #fff' : 'none',
+                  flexShrink: 0
+                }}>
+                  {f.avatar || (f.display_name || f.username || '?').charAt(0).toUpperCase()}
+                </div>
                 <div style={{ fontSize: '11px', fontWeight: activeFriend?.username === f.username ? '800' : '500', color: activeFriend?.username === f.username ? '#e2b644' : 'rgba(255,255,255,0.5)', width: '54px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.username}</div>
               </button>
             ))}
@@ -184,14 +187,42 @@ export default function FriendsTab({
             loadingFilms ? (
               <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '60px 24px', fontSize: 14 }}>Loading {activeFriend.username}'s films...</div>
             ) : displayFilms.length > 0 ? (
-              <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '16px' }}>
-                {displayFilms.map(film => (
-                  <PosterCard
-                    key={film.id}
-                    film={film}
-                    onClick={onOpenFilm}
-                  />
-                ))}
+              <div style={{ display: 'flex', flexDirection: 'column', marginTop: '4px' }}>
+                {displayFilms.map((film) => {
+                  const isAdded = addedIds?.includes(film.id);
+                  return (
+                    <div
+                      key={film.id}
+                      onClick={() => onOpenFilm(film)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', cursor: 'pointer' }}
+                    >
+                      <div style={{ flexShrink: 0, width: '54px', height: '76px', borderRadius: '8px', overflow: 'hidden', background: 'var(--surface3)', position: 'relative' }}>
+                        <img src={film.poster_url} alt={film.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(0, 0, 0, 0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: '9px solid rgba(255, 255, 255, 0.8)', marginLeft: '2px' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ flex: '1 1 0%', minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{film.title}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>{[film.genre, film.year].filter(Boolean).join(' · ')}</div>
+                      </div>
+                      <div style={{ flexShrink: 0 }}>
+                        {!isAdded ? (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onAddToList(film) }}
+                            style={{ padding: '7px 12px', borderRadius: '20px', border: 'none', background: 'var(--gold)', color: '#000', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                          >
+                            Add
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: 700 }}>✓ On List</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--muted)' }}>
