@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaHome, FaBookmark, FaRegCompass, FaUsers, FaSearch, FaEllipsisH, FaWifi, FaBars, FaUser } from 'react-icons/fa';
+import { FaHome, FaBookmark, FaRegCompass, FaUsers, FaSearch, FaEllipsisH, FaWifi, FaBars, FaUser, FaTimes } from 'react-icons/fa';
 import Search from '../../public/branding/search.png'
 import './DashboardLayout.css';
 
@@ -61,8 +61,14 @@ const Header = ({ searchQuery, onSearchChange, activeTab, onTabChange }) => (
                         fontSize: '20px', outline: 'none'
                     }}
                 />
-                {/* <FaSearch style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: 16 }} /> */}
-                <img src={Search} alt='search' />
+                {searchQuery ? (
+                    <FaTimes 
+                        style={{ color: 'rgba(255, 255, 255, 0.5)', cursor: 'pointer', fontSize: 20 }} 
+                        onClick={() => onSearchChange && onSearchChange('')} 
+                    />
+                ) : (
+                    <img src={Search} alt='search' />
+                )}
             </div>
 
             <div 
