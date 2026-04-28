@@ -524,7 +524,7 @@ export default function HomeDashboard(props) {
                     )}
 
                     {/* Friends Activity */}
-                    {friends && friends.length > 0 && (
+                    {/* {friends && friends.length > 0 && (
                         <div style={{
                             background: 'rgba(15, 15, 15, 0.4)', borderRadius: '24px', padding: '24px',
                             border: '1px solid rgba(255,255,255,0.05)',
@@ -551,7 +551,7 @@ export default function HomeDashboard(props) {
                                 </div>
                             </div>
                         </div>
-                    )}
+                    )} */}
                 </div>
 
             </div>
